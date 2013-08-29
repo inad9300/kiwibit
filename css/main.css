@@ -1,0 +1,580 @@
+article, aside, details, figcaption, figure, footer, header, menu, nav, section {
+	display: block }
+
+* { margin: 0; padding: 0 }
+nav ul { list-style: none }
+a { text-decoration: none }
+html, body { height: 100% }
+form input, form textarea, form select, form button { outline: none }
+
+::-moz-selection {
+	background: #333;
+	color: #eee;
+}
+::selection {
+	background: #333;
+	color: #eee;
+	text-shadow: none;
+}
+
+* {	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box; }
+
+body {
+	min-width: 1230px; /* cambiar tras responsive design */
+	font: 1em 'Open Sans', sans-serif;
+	background: #ddd url('../img/wall4.jpg') fixed;
+	background-size: 100% 100%;
+}
+
+#header {
+	height: 100%;
+	width: 200px;
+	float: left;
+	background: #fff;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1;
+	box-shadow: 1px 0 3px rgba(0,0,0,.05);
+}
+
+#hgroup {
+	float: left;
+	margin: 8px 16px 22px 16px;
+}
+
+#header h1 a {
+	font-size: .9em;
+	color: #333;
+}
+#header h1 a:hover {
+	color: #666;
+}
+
+#header h2 {
+	font-size: .8em;
+	font-weight: 400;
+	font-style: italic;
+	color: #333;
+}
+
+#header nav ul li {
+	float: left;
+	width: 100%;
+}
+
+#header nav ul li a {
+	display: block;
+	padding: 10px 56px;
+	color: #848577;
+}
+#header nav ul li:nth-child(1) a {
+	background: url('../img/home.png') no-repeat 16px 11px;
+	background-size: 20px 20px;
+}
+#header nav ul li:nth-child(2) a {
+	background: url('../img/tables.png') no-repeat 16px 11px;
+	background-size: 20px 20px;
+}
+#header nav ul li:nth-child(3) a {
+	background: url('../img/pencil.png') no-repeat 16px 11px;
+	background-size: 20px 20px;
+}
+#header nav ul li a:hover {
+	background-color: rgba(128,128,128,.1);
+	border-right: 4px solid #71af42;
+	color: #333;
+}
+
+#mainsection {
+	padding-left: 212px; /* = #header width */
+	padding-bottom: 16px;
+}
+
+#parametros, #parametros2 {
+	height: 80px;
+	margin: 16px;
+}
+
+
+#f1 input, #f1 select, #f2 input, #f2 select {
+	padding: 4px 3px;
+	border: none;
+	width: 100%;
+}
+
+#f1 select, #f2 select {
+	padding: 2px 3px;
+}
+
+#mainsection button {
+	height: 80px;
+	width: 64px;
+	border: none;
+	border-radius: 2px;
+	background: #fff;
+	color: #666;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+#mainsection button:hover {
+	background: #f5f5f5;
+	color: #444;
+	cursor: pointer;
+}
+#mainsection button:active {
+	position: relative;
+	top: 1px;
+	box-shadow: 0 1px 2px rgba(0,0,0,.1);
+}
+
+
+#i1, #i2, #i3, #i4, #i5, #i6, #i7, #i8, #i9, #i10 {
+	width: 80px;
+	height: 80px;
+	float: left;
+}
+
+/* Edad */
+#i1 {
+	background: #fff url('../img/b-cake.png') no-repeat 23px 12px;
+	border-radius: 2px 0 0 2px;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+
+#i1 input {
+	margin-top: 57px;
+	background: transparent;
+	text-align: center;
+	font-size: 11px;
+	border-top: 1px solid #ddd;
+	box-shadow: 0 1px 4px rgba(0,0,0,.1) inset;
+}
+
+#i1, #i2 {
+	border-right: 1px solid #eee;
+}
+
+#i2 input, #i3 input, #i4 input, #i5 input, #i6 input, #i7 input, #i8 input, #i9 input, #i10 input {
+	margin-top: 57px;
+	background: transparent;
+	text-align: center;
+	font-size: 11px;
+	border-top: 1px solid #ddd;
+	box-shadow: 0 1px 4px rgba(0,0,0,.1) inset;
+	border-radius: 0 0 2px 2px;
+}
+
+/* Peso */
+#i2 {
+	background: #fff url('../img/weight.png') no-repeat 25px 15px;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+
+/* Altura */
+#i3 {
+	background: #fff url('../img/ruler.png') no-repeat 23px 12px;
+	margin-right: 16px;	
+	border-radius: 0 2px 2px 0;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+
+/* Perímetros C-C */
+#i4 {
+	width: 170px;
+	margin-right: 16px;
+	border-radius: 2px;	
+	background: #fff url('../img/cint-cad.png') no-repeat 0 8px;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+
+#i4 input {
+	margin-top: 0;
+	height: 40px;
+	width: 130px;
+	float: right;
+	border-left: 1px solid #ddd;
+	border-radius: 0 0 2px 0;
+}
+#i4 input:first-child {
+	border-top: none;
+	border-radius: 0 2px 0 0;
+	box-shadow: 0 1px 4px rgba(0,0,0,.15) inset;
+}
+#i4 input:last-child {
+	box-shadow: 0 1px 4px rgba(32,32,32,.1) inset;
+}
+
+/* Sexo */
+#i5 {
+	width: 40px;
+	margin-right: 16px;
+	background-color: #fff;
+	border-radius: 2px;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+
+#sexselect {
+	width: 36px;
+	height: 36px;
+	margin: 2px;
+	float: left;
+	background: -webkit-linear-gradient(#ccc, #666);
+	background: -moz-linear-gradient(#ccc, #666);
+	background: -o-linear-gradient(#ccc, #666);
+	background: linear-gradient(#ccc, #666);
+	opacity: .35;
+	border-radius: 2px;
+	border: 1px solid #555;
+	box-shadow: 0 1px 0 #fafafa inset;
+	position: relative;
+
+	-webkit-transition: all .2s;
+	-moz-transition: all .2s;
+	transition: all .2s;
+}
+
+#male {
+	width: 40px;
+	height: 40px;
+	background: url('../img/male.png') no-repeat 9px 10px;
+	background-size: 20px;
+	cursor: pointer;
+	position: relative;
+	z-index: 1;
+}
+
+#female {
+	width: 40px;
+	height: 40px;
+	background: url('../img/female.png') no-repeat 12px 7px;
+	background-size: 15px;
+	cursor: pointer;
+	position: relative;
+	z-index: 1;
+}
+
+/* Actividad */
+#i6 {
+	width: 150px;
+	margin-right: 16px;
+	background: #fff url('../img/runner.png') no-repeat 58px 11px;
+	border-radius: 2px 2px 5px 5px;
+	padding-top: 47px;
+}
+
+
+#lvlact {
+	width: 150px;
+	height: 32px;
+	margin-top: 1px;
+	background: #eee;
+	border-radius: 0 0 2px 2px;
+	position: relative;
+	box-shadow: 0 4px 8px rgba(0,0,0,.35) inset;
+}
+
+#lvlactselect {
+	width: 0;
+    height: 0;
+    border-left: 11px solid transparent;
+    border-right: 11px solid transparent;
+    border-top: 8px solid #71af42;
+
+	position: absolute;
+	left: 4px;
+
+	-webkit-transition: all .2s;
+	-moz-transition: all .2s;
+	transition: all .2s;
+}
+#lvlact .actc {
+	float: left;
+	width: 30px;
+	height: 32px;
+	border-top: 3px solid #71af42;
+	text-align: center;
+	cursor: pointer;
+}
+
+#lvlact .actc span {
+	font-size: 14px;
+	position: relative;
+	top: 4px;
+	text-shadow: 0 1px 0 #fff;
+}
+
+
+/* Lactante, Embarazada */
+#i7 {
+	background: #fff url('../img/baby-bottle.png') no-repeat 24px 8px;
+	background-size: 30px;
+	border-right: 1px solid #ddd;
+	border-radius: 2px 0 0 2px;
+	width: 80px;
+	padding-top: 46px;
+}
+
+#lacselect, #embselect {
+	width: 32px;
+	height: 26px;
+	margin: 2px;
+	float: left;
+	background: -webkit-linear-gradient(#ddd, #777);
+	background: -moz-linear-gradient(#ddd, #777);
+	background: -o-linear-gradient(#ddd, #777);
+	background: linear-gradient(#ddd, #777);
+	opacity: .35;
+	border-radius: 2px;
+	border: 1px solid #555;
+	box-shadow: 0 1px 0 #fafafa inset;
+	position: absolute;
+	left: 37px;
+
+	-webkit-transition: all .2s;
+	-moz-transition: all .2s;
+	transition: all .2s;
+}
+
+#lacsino, #embsino {
+	width: 75px;
+	height: 32px;
+	margin-left: 2px;
+	background: #eee;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	text-align: center;
+	position: relative;
+}
+
+#lacsi, #embsi {
+	float: left;
+	width: 34px;
+	height: 28px;
+	margin-top: 1px;
+	margin-left: 1px;
+	border-radius: 2px;
+	cursor: pointer;
+}
+
+#lacsi span, #embsi span {
+	font-size: 15px;
+	position: relative;
+	top: 2px;
+	right: 1px;
+	text-shadow: 0 1px 0 rgba(255,255,255,.25);
+}
+
+#lacno, #embno {
+	float: left;
+	width: 34px;
+	height: 28px;
+	margin-top: 1px;
+	margin-left: 1px;
+	border-radius: 2px;
+	cursor: pointer;
+}
+
+#lacno span, #embno span {
+	font-size: 15px;
+	position: relative;
+	top: 2px;
+	right: -1px;
+	text-shadow: 0 1px 0 rgba(255,255,255,.25);
+}
+
+#i8 {	
+	margin-right: 16px;
+	border-radius: 0 2px 2px 0;
+	background: #fff url('../img/pregnant.png') no-repeat 22px 7px;
+	padding-top: 46px;
+}
+
+
+/* [f2] Unidad, Error */
+#i9, #i10 {
+	background-color: #fff;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+
+#i9 {
+	background: #fff url('../img/food.png') no-repeat 22px 13px;
+	border-right: 1px solid #eee;
+	border-radius: 2px 0 0 2px;
+}
+
+#i10 {
+	width: 98px;
+	background: #fff url('../img/error.png') no-repeat 26px 9px;
+	margin-right: 16px;
+	border-radius: 0 2px 2px 0;
+}
+
+
+#modulos {
+	float: left;
+}
+
+.pq { width: 150px; }
+.gr { width: 340px; }
+
+.modulo {
+	float: left;
+	margin: 16px 0 0 16px;
+	text-align: center;
+	background: #fff;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1);
+	border-radius: 9px 9px 2px 2px;
+}
+
+.modulo .titulo {
+	padding: 6px 0;
+	font: 700 1em 'Open Sans', sans-serif;
+	background: #71af42;
+	color: #fff;
+	text-shadow: 0 1px 0 rgba(0,0,0,.3);
+	border-radius: 3px 3px 0 0;
+}
+
+.pq .titulo { padding: 5px 0; }
+
+.modulo .contenido {
+	padding: 12px;
+	border-top: none;
+	border-radius: 0 0 3px 3px;
+}
+
+#imc, #tmb, #ccd, #icc, #fcm, #fcs {
+	display: block;
+	margin-bottom: 6px;
+	font: 1.6em 'Open Sans', sans-serif;
+}
+
+#nutrientes, #alimentosSugeridos, #nutrientesObtenidos {
+	width: 100%;
+	text-align: center;
+}
+
+#nutrientes tr td, #alimentosSugeridos tr td, #nutrientesObtenidos tr td, #selectorAlimentos tr td {
+	width: 50%;
+	padding: 5px 0;
+	border-bottom: 1px dashed #ccc;
+}
+
+#nutrientesObtenidosWrap {
+	background: #eee;
+	margin-left: -2px;
+	position: relative;
+	z-index: -1;
+	box-shadow: 0 2px 3px rgba(0,0,0,.1), 1px 0 8px rgba(0,0,0,.15) inset;
+}
+
+#nutrientesObtenidosWrap .titulo {
+	border-radius: 0 2px 0 0;
+	background: #6da840;
+	box-shadow: 2px 1px 8px rgba(0,0,0,.15) inset;
+}
+
+#nednut .titulo { border-radius: 2px 2px 0 0; }
+#nednut { border-radius: 9px 9px 2px 2px; }
+
+/* Selector */
+#botonSelector {
+	float: left;
+	margin: 16px 0 0 16px;
+}
+
+#selectorAlimentosWrap {
+	width: 250px;
+}
+
+#selectorAlimentos input {
+	width: 100px;
+	padding: 1px;	
+	outline: none;
+	
+	border: 1px solid #ddd;
+	border-top: none;
+	border-right-color: #eee;
+	border-left-color: #eee;
+
+	text-align: center;
+}
+
+
+
+
+/* --- Footer --- */
+
+#footer {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 200px; /* = #header width */
+	float: left;
+	padding: 8px;
+	background: rgba(0,0,0,.05);
+	z-index: 1;
+}
+
+#footer p {
+	font-size: 14px;
+	color: #222;
+	text-shadow: 0 1px 0 rgba(255,255,255,.2);
+}
+
+#footer img {
+	position: relative;
+	top: 2px;
+}
+
+
+#alimentos {
+	margin: 32px 16px 8px 16px;
+	border-top: 1px solid #888;
+	border-left: 1px solid #888;
+	text-align: center;
+	font-size: .7em;
+	background: #fff;
+	border: none;
+	border-radius: 9px;
+	box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+#alimentos th, #alimentos td {
+	padding: 2px;
+	border: none;
+}
+
+#alimentos th:first-child {
+	border-right: 1px solid rgba(0,0,0,.1);
+}
+
+/* Filas */
+#alimentos tr:nth-child(odd) {
+	background: #ccf;
+}
+#alimentos tr:first-child th {
+	background: #ccc;
+	border-bottom: 1px solid rgba(0,0,0,.1)
+}
+/* Columnas */
+#alimentos td:nth-child(odd) {
+	background: rgba(0,0,0,.05);
+}
+#alimentos tr:first-child th:nth-child(odd) {
+	background: #c3c3c3;
+}
+/* Esquinas */
+#alimentos tr:first-child th:first-child {
+	border-radius: 2px 0 0 0;
+}
+#alimentos tr:first-child th:last-child {
+	border-radius: 0 2px 0 0;
+}
+#alimentos tr:last-child td:last-child {
+	border-radius: 0 0 2px 0;
+}
+#alimentos tr:last-child th:first-child {
+	border-radius: 0 0 0 2px;
+}

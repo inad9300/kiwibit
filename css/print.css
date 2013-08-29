@@ -1,0 +1,65 @@
+body {
+	font-size: 12pt;
+	background: #fff;
+	color: #000;
+	margin: 0 5%;
+}
+	
+#header nav, #header h2, #parametros, #parametros2, #footer {
+	display: none;
+}
+
+#header h1 {
+	font-size: 16pt;
+}
+
+a {
+	color: #000;
+	text-decoration: underline;
+}
+
+a[href^="/"]:after {
+	content: " (http://www.kiwibit.net" attr(href) ") ";
+}
+
+
+
+#modulos {
+	float: left;
+	max-width: 360px; /* 340 + 20 de margen */
+}
+
+.pq { width: 160px; }
+.gr { width: 340px; }
+
+.modulo {
+	float: left;
+	margin: 8px 0 0 8px;
+	text-align: center;
+	background: #eee;
+}
+
+
+
+.modulo .titulo {
+	font-weight: 700;
+	border-bottom: 1px solid #ddd;
+	padding: 3px 0;
+}
+
+.modulo .contenido {
+	padding: 3px 0;
+}
+
+#nutrientes, #alimentosSugeridos, #nutrientesObtenidos {
+	width: 100%;
+	text-align: center;
+}
+
+#nutrientes tr td, #alimentosSugeridos tr td, #nutrientesObtenidos tr td {
+	width: 50%;
+}
+
+#alimentos {
+	text-align: center;
+}
