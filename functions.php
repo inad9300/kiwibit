@@ -2,7 +2,7 @@
 
 function db_connect()
 {
-	$con = mysqli_connect( 'localhost', 'root', 'servidor', 'kw_db' );
+	$con = mysqli_connect( 'localhost', 'root', 'pass', 'kw_db' );
 
 	if( mysqli_connect_errno() ){
 		echo 'Error al conectar: ' . mysqli_connect_error(); }
