@@ -1,7 +1,7 @@
 
 function validate()
 {
-	var data = new Object() // To return
+	var data = new Object(); // To return
 
 	// Collecting data
 	var age 	= parseFloat( document.parameters.age.value )
