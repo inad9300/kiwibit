@@ -1,4 +1,4 @@
-kiwibit
+Kiwibit
 =======
 
 Nutritional software - [Kiwibit.net](http://kiwibit.net/)
