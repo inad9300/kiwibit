@@ -1,0 +1,17 @@
+{
+    "private": true,
+    "scripts": {
+        "prebuild": "rm -rf ../server/static/app/*",
+        "build": "parcel build --experimental-scope-hoisting --no-cache --no-source-maps --out-dir ../server/static/app --public-url ../app src/index.html"
+    },
+    "alias": {
+        "@soil/dom": "./node_modules/@soil/dom/src"
+    },
+    "dependencies": {
+        "@soil/dom": "0.6.0"
+    },
+    "devDependencies": {
+        "parcel": "1.9.2",
+        "typescript": "2.9.2"
+    }
+}

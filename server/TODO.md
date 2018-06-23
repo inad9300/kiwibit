@@ -1,0 +1,8 @@
+- Parse HTTP requests as JSON.
+- Add UTF-8 support.
+- In-memory caching of database results.
+- Support HTTP cache.
+- Support GZip.
+- Figure out why the port is sometimes in use after a few runs.
+- Improve efficiency with epoll().
+- Create automated tests! Use assert().
