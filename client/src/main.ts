@@ -63,7 +63,7 @@ function fillFoodList(data: BasicFood[]) {
     data
         .map(item => h.li({}, [
             h.span({
-                tabIndex: 0, // FIXME
+                tabIndex: 0,
                 className: 'clickable',
                 onclick: () => showFoodDetails(item.ndb_no),
                 onkeydown: evt => {
