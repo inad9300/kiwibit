@@ -57,7 +57,9 @@ void serve(int socketFd) {
         if (reqBody.length() > 0 && reqBody != "\r\n\r\n") {
             logger::info("Request body: " + reqBody);
         }
-        route(socketFd, method, url, reqBody);
-        errply(socketFd, HttpStatus::NotFound, "There is no handler for the route requested.");
+        bool ok = route(socketFd, method, url, reqBody);
+        if (!ok) {
+            errply(socketFd, HttpStatus::NotFound, "There is no handler for the requested route.");
+        }
     }
 }

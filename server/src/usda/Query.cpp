@@ -54,13 +54,17 @@ public:
             for (int i = 1; i <= colCount; ++i) {
                 json += "\"" + meta->getColumnLabel(i) + "\":";
 
-                auto colType = meta->getColumnType(i);
-                if (colType == sql::DataType::DECIMAL) {
-                    json += res->getString(i);
-                } else if (colType == sql::DataType::CHAR && meta->getPrecision(i) == 1) {
-                    json += res->getString(i) == "Y" ? "true" : "false";
+                if (res->isNull(i)) {
+                    json += "null";
                 } else {
-                    json += "\"" + res->getString(i) + "\"";
+                    auto colType = meta->getColumnType(i);
+                    if (colType == sql::DataType::DECIMAL) {
+                        json += res->getString(i);
+                    } else if (colType == sql::DataType::CHAR && meta->getPrecision(i) == 1) { // FIXME Precision is sometimes reported as 0.
+                        json += res->getString(i) == "Y" ? "true" : "false";
+                    } else {
+                        json += "\"" + res->getString(i) + "\"";
+                    }
                 }
                 json += ",";
             }
@@ -72,6 +76,40 @@ public:
         }
 
         return json + "]";
+    }
+
+    std::string getNextAsJson() {
+        auto meta = this->res->getMetaData();
+        int colCount = meta->getColumnCount();
+        assert(colCount > 0);
+
+        if (this->res->rowsCount() == 0) {
+            return "";
+        }
+        res->next();
+
+        std::string json = "{";
+
+        for (int i = 1; i <= colCount; ++i) {
+            json += "\"" + meta->getColumnLabel(i) + "\":";
+
+            if (res->isNull(i)) {
+                json += "null";
+            } else {
+                auto colType = meta->getColumnType(i);
+                if (colType == sql::DataType::DECIMAL) {
+                    json += res->getString(i);
+                } else if (colType == sql::DataType::CHAR && meta->getPrecision(i) == 1) { // FIXME Precision is sometimes reported as 0.
+                    json += res->getString(i) == "Y" ? "true" : "false";
+                } else {
+                    json += "\"" + res->getString(i) + "\"";
+                }
+            }
+            json += ",";
+        }
+        json.pop_back();
+
+        return json + "}";
     }
 
     auto next() {
