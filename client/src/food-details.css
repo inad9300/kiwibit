@@ -1,3 +1,7 @@
+.food-list {
+    list-style: circle;
+    padding: 0 20px;
+}
 @media (min-width: 1400px) {
     .food-list {
         column-count: 2;
