@@ -1,27 +1,5 @@
 import {h} from '@soil/dom'
 
-const nbsp = '\u00A0'
-
-const foodSelect = h.select({
-    onchange: () => {
-        fetch(foodSelect.value)
-            .then(res => res.json())
-            .then(fillFoodList)
-    }
-}, [
-    h.option({disabled: true, selected: true}, ['Food category']),
-    h.option({value: "/beverages"}, ['Beverages']),
-    h.option({value: "/breakfast-cereals"}, ['Breakfast cereals']),
-    h.option({value: "/fats-and-oils"}, ['Fats and oils']),
-    h.option({value: "/fruits-and-juices"}, ['Fruits and juices']),
-    h.option({value: "/grains"}, ['Grains']),
-    h.option({value: "/legumes"}, ['Legumes']),
-    h.option({value: "/nuts-and-seeds"}, ['Nuts and seeds']),
-    h.option({value: "/soupes-and-sauces"}, ['Soupes and sauces']),
-    h.option({value: "/spices-and-herbs"}, ['Spices and herbs']),
-    h.option({value: "/vegetables"}, ['Vegetables']),
-])
-
 interface BasicFood {
     ndb_no: string
     long_desc: string
@@ -55,6 +33,28 @@ interface FoodDetails {
     sources: FoodSource[]
 }
 
+const nbsp = '\u00A0'
+
+const foodSelect = h.select({
+    onchange: () => {
+        fetch(foodSelect.value)
+            .then(res => res.json())
+            .then(fillFoodList)
+    }
+}, [
+    h.option({disabled: true, selected: true}, ['Food category']),
+    h.option({value: "/beverages"}, ['Beverages']),
+    h.option({value: "/breakfast-cereals"}, ['Breakfast cereals']),
+    h.option({value: "/fats-and-oils"}, ['Fats and oils']),
+    h.option({value: "/fruits-and-juices"}, ['Fruits and juices']),
+    h.option({value: "/grains"}, ['Grains']),
+    h.option({value: "/legumes"}, ['Legumes']),
+    h.option({value: "/nuts-and-seeds"}, ['Nuts and seeds']),
+    h.option({value: "/soupes-and-sauces"}, ['Soupes and sauces']),
+    h.option({value: "/spices-and-herbs"}, ['Spices and herbs']),
+    h.option({value: "/vegetables"}, ['Vegetables']),
+])
+
 const foodList = h.ul({className: 'food-list'})
 
 function fillFoodList(data: BasicFood[]) {
@@ -64,7 +64,7 @@ function fillFoodList(data: BasicFood[]) {
         .map(item => h.li({}, [
             h.span({
                 tabIndex: 0,
-                className: 'clickable',
+                style: {cursor: 'pointer'},
                 onclick: () => showFoodDetails(item.ndb_no),
                 onkeydown: evt => {
                     if (evt.key === 'Enter') {
@@ -116,7 +116,7 @@ function showFoodDetails(id: string) {
                 ])))
             ])
 
-            const sources = h.table({}, [
+            const sources = h.table({style: {marginBottom: '20px'}}, [
                 h.thead({}, [
                         h.tr({}, [
                         h.th({}, ['Title']),
@@ -137,7 +137,7 @@ function showFoodDetails(id: string) {
                 h.div({className: 'padded modal', onclick: evt => evt.stopPropagation()}, [
                     h.h2({}, ['Details']),
                     details,
-                    h.div({className: 'cleared'}),
+                    h.div({style: {clear: 'both'}}),
                     h.h2({}, ['Nutrition facts']),
                     nutrition,
                     h.h2({}, ['Sources']),

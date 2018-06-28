@@ -8,7 +8,7 @@
 #include "logger.cpp"
 #include "serve.cpp"
 
-#define PORT 3000
+#define PORT 3001
 
 int main() {
     usda::Query::initializePassword();

@@ -31,6 +31,7 @@ static void addFieldToJson(std::string& json, const std::string& fieldName, cons
 }
 
 static const std::regex foods_id("/foods/([0-9]+)");
+static const std::regex nutrients_id_foods("/nutrients/([0-9]+)/foods");
 
 bool route(int socketFd, std::string method, const std::string& url, const std::string& body) {
     if (body.length() > 0) {} // TODO Remove.
@@ -80,6 +81,33 @@ bool route(int socketFd, std::string method, const std::string& url, const std::
             addFieldToJson(json, "sources", sources.getAllAsJson());
 
             reply(socketFd, HttpStatus::OK, json);
+            return true;
+        }
+        else if (url == "/nutrients") {
+            auto nutrients = usda::Query(
+                "select ndf.nutr_no, ndf.units, ndf.nutrdesc"
+                " from nutr_def ndf"
+                " order by ndf.nutrdesc"
+            );
+
+            reply(socketFd, HttpStatus::OK, nutrients.getAllAsJson());
+            return true;
+        }
+        else if (std::regex_search(url, matches, nutrients_id_foods)) {
+            auto id = matches[1].str();
+
+            auto foods = usda::Query(
+                "select fd.long_desc, nd.nutr_val, fg.fdgrp_desc, fg.fdgrp_cd"
+                " from food_des fd"
+                " join nut_data nd on (nd.ndb_no = fd.ndb_no)"
+                " join fd_group fg on (fg.fdgrp_cd = fd.fdgrp_cd)"
+                " where nd.nutr_no = '" + id + "'"
+                " and fd.fdgrp_cd in (0200, 0400, 0600, 0800, 0900, 1100, 1200, 1400, 1600, 2000)"
+                " order by nd.nutr_val desc"
+                " limit 50"
+            );
+
+            reply(socketFd, HttpStatus::OK, foods.getAllAsJson());
             return true;
         }
     }

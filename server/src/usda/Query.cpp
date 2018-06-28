@@ -63,7 +63,7 @@ public:
                     } else if (colType == sql::DataType::CHAR && meta->getPrecision(i) == 1) { // FIXME Precision is sometimes reported as 0.
                         json += res->getString(i) == "Y" ? "true" : "false";
                     } else {
-                        json += "\"" + res->getString(i) + "\"";
+                        json += "\"" + res->getString(i) + "\""; // FIXME Doubles quotes need to be escaped!
                     }
                 }
                 json += ",";

@@ -3,28 +3,13 @@ select {
     font-family: 'Open Sans', sans-serif;
 }
 
-.clickable {
-    cursor: pointer;
-}
-
-.right-floated {
-    float: right;
-}
-
-.left-floated {
-    float: right;
-}
-
-.cleared {
-    clear: both;
-}
-
 .padded {
     padding: 20px;
 }
 
+select,
 button,
-select {
+.button {
     padding: 5px 7px;
     color: #333;
     background: #fff;
@@ -42,6 +27,9 @@ select:focus {
 button:active,
 select:active {
     box-shadow: none;
+}
+a.button {
+    text-decoration: none;
 }
 
 h2 {
@@ -121,12 +109,4 @@ table > tbody > tr:nth-child(even) {
 
 .modal h2:first-child {
     margin-top: 0;
-}
-
-.food-list li span {
-    color: #333;
-}
-.food-list li span:hover,
-.food-list li span:focus {
-    color: #000;
 }
