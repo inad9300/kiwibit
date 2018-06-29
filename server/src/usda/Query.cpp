@@ -12,6 +12,14 @@
 
 #include "../logger.cpp"
 
+void replace_string(std::string& subject, const std::string& search, const std::string& replace) {
+    size_t pos = 0;
+    while ((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+    }
+}
+
 namespace usda {
 
 class Query {
@@ -63,7 +71,9 @@ public:
                     } else if (colType == sql::DataType::CHAR && meta->getPrecision(i) == 1) { // FIXME Precision is sometimes reported as 0.
                         json += res->getString(i) == "Y" ? "true" : "false";
                     } else {
-                        json += "\"" + res->getString(i) + "\""; // FIXME Doubles quotes need to be escaped!
+                        std::string s = res->getString(i);
+                        replace_string(s, "\"", "\\\"");
+                        json += "\"" + s + "\"";
                     }
                 }
                 json += ",";
@@ -102,7 +112,9 @@ public:
                 } else if (colType == sql::DataType::CHAR && meta->getPrecision(i) == 1) { // FIXME Precision is sometimes reported as 0.
                     json += res->getString(i) == "Y" ? "true" : "false";
                 } else {
-                    json += "\"" + res->getString(i) + "\"";
+                    std::string s = res->getString(i);
+                    replace_string(s, "\"", "\\\"");
+                    json += "\"" + s + "\"";
                 }
             }
             json += ",";

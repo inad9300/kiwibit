@@ -1,4 +1,8 @@
+import './food-details.scss'
+
 import {h} from '@soil/dom'
+import {get} from './common/get'
+import {header} from './common/header'
 
 interface BasicFood {
     ndb_no: string
@@ -35,10 +39,12 @@ interface FoodDetails {
 
 const nbsp = '\u00A0'
 
-const foodSelect = h.select({
+const foodCategorySelect = h.select({
+    style: {
+        alignSelf: 'flex-start'
+    },
     onchange: () => {
-        fetch(foodSelect.value)
-            .then(res => res.json())
+        get(foodCategorySelect.value, {cache: true})
             .then(fillFoodList)
     }
 }, [
@@ -57,28 +63,27 @@ const foodSelect = h.select({
 
 const foodList = h.ul({className: 'food-list'})
 
-function fillFoodList(data: BasicFood[]) {
+function fillFoodList(foods: BasicFood[]) {
     foodList.innerHTML = ''
 
-    data
-        .map(item => h.li({}, [
+    foods
+        .map(f => h.li({}, [
             h.span({
                 tabIndex: 0,
                 style: {cursor: 'pointer'},
-                onclick: () => showFoodDetails(item.ndb_no),
+                onclick: () => showFoodDetails(f.ndb_no),
                 onkeydown: evt => {
                     if (evt.key === 'Enter') {
-                        showFoodDetails(item.ndb_no)
+                        showFoodDetails(f.ndb_no)
                     }
                 }
-            }, [item.long_desc])
+            }, [f.long_desc])
         ]))
         .forEach(li => foodList.appendChild(li))
 }
 
 function showFoodDetails(id: string) {
-    fetch('/foods/' + id)
-        .then(res => res.json())
+    get('/foods/' + id, {cache: true})
         .then((data: FoodDetails) => {
             const details = h.dl({}, [
                 h.dt({}, ['Food group']),
@@ -162,7 +167,10 @@ function showFoodDetails(id: string) {
         })
 }
 
-document.body.appendChild(foodSelect)
-document.body.appendChild(foodList)
+document.body.appendChild(header())
+document.body.appendChild(h.div({className: 'padded'}, [
+    foodCategorySelect,
+    foodList
+]))
 
-foodSelect.focus()
+foodCategorySelect.focus()

@@ -21,10 +21,6 @@ static const std::map<std::string, std::string> URL_TO_FOOD_GROUP = {
     {"/grains", "2000"}
 };
 
-// static bool startsWith(const std::string& str, const std::string& substr) {
-//     return str.rfind(substr, 0) == 0;
-// }
-
 static void addFieldToJson(std::string& json, const std::string& fieldName, const std::string& fieldValue) {
     json.pop_back();
     json += ",\"" + fieldName + "\":" + fieldValue + "}";
@@ -39,7 +35,12 @@ bool route(int socketFd, std::string method, const std::string& url, const std::
     std::smatch matches;
 
     if (method == "GET") {
-        if (URL_TO_FOOD_GROUP.count(url) > 0) {
+        if (url == "/") {
+            std::vector<std::string> headers{"Location: /app/food-details.html"};
+            reply(socketFd, headers, HttpStatus::Found);
+            return true;
+        }
+        else if (URL_TO_FOOD_GROUP.count(url) > 0) {
             auto foodGroup = URL_TO_FOOD_GROUP.at(url);
             auto q = usda::Query(
                 "select ndb_no, long_desc"

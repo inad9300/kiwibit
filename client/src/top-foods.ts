@@ -1,5 +1,9 @@
+import './top-foods.scss'
+
 import {h} from '@soil/dom'
 import * as Highcharts from 'highcharts'
+import {get} from './common/get'
+import {header} from './common/header'
 
 interface Nutrient {
     nutr_no: string
@@ -24,14 +28,14 @@ const FOOD_CATEGORY_COLOR: {[categoryId: string]: string} = {
     '1200': '#c5643f', // Nuts and seeds.
     '1400': '#3fc5b7', // Beverages.
     '1600': '#c53f94', // Legumes.
-    '2000': '#fbff51' // Grains.
+    '2000': '#ebef4e' // Grains.
 }
 
 const nutrientSelect = h.select({
     onchange: () => showTopFoods(nutrientSelect.value),
     style: {
         alignSelf: 'flex-start',
-        marginTop: '10px'
+        marginBottom: '10px'
     }
 }, [
     h.option({disabled: true, selected: true}, ['Nutrient'])
@@ -58,8 +62,7 @@ const chart = Highcharts.chart(chartWrapper, {
     series: [{}]
 })
 
-fetch('/nutrients')
-    .then(res => res.json())
+get('/nutrients', {cache: true})
     .then((nutrients: Nutrient[]) => {
         nutrients
             .map(n => h.option({value: n.nutr_no}, [`${n.nutrdesc} (${n.units})`]))
@@ -67,8 +70,7 @@ fetch('/nutrients')
     })
 
 function showTopFoods(nutrientId: string) {
-    fetch(`/nutrients/${nutrientId}/foods`)
-        .then(res => res.json())
+    get(`/nutrients/${nutrientId}/foods`, {cache: true})
         .then((topFoods: TopFood[]) => {
             const data = topFoods
                 .reverse()
@@ -85,11 +87,14 @@ function showTopFoods(nutrientId: string) {
         })
 }
 
+document.body.appendChild(header())
 document.body.appendChild(h.div({
+    className: 'padded',
     style: {
         height: '100%',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        flex: '1'
     }
 }, [
     nutrientSelect,
