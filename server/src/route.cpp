@@ -28,6 +28,7 @@ static void addFieldToJson(std::string& json, const std::string& fieldName, cons
 
 static const std::regex foods_id("/foods/([0-9]+)");
 static const std::regex nutrients_id_foods("/nutrients/([0-9]+)/foods");
+static const std::regex find_foods_value("/find-foods/([a-zA-Z0-9,%_]+)");
 
 bool route(int socketFd, std::string method, const std::string& url, const std::string& body) {
     if (body.length() > 0) {} // TODO Remove.
@@ -106,6 +107,49 @@ bool route(int socketFd, std::string method, const std::string& url, const std::
                 " and fd.fdgrp_cd in (0200, 0400, 0600, 0800, 0900, 1100, 1200, 1400, 1600, 2000)"
                 " order by nd.nutr_val desc"
                 " limit 50"
+            );
+
+            reply(socketFd, HttpStatus::OK, foods.getAllAsJson());
+            return true;
+        }
+        else if (url == "/all-top-foods") {
+            auto nutrients = usda::Query(
+                "select ndf.nutr_no, ndf.nutrdesc"
+                " from nutr_def ndf"
+                " order by ndf.nutrdesc asc"
+            );
+
+            std::string json = "[";
+            while (nutrients.next()) {
+                auto topFoodsRes = usda::Query(
+                    "select fd.long_desc"
+                    " from food_des fd"
+                    " join nut_data nd on (nd.ndb_no = fd.ndb_no)"
+                    " where nd.nutr_no = '" + nutrients.getString("nutr_no") + "'"
+                    " and fd.fdgrp_cd in (0200, 0400, 0600, 0800, 0900, 1100, 1200, 1400, 1600, 2000)"
+                    " order by nd.nutr_val desc"
+                    " limit 10"
+                );
+                json += "{\"nutrdesc\":\"" + nutrients.getString("nutrdesc")
+                    + "\",\"top_foods\":" + topFoodsRes.getAllAsJsonArray() + "},";
+            }
+            if (json.length() > 1) {
+                json.pop_back();
+            }
+            json += "]";
+
+            reply(socketFd, HttpStatus::OK, json);
+            return true;
+        }
+        else if (std::regex_search(url, matches, find_foods_value)) {
+            auto value = matches[1].str();
+
+            auto foods = usda::Query(
+                "select fd.ndb_no, fd.long_desc"
+                " from food_des fd"
+                " where fd.long_desc like '%" + value + "%'"
+                " and fd.fdgrp_cd in (0200, 0400, 0600, 0800, 0900, 1100, 1200, 1400, 1600, 2000)"
+                " limit 100"
             );
 
             reply(socketFd, HttpStatus::OK, foods.getAllAsJson());

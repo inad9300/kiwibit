@@ -3,7 +3,7 @@
     "scripts": {
         "prebuild": "rm -rf ../server/static/app/*",
         "build": "parcel build --experimental-scope-hoisting --no-cache --no-source-maps --out-dir ../server/static/app --public-url ../app src/*.html",
-        "build:dev": "parcel build --out-dir ../server/static/app --public-url ../app src/*.html"
+        "build:dev": "npm run prebuild && parcel build --out-dir ../server/static/app --public-url ../app src/*.html"
     },
     "alias": {
         "@soil/dom": "./node_modules/@soil/dom/src"

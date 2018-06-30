@@ -3,11 +3,7 @@ import './food-details.scss'
 import {h} from '@soil/dom'
 import {get} from './common/get'
 import {header} from './common/header'
-
-interface BasicFood {
-    ndb_no: string
-    long_desc: string
-}
+import {BasicFood} from './common/model'
 
 interface FoodNutrition {
     nutrdesc: string

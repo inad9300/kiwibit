@@ -50,6 +50,42 @@ public:
         delete this->conn;
     }
 
+    // NOTE Assumes a one-column result set.
+    std::vector<std::string> getAllAsVector() {
+        std::vector<std::string> result;
+        while (res->next()) {
+            result.push_back(res->getString(1));
+        }
+        return result;
+    }
+
+    // NOTE Assumes a one-column result set.
+    std::string getAllAsJsonString(const std::string& sep = ", ") {
+        std::string result = "";
+        while (res->next()) {
+            result += res->getString(1) + sep;
+        }
+        if (result.length() > 0) {
+            result.erase(result.length() - sep.length());
+            replace_string(result, "\"", "\\\"");
+        }
+        return "\"" + result + "\"";
+    }
+
+    // NOTE Assumes a one-column result set.
+    std::string getAllAsJsonArray() {
+        std::string result = "[";
+        while (res->next()) {
+            std::string value = res->getString(1);
+            replace_string(value, "\"", "\\\"");
+            result += "\"" + value + "\",";
+        }
+        if (result.length() > 1) {
+            result.pop_back();
+        }
+        return result + "]";
+    }
+
     std::string getAllAsJson() {
         auto meta = this->res->getMetaData();
         int colCount = meta->getColumnCount();
