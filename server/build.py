@@ -3,11 +3,22 @@
 import os
 import sys
 
+def run(cmd):
+    err = os.system(cmd)
+    if err:
+        sys.exit(err)
+
+def list_files(dir, ext):
+    all_files = []
+    for (dirpath, dirnames, filenames) in os.walk(dir):
+        all_files += [dirpath + '/' + f for f in filenames if f.endswith(ext)]
+    return all_files
+
 os.system('clear')
 args = sys.argv[1:]
 
 compiler_flags = '-std=c++17'
-compiler_paths = ''
+compiler_paths = '-I./lib/GSL/include'
 linker_flags = '-pthread -lmysqlcppconn'
 
 if '--release' in args:
@@ -22,23 +33,31 @@ build_cmd = (
     + ' ' + linker_flags
 )
 
-print('Building system... ')
-err = os.system(build_cmd)
-if err:
-    sys.exit(err)
+if '--test' not in args:
+    print('\nBuilding system...')
+    run(build_cmd)
 
-print('\nRunning static code analysis...')
-err = os.system('cppcheck --enable=all --suppress=missingIncludeSystem src/')
-if err:
-    sys.exit(err)
+if '--scan' in args:
+    print('\nRunning static code analysis...')
+    run('cppcheck --enable=all --suppress=missingIncludeSystem src/')
+    run('scan-build "' + build_cmd + '"')
 
-err = os.system('scan-build "' + build_cmd + '"')
-if err:
-    sys.exit(err)
+if '--test' in args:
+    print('\nRunning unit tests...')
 
-if '--skip-tests' not in args:
-    pass # TODO
+    test_files = list_files('./test', '.cpp')
+    for f in test_files:
+        print('- Compiling "' + f + '"...')
+        run(
+            'g++ ' + compiler_flags
+            + ' ' + compiler_paths
+            + ' -o bin/test ' + f
+            + ' ' + linker_flags
+        )
+
+        print('- Running "' + f + '"...')
+        run('./bin/test')
 
 if '--run' in args:
-    print('\nRunning...')
-    os.system('cd bin && ./server')
+    print('\nRunning server...')
+    run('cd bin && ./server')

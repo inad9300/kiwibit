@@ -1,9 +1,7 @@
-- Parse HTTP requests as JSON.
-- Add UTF-8 support.
-- In-memory caching of database results.
-- Support GZip.
-- Support HTTP cache.
-- Support HTTP/2.
-- Figure out why the port is sometimes in use after a few runs.
-- Improve efficiency with epoll().
-- Create automated tests! Use assert().
+- JSON parsing.
+- UTF-8.
+- GZip.
+- HTTP/2.
+- HTTP cache.
+- Database results cache.
+- Consider epoll().
