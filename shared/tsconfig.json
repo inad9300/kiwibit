@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "outDir": "bin",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "strict": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true
+    }
+}

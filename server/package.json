@@ -1,0 +1,15 @@
+{
+    "private": true,
+    "scripts": {
+        "start": "tsc && node bin/server/src/main.js"
+    },
+    "dependencies": {
+        "mysql": "2.16.0"
+    },
+    "devDependencies": {
+        "@types/mysql": "2.15.5",
+        "@types/node": "10.9.4",
+        "nodemon": "1.18.4",
+        "typescript": "3.0.3"
+    }
+}

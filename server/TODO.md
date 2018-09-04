@@ -1,7 +1,0 @@
-- JSON parsing.
-- UTF-8.
-- GZip.
-- HTTP/2.
-- HTTP cache.
-- Database results cache.
-- Consider epoll().

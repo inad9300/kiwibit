@@ -1,21 +1,17 @@
 {
     "private": true,
     "scripts": {
-        "prebuild": "rm -rf ../server/static/app/*",
-        "build": "parcel build --experimental-scope-hoisting --no-cache --no-source-maps --out-dir ../server/static/app --public-url ../app src/*.html",
-        "build:dev": "npm run prebuild && parcel build --out-dir ../server/static/app --public-url ../app src/*.html"
-    },
-    "alias": {
-        "@soil/dom": "./node_modules/@soil/dom/src"
+        "start": "rm -rf bin && parcel -d bin src/food-details/*.html"
     },
     "dependencies": {
-        "@soil/dom": "0.6.0",
-        "highcharts": "6.1.1"
+        "@fortawesome/fontawesome-free": "5.3.1",
+        "@soil/dom": "0.6.5",
+        "highcharts": "6.1.2"
     },
     "devDependencies": {
-        "@types/highcharts": "5.0.23",
-        "node-sass": "4.9.0",
-        "parcel": "1.9.3",
-        "typescript": "2.9.2"
+        "@types/highcharts": "5.0.27",
+        "node-sass": "4.9.3",
+        "parcel": "1.9.7",
+        "typescript": "3.0.3"
     }
 }

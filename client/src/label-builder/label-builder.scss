@@ -1,0 +1,32 @@
+@import '../shared/utils/base.scss';
+
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+.food-selector {
+    display: flex;
+    flex-direction: column;
+    min-width: 250px;
+    max-width: 50vw;
+
+    .top-controls {
+        display: flex;
+        margin-bottom: 5px;
+
+        input {
+            flex: 1;
+        }
+
+        button {
+            margin-left: 5px;
+        }
+    }
+
+    select {
+        flex: 1;
+        width: 100%;
+    }
+}

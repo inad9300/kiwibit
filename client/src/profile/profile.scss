@@ -1,0 +1,15 @@
+// TODO Remove call to `url()` once Parcel resolves modules from `node_modules`.
+@import url('../../node_modules/@fortawesome/fontawesome-free/css/solid.css');
+@import url('../../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css');
+
+@import '../shared/utils/base.scss';
+
+.page {
+    .main-title {
+        font-size: 18px;
+    }
+
+    .field-list {
+        color: purple;
+    }
+}
