@@ -3,6 +3,7 @@ import {get} from '../shared/http/get'
 import {add} from '../shared/utils/add'
 import {pct} from '../shared/utils/pct'
 import {getUrlParams} from '../shared/utils/getUrlParams'
+import {title} from '../shared/dom/title'
 import {unit} from '../shared/dom/unit'
 import {icon} from '../shared/dom/icon'
 import {clear} from '../shared/dom/clear'
@@ -24,6 +25,8 @@ Promise.all([
     get<contract.FoodDetails>(`${serverUrl}/foods/${foodId}`)
 ])
 .then(([rdis, foodDetails]) => {
+    title(foodDetails.Long_Desc)
+
     const extendedRdis = rdis
         .map(rdi => {
             const nutr = foodDetails.nutrients.find(nutr => nutr.NutrDesc === rdi.NutrDesc)
@@ -66,7 +69,7 @@ Promise.all([
                 ', ',
                 Object.assign(
                     unit(overallPct.toFixed(2), '%'),
-                    {title: 'Overall percentage of nutrients covered by this food'}
+                    {title: 'Overall percentage of nutrients covered by 100 grams of this food'}
                 )
             ]),
             h.a({

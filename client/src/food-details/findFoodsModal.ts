@@ -28,7 +28,7 @@ export function findFoodsModal() {
     const $foodNameInput = h.input({
         type: 'search',
         className: 's1',
-        placeholder: 'Enter at least 2 characters',
+        placeholder: 'Enter at least 3 characters, e.g. "lentils cooked"',
         oninput: () => findFoodsByNameAndCategory($foodNameInput.value, $foodCategorySelect.value)
     })
 
