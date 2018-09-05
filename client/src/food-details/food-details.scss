@@ -31,16 +31,20 @@ body {
             color: $color-blue;
             font-size: $font-size-lg;
 
-            &:hover {
+            &:hover:not(.disabled) {
                 cursor: pointer;
                 color: $color-dark-blue;
+            }
+
+            &.disabled {
+                opacity: 0.5;
             }
         }
     }
 
     > ul {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(375px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
         grid-column-gap: $margin-lg;
 
         > li {

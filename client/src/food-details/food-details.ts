@@ -7,10 +7,10 @@ import {unit} from '../shared/dom/unit'
 import {icon} from '../shared/dom/icon'
 import {clear} from '../shared/dom/clear'
 import * as contract from '../../../shared/contract'
-import {server_url} from '../shared/constants'
+import {serverUrl} from '../shared/constants'
 import {findFoodsModal} from './findFoodsModal'
 
-const $findFoodsModal = findFoodsModal()
+type ExtendedRdi = contract.Rdi & {pct: number, Nutr_Val: number}
 
 const urlParams = getUrlParams()
 const foodId = urlParams.get('id')
@@ -20,8 +20,8 @@ if (!foodId) {
 }
 
 Promise.all([
-    get<contract.Rdi[]>(`${server_url}/rdis?age=20&gender=M`),
-    get<contract.FoodDetails>(`${server_url}/foods/${foodId}`)
+    get<contract.Rdi[]>(`${serverUrl}/rdis?age=20&gender=M`),
+    get<contract.FoodDetails>(`${serverUrl}/foods/${foodId}`)
 ])
 .then(([rdis, foodDetails]) => {
     const extendedRdis = rdis
@@ -33,12 +33,30 @@ Promise.all([
                 Nutr_Val: nutr.Nutr_Val
             }
         })
-        .filter(pct => pct !== undefined) as (contract.Rdi & {pct: number, Nutr_Val: number})[]
+        .filter(pct => pct !== undefined) as ExtendedRdi[]
 
     const overallPct = pct(
         extendedRdis.map(rdi => Math.min(rdi.pct, 100)).reduce(add, 0),
         100 * extendedRdis.length
     )
+
+    const $sortByNameBtn = h.a({
+        title: 'Sort nutrients alphabetically',
+        onclick: () => renderNutrientsSortedByName()
+    }, [icon('sort-alpha-down')])
+
+    const $sortByPctBtn = h.a({
+        title: 'Sort nutrients by RDI coverage',
+        onclick: () => renderNutrientsSortedByPct()
+    }, [icon('sort-amount-down')])
+
+    const $nutrientList = h.ul({})
+
+    if ((localStorage.getItem('nutrients_order') || 'alpha') === 'alpha') {
+        renderNutrientsSortedByName()
+    } else {
+        renderNutrientsSortedByPct()
+    }
 
     const $foodDetails = h.div({className: 'food-details'}, [
         h.h1({}, [
@@ -59,23 +77,50 @@ Promise.all([
                 onclick: () => $findFoodsModal.open(),
                 title: 'Find details of a different food'
             }, [icon('search')]),
+            $sortByNameBtn,
+            $sortByPctBtn,
             clear()
         ]),
-        h.ul({}, extendedRdis.map(rdi => h.li({}, [
-            h.h2({}, [
-                rdi.NutrDesc,
-                // TODO Take into account the tolerable upper intake level.
-                h.output({className: rdi.pct > 300 ? 'high' : ''}, [
-                    unit(rdi.Nutr_Val, rdi.Units),
-                    ', ',
-                    unit(rdi.pct.toFixed(2), '%')
-                ])
-            ]),
-            h.progress({max: 100, value: rdi.pct})
-        ])))
+        $nutrientList
     ])
 
     document.body.appendChild($foodDetails)
+
+    function renderNutrientsSortedByName() {
+        localStorage.setItem('nutrients_order', 'alpha')
+        $sortByPctBtn.classList.remove('disabled')
+        $sortByNameBtn.classList.add('disabled')
+        $nutrientList.innerHTML = ''
+        extendedRdis
+            .sort((a, b) => a.NutrDesc > b.NutrDesc ? 1 : -1)
+            .forEach(rdi => $nutrientList.appendChild(nutrientItem(rdi)))
+    }
+
+    function renderNutrientsSortedByPct() {
+        localStorage.setItem('nutrients_order', 'pct')
+        $sortByPctBtn.classList.add('disabled')
+        $sortByNameBtn.classList.remove('disabled')
+        $nutrientList.innerHTML = ''
+        extendedRdis
+            .sort((a, b) => a.pct > b.pct ? -1 : 1)
+            .forEach(rdi => $nutrientList.appendChild(nutrientItem(rdi)))
+    }
 })
 
+const $findFoodsModal = findFoodsModal()
 document.body.appendChild($findFoodsModal)
+
+function nutrientItem(rdi: ExtendedRdi) {
+    return h.li({}, [
+        h.h2({}, [
+            rdi.NutrDesc,
+            // TODO Take into account the tolerable upper intake level.
+            h.output({className: rdi.pct > 300 ? 'high' : ''}, [
+                unit(rdi.Nutr_Val, rdi.Units),
+                ', ',
+                unit(rdi.pct.toFixed(2), '%')
+            ])
+        ]),
+        h.progress({max: 100, value: rdi.pct})
+    ])
+}

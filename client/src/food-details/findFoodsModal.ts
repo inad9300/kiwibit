@@ -2,7 +2,7 @@ import {h} from '@soil/dom'
 import {get} from '../shared/http/get'
 import {icon} from '../shared/dom/icon'
 import * as contract from '../../../shared/contract'
-import {server_url} from '../shared/constants'
+import {serverUrl} from '../shared/constants'
 
 export function findFoodsModal() {
     const $foodCategorySelect = h.select({
@@ -16,7 +16,7 @@ export function findFoodsModal() {
         h.option({value: '', selected: true}, ['All food categories'])
     ])
 
-    get<contract.FoodCategory[]>(`${server_url}/foods/categories`, {cache: true})
+    get<contract.FoodCategory[]>(`${serverUrl}/foods/categories`, {cache: true})
         .then(cats => {
             cats.forEach(cat => {
                 $foodCategorySelect.appendChild(
@@ -69,7 +69,7 @@ export function findFoodsModal() {
         const urlName = 'name=' + name.replace(/\s/g, '%')
         const urlCategoryId = categoryId ? '&categoryId=' + categoryId : ''
 
-        get<contract.FoundFood[]>(`${server_url}/foods/search?${urlName}${urlCategoryId}`, {cache: true})
+        get<contract.FoundFood[]>(`${serverUrl}/foods/search?${urlName}${urlCategoryId}`, {cache: true})
             .then(foods => {
                 $resultList.innerHTML = ''
 
