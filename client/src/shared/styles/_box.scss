@@ -10,12 +10,14 @@
     flex-direction: column;
 }
 
+$box-space: 8px;
+
 .spaced.h.box > *:not(:last-child) {
-    margin-right: 8px;
+    margin-right: $box-space;
 }
 
 .spaced.v.box > *:not(:last-child) {
-    margin-bottom: 8px;
+    margin-bottom: $box-space;
 }
 
 .spread.box {

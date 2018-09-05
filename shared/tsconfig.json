@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "outDir": "bin",
         "module": "commonjs",
         "moduleResolution": "node",
         "strict": true,

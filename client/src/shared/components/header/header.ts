@@ -9,13 +9,13 @@ export function header() {
         ]),
         h.ul({}, [
             h.li({}, [
-                h.a({href: 'food-details.html'}, ['Food details'])
+                h.a({href: 'foods-details'}, ['Food details'])
             ]),
             h.li({}, [
-                h.a({href: 'top-foods.html'}, ['Top foods'])
+                h.a({href: 'top-foods'}, ['Top foods'])
             ]),
             h.li({}, [
-                h.a({href: 'label-builder.html'}, ['Label builder'])
+                h.a({href: 'label-builder'}, ['Label builder'])
             ])
         ])
     ])

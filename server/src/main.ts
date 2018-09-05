@@ -22,75 +22,65 @@ http
     .on('error', err => console.error('Server failed to start.', err))
 
 function server(req: http.IncomingMessage, res: http.ServerResponse) {
-    console.debug('URL:', req.url)
+    console.debug('HTTP request', req.url)
 
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:1234')
 
     if (/^\/api\/foods\/[0-9]+$/.test(req.url!)) {
         const foodId = req.url!.match(/^\/api\/foods\/([0-9]+)$/)![1]
         findFoodById(foodId)
-            .then(foodDetails => {
-                res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'})
-                return res.end(JSON.stringify(foodDetails))
-            })
-            .catch(err => {
-                console.error(err)
-                res.writeHead(500)
-                return res.end()
-            })
+            .then(foodDetails => write(res, 200, foodDetails))
+            .catch(err => write(res, 500, err))
     }
     else if (/^\/api\/rdis\?/.test(req.url!)) {
         const urlParams = getUrlParams(req.url!)
         const ageStr = urlParams.age
         if (!ageStr || typeof ageStr !== 'string' || !/[0-9]+/.test(ageStr)) {
-            res.writeHead(400)
-            return res.end()
+            return write(res, 400, {message: `Parameter "age" must be numeric.`})
         }
         const age = parseInt(ageStr, 10)
         if (age < 0 || age > 150) {
-            res.writeHead(400)
-            return res.end()
+            return write(res, 400, {message: `Parameter "age" must be between 0 and 150.`})
         }
-
         const gender = urlParams.gender
         if (typeof gender !== 'string' || (gender !== 'M' && gender !== 'F')) {
-            res.writeHead(400)
-            return res.end()
+            return write(res, 400, {message: `Parameter "gender" must be either "M" or "F".`})
         }
-
         findRdisByAgeAndGender(age, gender)
-            .then(rdis => {
-                res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'})
-                return res.end(JSON.stringify(rdis))
-            })
-            .catch(err => {
-                console.error(err)
-                res.writeHead(500)
-                return res.end()
-            })
+            .then(rdis => write(res, 200, rdis))
+            .catch(err => write(res, 500, err))
     }
     else if (/^\/api\/foods\/search\?/.test(req.url!)) {
-        const name = getUrlParams(req.url!).name
+        const urlParams = getUrlParams(req.url!)
+        const name = urlParams.name
         if (!name || typeof name !== 'string' || name.length <= 2) {
-            res.writeHead(400)
-            return res.end()
+            return write(res, 400, {message: `Parameter "name" is too short.`})
         }
-
-        findFoodsByName(name)
-            .then(foods => {
-                res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'})
-                return res.end(JSON.stringify(foods))
-            })
-            .catch(err => {
-                console.error(err)
-                res.writeHead(500)
-                return res.end()
-            })
+        const categoryIdStr = urlParams.categoryId
+        if (categoryIdStr && (typeof categoryIdStr !== 'string' || !/[0-9]+/.test(categoryIdStr))) {
+            return write(res, 400, {message: `Parameter "categoryId" must be numeric.`})
+        }
+        const categoryId = categoryIdStr
+            ? parseInt(categoryIdStr, 10)
+            : undefined
+        findFoodsByNameAndCategory(name, categoryId)
+            .then(foods => write(res, 200, foods))
+            .catch(err => write(res, 500, err))
+    }
+    else if (/^\/api\/foods\/categories/.test(req.url!)) {
+        findFoodCategories()
+            .then(cats => write(res, 200, cats))
+            .catch(err => write(res, 500, err))
     }
     else {
-        res.writeHead(404)
-        return res.end()
+        write(res, 404, {message: `There is no handler for end-point "${req.url}".`})
     }
+}
+
+function write(res: http.ServerResponse, statusCode: number, body: object) {
+    console.debug('HTTP response', statusCode, body)
+    res.writeHead(statusCode, {'Content-Type': 'application/json; charset=utf-8'})
+    res.end(JSON.stringify(body))
 }
 
 function getUrlParams(url: string) {
@@ -125,14 +115,13 @@ function findFoodById(foodId: string): Promise<contract.FoodDetails> {
 }
 
 function findRdisByAgeAndGender(age: number, gender: GenderString): Promise<contract.Rdi[]> {
-    console.debug(age, gender)
-
     return new Promise((resolve, reject) => {
         db.query(`
             select rdi.value, ndf.NutrDesc, ndf.Units
             from rdi
             join nutr_def ndf on (ndf.Nutr_No = rdi.nutr_no)
-            where rdi.age_min <= ?
+            where ndf.interest >= 10
+            and rdi.age_min <= ?
             and rdi.age_max >= ?
             and rdi.gender = ?
             order by ndf.NutrDesc
@@ -148,20 +137,42 @@ function findRdisByAgeAndGender(age: number, gender: GenderString): Promise<cont
     })
 }
 
-function findFoodsByName(name: string): Promise<contract.FoundFood[]> {
+function findFoodsByNameAndCategory(name: string, categoryId?: number): Promise<contract.FoundFood[]> {
     return new Promise((resolve, reject) => {
+        const params: (number | string)[] = ['%' + name + '%']
+        if (categoryId) {
+            params.push(categoryId)
+        }
+
         db.query(`
             select fd.NDB_No, fd.Long_Desc, fg.FdGrp_Desc
             from food_des fd
             join fd_group fg on (fg.FdGrp_Cd = fd.FdGrp_Cd)
             where fg.interest >= 10
             and lower(fd.Long_Desc) like lower(?)
+            ${categoryId ? 'and fg.FdGrp_Cd = ?' : ''}
             limit 100
-        `, ['%' + name + '%'], (err, foods) => {
+        `, params, (err, foods) => {
             if (err) {
                 reject(err)
             } else {
                 resolve(foods)
+            }
+        })
+    })
+}
+
+function findFoodCategories(): Promise<contract.FoodCategory[]> {
+    return new Promise((resolve, reject) => {
+        db.query(`
+            select fg.FdGrp_Cd, fg.FdGrp_Desc
+            from fd_group fg
+            where fg.interest >= 10
+        `, [], (err, cats) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(cats)
             }
         })
     })

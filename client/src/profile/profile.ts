@@ -1,5 +1,5 @@
 import {h} from '@soil/dom'
-import {icon} from '../shared/utils/icon'
+import {icon} from '../shared/dom/icon'
 
 const page = h.div({className: 'page'}, [
     h.h1({className: 'main-title'}, ['Your profile']),

@@ -1,44 +1,39 @@
-@import '../shared/utils/base';
-@import '../shared/utils/box';
+@import '../shared/styles/base';
+@import '../shared/styles/common';
+@import '../shared/styles/box';
 @import url('../../node_modules/@fortawesome/fontawesome-free/css/solid.css');
 @import url('../../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css');
-
-$h-space: 16px;
+@import './findFoodsModal';
 
 body {
-    padding: $h-space;
-}
-
-.hidden {
-    display: none;
+    padding: $margin-lg;
 }
 
 .food-details {
     output {
-        margin-left: 8px;
-        color: #777;
+        margin-left: $margin;
+        color: $font-color-light;
     }
 
     output.high {
-        color: #f77;
+        color: $color-red;
     }
 
     > h1 {
-        font-size: 28px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #bbb;
-        margin-bottom: 4px;
+        font-size: $font-size-xl;
+        padding-bottom: $margin;
+        border-bottom: 1px solid $border-color;
+        margin-bottom: $margin-sm;
 
         > a {
             float: right;
-            margin: 5px 0 0 8px;
-            color: #2a58ad;
-            opacity: 0.5;
-            font-size: 20px;
+            margin: $margin-sm 0 0 $margin;
+            color: $color-blue;
+            font-size: $font-size-lg;
 
             &:hover {
                 cursor: pointer;
-                opacity: 1;
+                color: $color-dark-blue;
             }
         }
     }
@@ -46,66 +41,15 @@ body {
     > ul {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(375px, 1fr));
-        grid-column-gap: $h-space;
+        grid-column-gap: $margin-lg;
 
         > li {
-            margin-top: 16px;
+            margin-top: $margin-lg;
 
             > progress {
                 height: 8px;
                 width: 100%;
                 border: none;
-            }
-        }
-    }
-}
-
-.find-food-modal {
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
-    margin: 0 auto;
-    width: 60%;
-    min-width: 600px;
-    max-width: 900px;
-    padding: 12px;
-    border: 1px solid #aaa;
-    border-top: none;
-    background-color: #eee;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
-
-    > .box {
-        padding-bottom: 8px;
-        border-bottom: 1px solid #aaa;
-        margin-bottom: 8px;
-
-        > input {
-            margin-right: 6px;
-        }
-    }
-
-    > ul {
-        max-height: 400px;
-        overflow-y: auto;
-
-        > li {
-            padding: 4px;
-            line-height: 120%;
-
-            &.no-results {
-                text-align: center;
-                color: #666;
-            }
-
-            > a {
-                color: #333;
-                text-decoration: none;
-
-                &:hover,
-                &:focus {
-                    color: black;
-                }
             }
         }
     }

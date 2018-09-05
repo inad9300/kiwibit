@@ -1,6 +1,7 @@
 {
     "extends": "../shared/tsconfig.json",
     "compilerOptions": {
+        "outDir": "bin",
         "target": "es5",
         "lib": ["es6"],
         "allowJs": true

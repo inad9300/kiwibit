@@ -1,4 +1,4 @@
-import {clone} from './clone'
+import {clone} from '../utils/clone'
 
 interface GetOptions {
     cache?: boolean

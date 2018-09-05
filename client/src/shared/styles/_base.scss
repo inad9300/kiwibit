@@ -1,55 +1,37 @@
 @import './reset.scss';
+@import './constants.scss';
 
 * {
     box-sizing: border-box;
+
+    &:not(.fas) {
+        font-family: 'Open Sans', sans-serif !important;
+    }
 }
-
-*:not(i) {
-    font-family: 'Open Sans', sans-serif !important;
-}
-
-// html,
-// body {
-//     min-height: 100vh;
-// }
-
-// .padded {
-//     padding: 8px;
-// }
-
-$shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 
 input,
 button,
 select {
-    padding: 5px 7px;
-    color: #333;
+    padding: $margin-sm $margin;
+    color: $font-color;
     background-color: #fff;
-    border: 1px solid #aaa;
+    border: 1px solid $border-color;
 
     &:hover,
     &:focus {
         color: #000;
-        border: 1px solid #888;
+        border: 1px solid $border-color-hover;
     }
 }
 
 input {
-    box-shadow: $shadow inset;
+    box-shadow: $shadow-sm inset;
 }
 
 button {
-    box-shadow: $shadow;
+    box-shadow: $shadow-sm;
     cursor: pointer;
 }
-
-// h2 {
-//     margin-bottom: 0.5em;
-//     padding-bottom: 0.2em;
-//     font-weight: normal;
-//     color: #888;
-//     border-bottom: 1px solid #ccc;
-// }
 
 // dl {
 //     > dt {
@@ -58,9 +40,9 @@ button {
 //         margin-right: 12px;
 //         min-width: 150px;
 //         font-weight: bold;
-//         color: #333;
+//         color: $font-color;
 //     }
-
+//
 //     > dt,
 //     > dd {
 //         margin-bottom: 6px;
@@ -70,24 +52,24 @@ button {
 // table {
 //     border-collapse: collapse;
 //     border-bottom: 1px solid #ddd;
-
+//
 //     > thead {
 //         background-color: #eee;
 //         border-top: 1px solid #ccc;
 //         border-bottom: 1px solid #ccc;
-
+//
 //         th {
-//             color: #333;
+//             color: $font-color;
 //             text-align: left;
 //             padding: 8px;
 //         }
 //     }
-
+//
 //     > tbody {
 //         td {
 //             padding: 3px 8px;
 //         }
-
+//
 //         > tr:nth-child(even) {
 //             background-color: #f4f4f4;
 //         }
@@ -116,7 +98,7 @@ button {
 //     background: white;
 //     box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
 //     z-index: 100;
-
+//
 //     h2:first-child {
 //         margin-top: 0;
 //     }

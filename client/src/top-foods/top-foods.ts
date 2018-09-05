@@ -1,6 +1,6 @@
 import {h} from '@soil/dom'
 import * as Highcharts from 'highcharts'
-import {get} from '../shared/utils/get'
+import {get} from '../shared/http/get'
 import {header} from '../shared/components/header/header'
 
 interface Nutrient {

@@ -1,7 +1,7 @@
 {
     "private": true,
     "scripts": {
-        "start": "tsc && node bin/server/src/main.js"
+        "start": "rm -rf bin && tsc && node bin/server/src/main.js"
     },
     "dependencies": {
         "mysql": "2.16.0"

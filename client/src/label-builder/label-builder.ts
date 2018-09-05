@@ -1,5 +1,5 @@
 import {h} from '@soil/dom'
-import {get} from '../shared/utils/get'
+import {get} from '../shared/http/get'
 import {header} from '../shared/components/header/header'
 
 type BasicFood = any

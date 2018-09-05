@@ -19,3 +19,8 @@ export interface Rdi {
     Units: db.nutr_def['Units']
     value: db.rdi['value']
 }
+
+export interface FoodCategory {
+    FdGrp_Cd: db.fd_group['FdGrp_Cd']
+    FdGrp_Desc: db.fd_group['FdGrp_Desc']
+}
