@@ -146,7 +146,7 @@ function findFoodsByNameAndCategory(name: string, categoryId?: number): Promise<
         }
 
         db.query(`
-            select fd.NDB_No, fd.Long_Desc, fg.FdGrp_Desc
+            select fd.NDB_No, fd.Long_Desc, fg.FdGrp_Desc, fg.color
             from food_des fd
             join fd_group fg on (fg.FdGrp_Cd = fd.FdGrp_Cd)
             where fg.interest >= 10

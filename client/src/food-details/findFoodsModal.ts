@@ -82,7 +82,11 @@ export function findFoodsModal() {
 
                 foods.forEach(food => $resultList.appendChild(
                     h.li({}, [
-                        // TODO Use `food.FdGrp_Desc`.
+                        h.span({
+                            title: food.FdGrp_Desc,
+                            className: 'food-group-circle',
+                            style: {backgroundColor: food.color}
+                        }),
                         h.a({href: 'index.html?id=' + food.NDB_No}, [food.Long_Desc])
                     ])
                 ))

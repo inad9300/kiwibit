@@ -53,6 +53,7 @@ export interface fd_group {
     FdGrp_Cd: string
     FdGrp_Desc: string
     interest: number
+    color: string
 }
 
 export interface food_des {

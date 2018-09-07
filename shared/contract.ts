@@ -13,6 +13,7 @@ export interface FoundFood {
     NDB_No: db.food_des['NDB_No']
     Long_Desc: db.food_des['Long_Desc']
     FdGrp_Desc: db.fd_group['FdGrp_Desc']
+    color: db.fd_group['color']
 }
 
 export interface Rdi {
