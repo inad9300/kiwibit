@@ -3,6 +3,7 @@ import {get} from '../shared/http/get'
 import {icon} from '../shared/dom/icon'
 import * as contract from '../../../shared/contract'
 import {serverUrl} from '../shared/constants'
+import {foodGroupCircle} from './foodGroupCircle'
 
 export function findFoodsModal() {
     const $foodCategorySelect = h.select({
@@ -82,11 +83,7 @@ export function findFoodsModal() {
 
                 foods.forEach(food => $resultList.appendChild(
                     h.li({}, [
-                        h.span({
-                            title: food.FdGrp_Desc,
-                            className: 'food-group-circle',
-                            style: {backgroundColor: food.color}
-                        }),
+                        foodGroupCircle(food),
                         h.a({href: 'index.html?id=' + food.NDB_No}, [food.Long_Desc])
                     ])
                 ))

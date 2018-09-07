@@ -2,6 +2,8 @@ import * as db from './db/model'
 
 export interface FoodDetails {
     Long_Desc: db.food_des['Long_Desc']
+    FdGrp_Desc: db.fd_group['FdGrp_Desc']
+    color: db.fd_group['color']
     nutrients: {
         Nutr_Val: db.nut_data['Nutr_Val']
         NutrDesc: db.nutr_def['NutrDesc']

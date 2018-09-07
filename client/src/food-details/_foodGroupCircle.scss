@@ -1,0 +1,12 @@
+.food-group-circle {
+    $size: 14px;
+
+    display: inline-block;
+    height: $size;
+    width: $size;
+    margin-right: $margin-sm;
+    border: 1px solid black;
+    border-radius: 128px;
+    position: relative;
+    top: 1px;
+}

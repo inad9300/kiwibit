@@ -4,6 +4,7 @@
 @import url('../../node_modules/@fortawesome/fontawesome-free/css/solid.css');
 @import url('../../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css');
 @import './findFoodsModal';
+@import './foodGroupCircle';
 
 body {
     padding: $margin-lg;
@@ -49,6 +50,11 @@ body {
         padding-bottom: $margin;
         border-bottom: 1px solid $border-color;
         margin-bottom: $margin-sm;
+
+        > .food-group-circle {
+            height: 20px;
+            width: 20px;
+        }
 
         > a {
             float: right;

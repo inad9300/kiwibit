@@ -10,6 +10,7 @@ import {clear} from '../shared/dom/clear'
 import * as contract from '../../../shared/contract'
 import {serverUrl} from '../shared/constants'
 import {findFoodsModal} from './findFoodsModal'
+import {foodGroupCircle} from './foodGroupCircle'
 
 type ExtendedRdi = contract.Rdi & contract.FoodDetails['nutrients'][0] & {pct: number}
 
@@ -66,6 +67,7 @@ Promise.all([
 
     const $foodDetails = h.div({className: 'food-details'}, [
         h.h1({}, [
+            foodGroupCircle(foodDetails),
             foodDetails.Long_Desc,
             h.output({}, [
                 unit(100, 'g'),
