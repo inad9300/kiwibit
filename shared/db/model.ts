@@ -42,6 +42,7 @@ export interface nutr_def {
     Units: string
     Tagname?: string
     NutrDesc: string
+    display_name?: string
     Num_Dec: number
     SR_Order: number
     interest: number

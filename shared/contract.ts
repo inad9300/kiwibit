@@ -5,6 +5,7 @@ export interface FoodDetails {
     nutrients: {
         Nutr_Val: db.nut_data['Nutr_Val']
         NutrDesc: db.nutr_def['NutrDesc']
+        display_name: db.nutr_def['display_name']
     }[]
 }
 

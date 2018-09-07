@@ -11,12 +11,15 @@ import * as contract from '../../../shared/contract'
 import {serverUrl} from '../shared/constants'
 import {findFoodsModal} from './findFoodsModal'
 
-type ExtendedRdi = contract.Rdi & {pct: number, Nutr_Val: number}
+type ExtendedRdi = contract.Rdi & contract.FoodDetails['nutrients'][0] & {pct: number}
+
+const $findFoodsModal = findFoodsModal()
+document.body.appendChild($findFoodsModal)
 
 const urlParams = getUrlParams()
 const foodId = urlParams.get('id')
 if (!foodId) {
-    // TODO Communicate to the user.
+    renderNoFoodScreen()
     throw new Error('Food id missing in the URL.')
 }
 
@@ -32,8 +35,8 @@ Promise.all([
             const nutr = foodDetails.nutrients.find(nutr => nutr.NutrDesc === rdi.NutrDesc)
             return !nutr ? undefined : {
                 ...rdi,
-                pct: pct(nutr.Nutr_Val, rdi.value),
-                Nutr_Val: nutr.Nutr_Val
+                ...nutr,
+                pct: pct(nutr.Nutr_Val, rdi.value)
             }
         })
         .filter(pct => pct !== undefined) as ExtendedRdi[]
@@ -109,14 +112,30 @@ Promise.all([
             .forEach(rdi => $nutrientList.appendChild(nutrientItem(rdi)))
     }
 })
+.catch(() => renderNoFoodScreen())
 
-const $findFoodsModal = findFoodsModal()
-document.body.appendChild($findFoodsModal)
+function renderNoFoodScreen() {
+    document.body.appendChild(
+        h.div({className: 'no-food'}, [
+            h.p({}, [
+                foodId
+                    ? `No food exists with id ${foodId}. Try finding another food.`
+                    : 'No food id was present in the URL. Look for some food.'
+            ]),
+            h.a({
+                onclick: () => $findFoodsModal.open(),
+                title: 'Find details of some food'
+            }, [
+                icon('search')
+            ])
+        ])
+    )
+}
 
 function nutrientItem(rdi: ExtendedRdi) {
     return h.li({}, [
-        h.h2({}, [
-            rdi.NutrDesc,
+        h.h2({title: rdi.display_name ? rdi.NutrDesc : ''}, [
+            rdi.display_name || rdi.NutrDesc,
             // TODO Take into account the tolerable upper intake level.
             h.output({className: rdi.pct > 300 ? 'high' : ''}, [
                 unit(rdi.Nutr_Val, rdi.Units),

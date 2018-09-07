@@ -9,6 +9,31 @@ body {
     padding: $margin-lg;
 }
 
+.no-food {
+    text-align: center;
+
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    > p {
+        font-size: $font-size-lg;
+        color: $font-color-light;
+        margin-bottom: $margin-xl;
+    }
+
+    > a {
+        color: $color-blue;
+        font-size: 128px;
+
+        &:hover {
+            cursor: pointer;
+            color: $color-dark-blue;
+        }
+    }
+}
+
 .food-details {
     output {
         margin-left: $margin;

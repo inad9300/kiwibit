@@ -90,7 +90,7 @@ function getUrlParams(url: string) {
 function findFoodById(foodId: string): Promise<contract.FoodDetails> {
     return new Promise((resolve, reject) => {
         db.query(`
-            select fd.Long_Desc, ndt.Nutr_Val, ndf.NutrDesc
+            select fd.Long_Desc, ndt.Nutr_Val, ndf.NutrDesc, ndf.display_name
             from food_des fd
             join nut_data ndt on (ndt.NDB_No = fd.NDB_No)
             join nutr_def ndf on (ndf.Nutr_No = ndt.Nutr_No)
@@ -106,7 +106,8 @@ function findFoodById(foodId: string): Promise<contract.FoodDetails> {
                     Long_Desc: foodDetails[0].Long_Desc,
                     nutrients: foodDetails.map((d: any) => ({
                         Nutr_Val: d.Nutr_Val,
-                        NutrDesc: d.NutrDesc
+                        NutrDesc: d.NutrDesc,
+                        display_name: d.display_name
                     }))
                 })
             }
