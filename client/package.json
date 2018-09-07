@@ -1,7 +1,7 @@
 {
     "private": true,
     "scripts": {
-        "start": "rm -rf bin && parcel -d bin src/food-details/*.html"
+        "start": "rm -rf bin && parcel -d bin src/{food-details,top-foods}/*.html"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "5.3.1",

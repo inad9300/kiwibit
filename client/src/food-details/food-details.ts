@@ -7,12 +7,12 @@ import {title} from '../shared/dom/title'
 import {unit} from '../shared/dom/unit'
 import {icon} from '../shared/dom/icon'
 import {clear} from '../shared/dom/clear'
-import * as contract from '../../../shared/contract'
+import {Rdi, FoodDetails} from '../../../shared/contract'
 import {serverUrl} from '../shared/constants'
 import {findFoodsModal} from './findFoodsModal'
 import {foodGroupCircle} from './foodGroupCircle'
 
-type ExtendedRdi = contract.Rdi & contract.FoodDetails['nutrients'][0] & {pct: number}
+type ExtendedRdi = Rdi & FoodDetails['nutrients'][0] & {pct: number}
 
 const $findFoodsModal = findFoodsModal()
 document.body.appendChild($findFoodsModal)
@@ -25,8 +25,8 @@ if (!foodId) {
 }
 
 Promise.all([
-    get<contract.Rdi[]>(`${serverUrl}/rdis?age=20&gender=M`),
-    get<contract.FoodDetails>(`${serverUrl}/foods/${foodId}`)
+    get<Rdi[]>(`${serverUrl}/rdis?age=20&gender=M`),
+    get<FoodDetails>(`${serverUrl}/foods/${foodId}`)
 ])
 .then(([rdis, foodDetails]) => {
     title(foodDetails.Long_Desc)

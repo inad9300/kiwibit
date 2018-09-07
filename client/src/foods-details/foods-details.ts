@@ -34,16 +34,16 @@ interface FoodDetails {
 
 const nbsp = '\u00A0'
 
-const foodCategorySelect = h.select({
+const $foodGroupSelect = h.select({
     style: {
         alignSelf: 'flex-start'
     },
     onchange: () => {
-        get(foodCategorySelect.value, {cache: true})
+        get($foodGroupSelect.value, {cache: true})
             .then(fillFoodList)
     }
 }, [
-    h.option({disabled: true, selected: true}, ['Food category']),
+    h.option({disabled: true, selected: true}, ['Food group']),
     h.option({value: '/beverages'}, ['Beverages']),
     h.option({value: '/breakfast-cereals'}, ['Breakfast cereals']),
     h.option({value: '/fats-and-oils'}, ['Fats and oils']),
@@ -70,8 +70,8 @@ const foodCategorySelect = h.select({
 //     }
 // }
 
-// const _foodCategorySelect = document.createElement('select')
-// html.addOptionsToSelect(_foodCategorySelect, [
+// const _foodGroupSelect = document.createElement('select')
+// html.addOptionsToSelect(_foodGroupSelect, [
 //     {value: 'beverages', text: 'Beverages'}
 // ])
 
@@ -183,8 +183,8 @@ function showFoodDetails(id: string) {
 
 document.body.appendChild(header())
 document.body.appendChild(h.div({className: 'padded'}, [
-    foodCategorySelect,
+    $foodGroupSelect,
     foodList
 ]))
 
-foodCategorySelect.focus()
+$foodGroupSelect.focus()

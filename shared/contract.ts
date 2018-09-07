@@ -19,12 +19,29 @@ export interface FoundFood {
 }
 
 export interface Rdi {
+    Nutr_No: db.nutr_def['Nutr_No']
     NutrDesc: db.nutr_def['NutrDesc']
     Units: db.nutr_def['Units']
     value: db.rdi['value']
 }
 
-export interface FoodCategory {
+export interface FoodGroup {
     FdGrp_Cd: db.fd_group['FdGrp_Cd']
     FdGrp_Desc: db.fd_group['FdGrp_Desc']
+}
+
+export interface Nutrient {
+    Nutr_No: db.nutr_def['Nutr_No']
+    NutrDesc: db.nutr_def['NutrDesc']
+    display_name: db.nutr_def['display_name']
+    Units: db.nutr_def['Units']
+}
+
+export interface TopFood {
+    NDB_No: db.food_des['NDB_No']
+    Long_Desc: db.food_des['Long_Desc']
+    Nutr_Val: db.nut_data['Nutr_Val']
+    Units: db.nutr_def['Units']
+    FdGrp_Desc: db.fd_group['FdGrp_Desc']
+    color: db.fd_group['color']
 }

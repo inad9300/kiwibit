@@ -1,87 +1,102 @@
 import {h} from '@soil/dom'
 import * as Highcharts from 'highcharts'
 import {get} from '../shared/http/get'
+import {title} from '../shared/dom/title'
+import {serverUrl} from '../shared/constants'
+import {TopFood, Rdi} from '../../../shared/contract'
+import {nutrientSelect} from './nutrientSelect'
 
-// TODO Store in database.
-const FOOD_CATEGORY_COLOR: {[categoryId: string]: string} = {
-    '0200': '#8baa27', // Spices and herbs.
-    '0400': '#1f79c6', // Fats and oils.
-    '0600': '#c61f1f', // Soupes and sauces.
-    '0800': '#a74f0f', // Breakfast cereals.
-    '0900': '#e69809', // Fruits and juices.
-    '1100': '#227e10', // Vegetables.
-    '1200': '#c5643f', // Nuts and seeds.
-    '1400': '#3fc5b7', // Beverages.
-    '1600': '#c53f94', // Legumes.
-    '2000': '#f9cd2c' // Grains.
-}
-
-const $nutrientSelect = h.select({
-    onchange: () => {
-        if ($nutrientSelect.value === 'all') {
-            // showAllTopFoods()
-        } else {
-            showTopFoods($nutrientSelect.value)
-        }
+const $nutrientSelect = nutrientSelect({
+    onChange: nutrientId => location.href = '/top-foods/index.html?nutrient-id=' + nutrientId,
+    onLoad: nutrient => {
+        showTopFoods(nutrient.Nutr_No)
+        $nutrientSelect.focus()
+        title(`Top foods high in ${nutrient.display_name || nutrient.NutrDesc}`)
     }
-}, [
-    h.option({disabled: true, selected: true}, ['Nutrient']),
-    h.option({value: 'all'}, ['All nutrients'])
-])
+})
 
-const $chartWrapper = h.div({className: 'hidden s1'})
+const $chartWrapper = h.div({className: 'chart-wrapper hidden'})
 
 const $chart = Highcharts.chart($chartWrapper, {
-    chart: {type: 'column'},
-    title: {text: ''},
-    xAxis: {type: 'category'},
-    yAxis: {title: {text: ''}},
+    chart: {type: 'bar'},
+    title: {text: null},
+    xAxis: {
+        type: 'category',
+        labels: {
+            style: {color: '#333', fontSize: '13px'}
+        }
+    },
+    yAxis: {title: {text: null}},
     tooltip: {
         headerFormat: '',
-        pointFormat: `<b>{point.y}</b> / {point.name} ({point.foodCategory})`
+        pointFormat: `<b>{point.Nutr_Val}\u2009{point.Units}</b> / {point.Long_Desc} ({point.FdGrp_Desc})`
     },
     credits: {enabled: false},
     legend: {enabled: false},
+    plotOptions: {
+        series: {
+            cursor: 'pointer',
+            point: {
+                events: {
+                    click: function (event: MouseEvent) {
+                        const url = '/food-details/index.html?id=' + (this as TopFood).NDB_No
+                        if (event.ctrlKey) {
+                            window.open(url, '_blank')
+                        } else {
+                            location.href = url
+                        }
+                        return true
+                    }
+                }
+            }
+        }
+    },
     series: [{}]
 })
 
-get('/nutrients', {cache: true})
-    .then((nutrients: any[]) => {
-        nutrients
-            .map(n => h.option({value: n.nutr_no}, [`${n.nutrdesc} (${n.units})`]))
-            .forEach(opt => $nutrientSelect.appendChild(opt))
-    })
-
-document.body.appendChild(h.div({
-    className: 'padded',
-    style: {
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        flex: '1'
-    }
-}, [
+document.body.appendChild(h.div({className: 'top-foods v box'}, [
     $nutrientSelect,
-    $chartWrapper
+    h.div({className: 'outer-chart-wrapper s1'}, [
+        $chartWrapper
+    ])
 ]))
 
-$nutrientSelect.focus()
-
 function showTopFoods(nutrientId: string) {
-    get(`/nutrients/${nutrientId}/foods`, {cache: true})
-        .then((topFoods: any[]) => {
-            const data = topFoods
-                .reverse()
-                .map(f => ({
-                    name: f.long_desc,
-                    y: f.nutr_val,
-                    foodCategory: f.fdgrp_desc,
-                    color: FOOD_CATEGORY_COLOR[f.fdgrp_cd]
-                }))
+    get<TopFood[]>(`${serverUrl}/nutrients/${nutrientId}/foods`).then(topFoods => {
+        $chartWrapper.classList.remove('hidden')
 
-            $chartWrapper.style.display = ''
+        const data = topFoods.map(f => ({
+            ...f,
+            name: f.Long_Desc,
+            y: f.Nutr_Val,
+            color: f.color
+        }))
 
-            $chart.series[0].setData(data)
-            $chart.reflow()
+        $chart.series[0].setData(data)
+        $chart.reflow()
+
+        get<Rdi[]>(`${serverUrl}/rdis?age=20&gender=M`).then(rdis => {
+            const rdi = rdis.find(r => r.Nutr_No === nutrientId)
+            if (!rdi) {
+                return
+            }
+            $chart.yAxis[0].update({
+                max: Math.max(rdi.value, ...topFoods.map(f => f.Nutr_Val)),
+                plotLines: [{
+                    value: rdi.value,
+                    width: 1,
+                    zIndex: 10,
+                    color: 'red',
+                    label: {
+                        text: '<abbr title="Reference Daily Intake">RDI</abbr>',
+                        rotation: 0,
+                        y: -1,
+                        x: -8,
+                        style: {color: 'red', fontSize: '9px'},
+                        useHTML: true
+                    }
+                }]
+            })
         })
+    })
 }

@@ -1,3 +1,20 @@
 @import '../shared/styles/base';
 @import '../shared/styles/common';
 @import '../shared/styles/box';
+
+.top-foods {
+    height: 100vh;
+    padding: $margin-lg $margin-lg 0 $margin-lg;
+
+    > select {
+        margin-bottom: $margin;
+    }
+
+    > .outer-chart-wrapper {
+        overflow-y: auto;
+
+        > .chart-wrapper {
+            height: 4200px;
+        }
+    }
+}

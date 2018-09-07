@@ -56,20 +56,31 @@ function server(req: http.IncomingMessage, res: http.ServerResponse) {
         if (!name || typeof name !== 'string' || name.length <= 2) {
             return write(res, 400, {message: `Parameter "name" is too short.`})
         }
-        const categoryIdStr = urlParams.categoryId
-        if (categoryIdStr && (typeof categoryIdStr !== 'string' || !/[0-9]+/.test(categoryIdStr))) {
-            return write(res, 400, {message: `Parameter "categoryId" must be numeric.`})
+        const groupIdStr = urlParams.groupId
+        if (groupIdStr && (typeof groupIdStr !== 'string' || !/[0-9]+/.test(groupIdStr))) {
+            return write(res, 400, {message: `Parameter "groupId" must be numeric.`})
         }
-        const categoryId = categoryIdStr
-            ? parseInt(categoryIdStr, 10)
+        const groupId = groupIdStr
+            ? parseInt(groupIdStr, 10)
             : undefined
-        findFoodsByNameAndCategory(name, categoryId)
+        findFoodsByNameAndGroup(name, groupId)
             .then(foods => write(res, 200, foods))
             .catch(err => write(res, 500, err))
     }
-    else if (/^\/api\/foods\/categories/.test(req.url!)) {
-        findFoodCategories()
+    else if (/^\/api\/foods\/groups$/.test(req.url!)) {
+        findFoodGroups()
             .then(cats => write(res, 200, cats))
+            .catch(err => write(res, 500, err))
+    }
+    else if (/^\/api\/nutrients$/.test(req.url!)) {
+        findNutrients()
+            .then(nutrs => write(res, 200, nutrs))
+            .catch(err => write(res, 500, err))
+    }
+    else if (/^\/api\/nutrients\/[0-9]+\/foods$/.test(req.url!)) {
+        const nutrientId = req.url!.match(/^\/api\/nutrients\/([0-9]+)\/foods$/)![1]
+        findTopFoodsForNutrient(nutrientId)
+            .then(foods => write(res, 200, foods))
             .catch(err => write(res, 500, err))
     }
     else {
@@ -121,7 +132,7 @@ function findFoodById(foodId: string): Promise<contract.FoodDetails> {
 function findRdisByAgeAndGender(age: number, gender: GenderString): Promise<contract.Rdi[]> {
     return new Promise((resolve, reject) => {
         db.query(`
-            select rdi.value, ndf.NutrDesc, ndf.Units
+            select rdi.value, ndf.NutrDesc, ndf.Units, ndf.Nutr_No
             from rdi
             join nutr_def ndf on (ndf.Nutr_No = rdi.nutr_no)
             where ndf.interest >= 10
@@ -141,11 +152,11 @@ function findRdisByAgeAndGender(age: number, gender: GenderString): Promise<cont
     })
 }
 
-function findFoodsByNameAndCategory(name: string, categoryId?: number): Promise<contract.FoundFood[]> {
+function findFoodsByNameAndGroup(name: string, groupId?: number): Promise<contract.FoundFood[]> {
     return new Promise((resolve, reject) => {
         const params: (number | string)[] = ['%' + name + '%']
-        if (categoryId) {
-            params.push(categoryId)
+        if (groupId) {
+            params.push(groupId)
         }
 
         db.query(`
@@ -154,7 +165,7 @@ function findFoodsByNameAndCategory(name: string, categoryId?: number): Promise<
             join fd_group fg on (fg.FdGrp_Cd = fd.FdGrp_Cd)
             where fg.interest >= 10
             and lower(fd.Long_Desc) like lower(?)
-            ${categoryId ? 'and fg.FdGrp_Cd = ?' : ''}
+            ${groupId ? 'and fg.FdGrp_Cd = ?' : ''}
             limit 100
         `, params, (err, foods) => {
             if (err) {
@@ -166,13 +177,54 @@ function findFoodsByNameAndCategory(name: string, categoryId?: number): Promise<
     })
 }
 
-function findFoodCategories(): Promise<contract.FoodCategory[]> {
+function findFoodGroups(): Promise<contract.FoodGroup[]> {
     return new Promise((resolve, reject) => {
         db.query(`
             select fg.FdGrp_Cd, fg.FdGrp_Desc
             from fd_group fg
             where fg.interest >= 10
+            order by fg.FdGrp_Desc
         `, [], (err, cats) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(cats)
+            }
+        })
+    })
+}
+
+function findNutrients(): Promise<contract.Nutrient[]> {
+    return new Promise((resolve, reject) => {
+        db.query(`
+            select ndf.Nutr_No, ndf.NutrDesc, ndf.Units, ndf.display_name
+            from nutr_def ndf
+            where ndf.interest >= 10
+            order by coalesce(ndf.display_name, ndf.NutrDesc)
+        `, [], (err, cats) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(cats)
+            }
+        })
+    })
+}
+
+function findTopFoodsForNutrient(nutrientId: string): Promise<contract.TopFood[]> {
+    return new Promise((resolve, reject) => {
+        db.query(`
+            select fd.NDB_No, fd.Long_Desc, nd.Nutr_Val, ndf.Units, fg.FdGrp_Desc, fg.color
+            from food_des fd
+            join nut_data nd on (nd.NDB_No = fd.NDB_No)
+            join fd_group fg on (fg.FdGrp_Cd = fd.FdGrp_Cd)
+            join nutr_def ndf on (nd.Nutr_No = ndf.Nutr_No)
+            where ndf.Nutr_No = ?
+            and fg.interest >= 10
+            and (nd.Add_Nutr_Mark is null or nd.Add_Nutr_Mark != 'Y')
+            order by nd.Nutr_Val desc
+            limit 200
+        `, [nutrientId], (err, cats) => {
             if (err) {
                 reject(err)
             } else {

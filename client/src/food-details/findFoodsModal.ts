@@ -6,21 +6,21 @@ import {serverUrl} from '../shared/constants'
 import {foodGroupCircle} from './foodGroupCircle'
 
 export function findFoodsModal() {
-    const $foodCategorySelect = h.select({
+    const $foodGroupSelect = h.select({
         oninput: () => {
-            findFoodsByNameAndCategory($foodNameInput.value, $foodCategorySelect.value)
+            findFoodsByNameAndGroup($foodNameInput.value, $foodGroupSelect.value)
             if (!$foodNameInput.value) {
                 $foodNameInput.focus()
             }
         }
     }, [
-        h.option({value: '', selected: true}, ['All food categories'])
+        h.option({value: '', selected: true}, ['All food groups'])
     ])
 
-    get<contract.FoodCategory[]>(`${serverUrl}/foods/categories`, {cache: true})
+    get<contract.FoodGroup[]>(`${serverUrl}/foods/groups`, {cache: true})
         .then(cats => {
             cats.forEach(cat => {
-                $foodCategorySelect.appendChild(
+                $foodGroupSelect.appendChild(
                     h.option({value: cat.FdGrp_Cd}, [cat.FdGrp_Desc])
                 )
             })
@@ -30,14 +30,14 @@ export function findFoodsModal() {
         type: 'search',
         className: 's1',
         placeholder: 'Enter at least 3 characters, e.g. "lentils cooked"',
-        oninput: () => findFoodsByNameAndCategory($foodNameInput.value, $foodCategorySelect.value)
+        oninput: () => findFoodsByNameAndGroup($foodNameInput.value, $foodGroupSelect.value)
     })
 
     const $resultList = h.ul()
 
     const $modal = h.div({className: 'hidden find-foods-modal'}, [
         h.div({className: 'h box'}, [
-            $foodCategorySelect,
+            $foodGroupSelect,
             $foodNameInput,
             h.button({onclick: close, title: 'Close (Esc)'}, [icon('times')]),
         ]),
@@ -62,15 +62,15 @@ export function findFoodsModal() {
         document.removeEventListener('keydown', handleEsc)
     }
 
-    function findFoodsByNameAndCategory(name: string, categoryId: string) {
+    function findFoodsByNameAndGroup(name: string, groupId: string) {
         if (name.length <= 2) {
             return
         }
 
         const urlName = 'name=' + name.replace(/\s/g, '%')
-        const urlCategoryId = categoryId ? '&categoryId=' + categoryId : ''
+        const urlGroupId = groupId ? '&groupId=' + groupId : ''
 
-        get<contract.FoundFood[]>(`${serverUrl}/foods/search?${urlName}${urlCategoryId}`, {cache: true})
+        get<contract.FoundFood[]>(`${serverUrl}/foods/search?${urlName}${urlGroupId}`, {cache: true})
             .then(foods => {
                 $resultList.innerHTML = ''
 
