@@ -100,7 +100,11 @@ Promise.all([
         $sortByNameBtn.classList.add('disabled')
         $nutrientList.innerHTML = ''
         extendedRdis
-            .sort((a, b) => a.NutrDesc > b.NutrDesc ? 1 : -1)
+            .sort((a, b) => {
+                const nameA = a.display_name || a.NutrDesc
+                const nameB = b.display_name || b.NutrDesc
+                return nameA > nameB ? 1 : -1
+            })
             .forEach(rdi => $nutrientList.appendChild(nutrientItem(rdi)))
     }
 

@@ -28,7 +28,8 @@ input {
     box-shadow: $shadow-sm inset;
 }
 
-button {
+button,
+select {
     box-shadow: $shadow-sm;
     cursor: pointer;
 }
