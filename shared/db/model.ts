@@ -126,3 +126,14 @@ export interface rdi {
     type: 'RDA' | 'AI' | 'UL' | 'AMDR'
     value: number
 }
+
+export interface tuil {
+    id: number
+    nutr_no: string
+    age_min: number
+    age_max: number
+    gender: GenderString
+    pregnancy: BoolString
+    lactation: BoolString
+    value: number
+}

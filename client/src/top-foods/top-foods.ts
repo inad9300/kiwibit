@@ -80,23 +80,31 @@ function showTopFoods(nutrientId: string) {
             if (!rdi) {
                 return
             }
+            const plotLines = [plotLine('<abbr title="Reference Daily Intake">RDI</abbr>', rdi.value, 'green')]
+            if (rdi.max) {
+                plotLines.push(plotLine('<abbr title="Tolerable Upper Intake Level">UL</abbr>', rdi.max, 'red'))
+            }
             $chart.yAxis[0].update({
                 max: Math.max(rdi.value, ...topFoods.map(f => f.Nutr_Val)),
-                plotLines: [{
-                    value: rdi.value,
-                    width: 1,
-                    zIndex: 10,
-                    color: 'red',
-                    label: {
-                        text: '<abbr title="Reference Daily Intake">RDI</abbr>',
-                        rotation: 0,
-                        y: -1,
-                        x: -8,
-                        style: {color: 'red', fontSize: '9px'},
-                        useHTML: true
-                    }
-                }]
+                plotLines
             })
         })
     })
+}
+
+function plotLine(text: string, value: number, color: string) {
+    return {
+        value,
+        width: 1,
+        zIndex: 10,
+        color,
+        label: {
+            text,
+            rotation: 0,
+            y: -1,
+            x: -8,
+            style: {color, fontSize: '9px'},
+            useHTML: true
+        }
+    }
 }

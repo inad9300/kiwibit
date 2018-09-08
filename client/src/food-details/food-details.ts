@@ -4,11 +4,10 @@ import {add} from '../shared/utils/add'
 import {pct} from '../shared/utils/pct'
 import {getUrlParams} from '../shared/utils/getUrlParams'
 import {title} from '../shared/dom/title'
-import {unit} from '../shared/dom/unit'
 import {icon} from '../shared/dom/icon'
 import {clear} from '../shared/dom/clear'
 import {Rdi, FoodDetails} from '../../../shared/contract'
-import {serverUrl} from '../shared/constants'
+import {serverUrl, nbsp} from '../shared/constants'
 import {findFoodsModal} from './findFoodsModal'
 import {foodGroupCircle} from './foodGroupCircle'
 
@@ -70,12 +69,9 @@ Promise.all([
             foodGroupCircle(foodDetails),
             foodDetails.Long_Desc,
             h.output({}, [
-                unit(100, 'g'),
+                h.span({title: 'Overall percentage of nutrients covered by 100 grams of this food'}, [overallPct.toFixed(2) + nbsp + '%']),
                 ', ',
-                Object.assign(
-                    unit(overallPct.toFixed(2), '%'),
-                    {title: 'Overall percentage of nutrients covered by 100 grams of this food'}
-                )
+                100 + nbsp + 'g'
             ]),
             h.a({
                 href: 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.Long_Desc),
@@ -139,15 +135,28 @@ function renderNoFoodScreen() {
 }
 
 function nutrientItem(rdi: ExtendedRdi) {
-    return h.li({}, [
-        h.h2({title: rdi.display_name ? rdi.NutrDesc : ''}, [
-            rdi.display_name || rdi.NutrDesc,
-            // TODO Take into account the tolerable upper intake level.
-            h.output({className: rdi.pct > 300 ? 'high' : ''}, [
-                unit(rdi.Nutr_Val, rdi.Units),
-                ', ',
-                unit(rdi.pct.toFixed(2), '%')
-            ])
+    let className = 'incomplete'
+    if (rdi.pct >= 90) {
+        className = 'complete'
+    }
+    if (rdi.max && rdi.Nutr_Val > rdi.max) {
+        className = 'exceeding'
+    }
+    if (!rdi.max && rdi.pct >= 110) {
+        className = 'possibly-exceeding'
+    }
+
+    return h.li({className}, [
+        h.h2({}, [
+            h.span({title: rdi.display_name ? rdi.NutrDesc : ''}, [rdi.display_name || rdi.NutrDesc])
+        ]),
+        h.span({className: 'progress-start', title: 'Percentage and amount of the nutrient covered by 100 grams of this food'}, [
+            `${rdi.pct.toFixed(2)}${nbsp}%, ${rdi.Nutr_Val}${nbsp}${rdi.Units} (`,
+            h.abbr({title: 'Tolerable Upper Intake Level'}, ['UL']),
+            `: ${rdi.max ? `${rdi.max}\u2009${rdi.Units}` : `unkown`})`
+        ]),
+        h.span({className: 'progress-end', title: 'Reference Daily Intake'}, [
+            rdi.value + nbsp + rdi.Units
         ]),
         h.progress({max: 100, value: rdi.pct})
     ])

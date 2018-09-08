@@ -1,5 +1,6 @@
 use usdanlsr28;
 
+-- Reference daily intakes.
 create table rdi (
     id        int auto_increment primary key,
     nutr_no   char(3) not null,

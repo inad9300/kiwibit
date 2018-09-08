@@ -40,7 +40,7 @@ update nutr_def set is_essential = 'Y' where NutrDesc in (
     'Vitamin D', -- D2? D3?
     'Vitamin E (alpha-tocopherol)',
     'Vitamin K (phylloquinone)',
-    -- Minerals. // Missing: chlorine, iodine, chromium, molybdenum, selenium, cobalt.
+    -- Minerals. // Missing: chlorine, iodine*, chromium, molybdenum*, cobalt.
     'Calcium, Ca',
     'Copper, Cu',
     'Iron, Fe',
@@ -52,5 +52,7 @@ update nutr_def set is_essential = 'Y' where NutrDesc in (
     'Sodium, Na',
     'Zinc, Zn'
 );
+
+-- *Added aftwards to be able to register their upper intake levels.
 
 commit;

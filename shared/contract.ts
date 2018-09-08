@@ -23,6 +23,7 @@ export interface Rdi {
     NutrDesc: db.nutr_def['NutrDesc']
     Units: db.nutr_def['Units']
     value: db.rdi['value']
+    max?: db.tuil['value']
 }
 
 export interface FoodGroup {

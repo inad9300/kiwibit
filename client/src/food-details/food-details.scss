@@ -41,10 +41,6 @@ body {
         color: $font-color-light;
     }
 
-    output.high {
-        color: $color-red;
-    }
-
     > h1 {
         font-size: $font-size-xl;
         padding-bottom: $margin;
@@ -79,12 +75,61 @@ body {
         grid-column-gap: $margin-lg;
 
         > li {
-            margin-top: $margin-lg;
+            margin-top: $margin;
+            position: relative;
+
+            > h2 {
+                margin-bottom: $margin-sm;
+            }
+
+            &.incomplete > progress {
+                &::-moz-progress-bar { background-color: $progress-incomplete; }
+                &::-webkit-progress-value { background-color: $progress-incomplete; }
+            }
+            &.complete > progress {
+                &::-moz-progress-bar { background-color: $progress-complete; }
+                &::-webkit-progress-value { background-color: $progress-complete; }
+            }
+            &.exceeding > progress {
+                &::-moz-progress-bar { background-color: $progress-exceeding; }
+                &::-webkit-progress-value { background-color: $progress-exceeding; }
+            }
+            &.possibly-exceeding > progress {
+                &::-moz-progress-bar { background-color: $progress-possibly-exceeding; }
+                &::-webkit-progress-value { background-color: $progress-possibly-exceeding; }
+            }
 
             > progress {
-                height: 8px;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+
+                height: 30px;
                 width: 100%;
-                border: none;
+                border: 1px solid #555;
+
+                $background-color: #eee;
+                background-color: $background-color;
+                &::-webkit-progress-bar {
+                    background-color: $background-color;
+                }
+            }
+
+            > .progress-start,
+            > .progress-end {
+                position: absolute;
+                top: 29px;
+                font-size: $font-size-sm;
+                color: rgba(0, 0, 0, 0.9);
+                text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+            }
+
+            > .progress-start {
+                left: $margin;
+            }
+
+            > .progress-end {
+                right: $margin;
             }
         }
     }

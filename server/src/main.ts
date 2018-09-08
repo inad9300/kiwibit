@@ -7,7 +7,7 @@ import * as secrets from '../../shared/secrets'
 
 console.debug('Starting execution.')
 
-const db: mysql.Pool = mysql.createPool({
+const db = mysql.createPool({
     host: 'localhost',
     port: 3306,
     password: secrets.usda_db,
@@ -132,22 +132,44 @@ function findFoodById(foodId: string): Promise<contract.FoodDetails> {
 function findRdisByAgeAndGender(age: number, gender: GenderString): Promise<contract.Rdi[]> {
     return new Promise((resolve, reject) => {
         db.query(`
-            select rdi.value, ndf.NutrDesc, ndf.Units, ndf.Nutr_No
-            from rdi
-            join nutr_def ndf on (ndf.Nutr_No = rdi.nutr_no)
-            where ndf.interest >= 10
-            and rdi.age_min <= ?
-            and rdi.age_max >= ?
-            and rdi.gender = ?
-            order by ndf.NutrDesc
-        `, [age, age, gender], (err, rdis) => {
-            if (err) {
-                reject(err)
-            } else if (rdis.length === 0) {
-                reject(new Error(`No RDI information found for ${age}-years-old ${gender === 'M' ? 'males' : 'females'}.`))
-            } else {
-                resolve(rdis)
-            }
+            select tuil.nutr_no, tuil.value
+            from tuil
+            where tuil.age_min <= ?
+            and tuil.age_max >= ?
+            and tuil.gender = ?
+            and tuil.pregnancy = 'N'
+            and tuil.lactation = 'N'
+        `, [age, age, gender], (tuilsErr, tuils: any[]) => {
+            db.query(`
+                select rdi.value, ndf.NutrDesc, ndf.Units, ndf.Nutr_No
+                from rdi
+                join nutr_def ndf on (ndf.Nutr_No = rdi.nutr_no)
+                where ndf.interest >= 10
+                and rdi.age_min <= ?
+                and rdi.age_max >= ?
+                and rdi.gender = ?
+                and rdi.pregnancy = 'N'
+                and rdi.lactation = 'N'
+                order by ndf.NutrDesc
+            `, [age, age, gender], (rdisErr, rdis: any[]) => {
+                if (rdisErr) {
+                    reject(rdisErr)
+                } else if (rdis.length === 0) {
+                    reject(new Error(`No RDI information found for ${age}-years-old ${gender === 'M' ? 'males' : 'females'}.`))
+                } else {
+                    if (!tuilsErr) {
+                        rdis.forEach(rdi => {
+                            const tuil = tuils.find(tuil => tuil.nutr_no === rdi.Nutr_No)
+                            if (tuil) {
+                                rdi.max = tuil.value
+                            }
+                        })
+                    } else {
+                        console.error(tuilsErr)
+                    }
+                    resolve(rdis)
+                }
+            })
         })
     })
 }

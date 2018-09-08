@@ -88,7 +88,7 @@ create table nutr_def (
 	Tagname		char(20),					-- International Network of Food Data Systems (INFOODS) tagnames.
 	NutrDesc	char(60)		not null,	-- name of nutrient/food component.
 	Num_Dec		decimal(6,0)	not null,	-- number of decimal places to which a nutrient value is rounded
-	SR_Order	decimal(6,0)	not null,
+	SR_Order	decimal(6,0)	not null,   -- used to sort nutrient records in the same order as various reports produced from SR (Standard Reference)
 	constraint nutr_def_pk primary key (Nutr_No)
 );
 
