@@ -2,14 +2,14 @@ use usdanlsr28;
 
 -- Tolerable upper (daily) intake levels.
 create table tuil (
-    id        int auto_increment primary key,
-    nutr_no   char(3) not null,
-    age_min   int unsigned not null,
-    age_max   int unsigned not null,
-    gender    char(1) not null,
+    id int unsigned auto_increment primary key,
+    nutr_no char(3) not null,
+    age_min int unsigned not null,
+    age_max int unsigned not null,
+    gender char(1) not null,
     pregnancy char(1) not null default 'N',
     lactation char(1) not null default 'N',
-    value     float not null,
+    value float not null,
 
     constraint uk_tuil_all unique (nutr_no, age_min, age_max, gender, pregnancy, lactation),
     constraint fk_tuil_nutr_def foreign key (nutr_no) references nutr_def(nutr_no),

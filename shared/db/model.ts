@@ -1,5 +1,7 @@
 export type BoolString = 'Y' | 'N'
 
+export type BoolNumber = 1 | 0
+
 export type GenderString = 'M' | 'F'
 
 export interface src_cd {
@@ -136,4 +138,29 @@ export interface tuil {
     pregnancy: BoolString
     lactation: BoolString
     value: number
+}
+
+export interface users {
+    id: number
+    name: string
+    email: string
+    pwd: string
+    age?: number
+    gender?: GenderString
+    pregnancy: BoolString
+    lactation: BoolString
+    activity_lvl: number
+    weight?: number
+    height?: number
+}
+
+export interface meals {
+    id: number
+    NDB_No: string
+    user_id: number
+    date: Date
+    type?: 'Breakfast' | 'Brunch' | 'Lunch' | 'Dinner' | 'Snack'
+    qty: number
+    eaten: BoolNumber
+    dorder: number
 }

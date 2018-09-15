@@ -1,20 +1,20 @@
 import {h} from '@soil/dom'
 import {get} from '../shared/http/get'
+import * as api from '../../../shared/api'
 import {serverUrl} from '../shared/constants'
-import {Nutrient} from '../../../shared/contract'
 import {getUrlParams} from '../shared/utils/getUrlParams'
 
 const urlParams = getUrlParams()
 const nutrientId = urlParams.get('nutrient-id')
 
-export function nutrientSelect(args: {onChange: (nutrientId: string) => void, onLoad: (nutrient: Nutrient) => void}) {
+export function nutrientSelect(args: {onChange: (nutrientId: string) => void, onLoad: (nutrient: api.Nutrient) => void}) {
     const $select = h.select({
         onchange: () => args.onChange($select.value)
     }, [
         h.option({disabled: true, selected: true}, ['Select a nutrient...'])
     ])
 
-    get<Nutrient[]>(`${serverUrl}/nutrients`).then(nutrients => {
+    get<api.Nutrient[]>(`${serverUrl}/nutrients`).then(nutrients => {
         nutrients.forEach(n => $select.appendChild(
             h.option({
                 value: n.Nutr_No,

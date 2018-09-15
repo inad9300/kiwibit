@@ -1,4 +1,5 @@
 import {h} from '@soil/dom'
+import * as api from '../../../shared/api'
 import {get} from '../shared/http/get'
 import {add} from '../shared/utils/add'
 import {pct} from '../shared/utils/pct'
@@ -6,12 +7,11 @@ import {getUrlParams} from '../shared/utils/getUrlParams'
 import {title} from '../shared/dom/title'
 import {icon} from '../shared/dom/icon'
 import {clear} from '../shared/dom/clear'
-import {Rdi, FoodDetails} from '../../../shared/contract'
 import {serverUrl, nbsp} from '../shared/constants'
 import {findFoodsModal} from './findFoodsModal'
 import {foodGroupCircle} from './foodGroupCircle'
 
-type ExtendedRdi = Rdi & FoodDetails['nutrients'][0] & {pct: number}
+type ExtendedRdi = api.Rdi & api.FoodDetails['nutrients'][0] & {pct: number}
 
 const $findFoodsModal = findFoodsModal()
 document.body.appendChild($findFoodsModal)
@@ -24,8 +24,8 @@ if (!foodId) {
 }
 
 Promise.all([
-    get<Rdi[]>(`${serverUrl}/rdis?age=20&gender=M`),
-    get<FoodDetails>(`${serverUrl}/foods/${foodId}`)
+    get<api.Rdi[]>(`${serverUrl}/rdis?age=20&gender=M`),
+    get<api.FoodDetails>(`${serverUrl}/foods/${foodId}`)
 ])
 .then(([rdis, foodDetails]) => {
     title(foodDetails.Long_Desc)
@@ -148,7 +148,10 @@ function nutrientItem(rdi: ExtendedRdi) {
 
     return h.li({className}, [
         h.h2({}, [
-            h.span({title: rdi.display_name ? rdi.NutrDesc : ''}, [rdi.display_name || rdi.NutrDesc])
+            h.a({
+                title: rdi.display_name ? rdi.NutrDesc : '',
+                href: '/top-foods/index.html?nutrient-id=' + rdi.Nutr_No
+            }, [rdi.display_name || rdi.NutrDesc])
         ]),
         h.span({className: 'progress-start', title: 'Percentage and amount of the nutrient covered by 100 grams of this food'}, [
             `${rdi.pct.toFixed(2)}${nbsp}%, ${rdi.Nutr_Val}${nbsp}${rdi.Units} (`,

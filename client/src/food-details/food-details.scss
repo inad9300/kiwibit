@@ -80,6 +80,15 @@ body {
 
             > h2 {
                 margin-bottom: $margin-sm;
+
+                > a {
+                    color: $font-color;
+                    text-decoration: none;
+
+                    &:hover {
+                        color: $font-color-hover;
+                    }
+                }
             }
 
             &.incomplete > progress {
