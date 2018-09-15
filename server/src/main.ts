@@ -105,7 +105,7 @@ function server(req: http.IncomingMessage, res: http.ServerResponse) {
     else if (GET && /^\/api\/nutrients\/[0-9]+\/foods(\?per=(gram|calory))?$/.test(req.url!)) {
         const matches = req.url!.match(/^\/api\/nutrients\/([0-9]+)\/foods(?:\?per=(gram|calory))?$/)!
         const nutrientId = matches[1]
-        const per = matches[2] as 'gram' | 'calory'
+        const per = (matches[2] || 'gram') as 'gram' | 'calory'
         findTopFoodsForNutrient(nutrientId, per)
             .then(data => write(res, 200, data))
             .catch(err => write(res, 500, err))
@@ -449,7 +449,7 @@ function findWeekMeals(date: Date, userId: number): Promise<api.Meal[]> {
         from meals ml
         join food_des fd on (fd.NDB_No = ml.NDB_No)
         where ml.user_id = ?
-        and weekofyear(ml.date) = weekofyear(?)
+        and yearweek(ml.date, 3) = yearweek(?, 3)
     `, [userId, date])
 }
 
