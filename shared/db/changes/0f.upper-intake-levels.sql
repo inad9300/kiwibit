@@ -1,4 +1,4 @@
-use usdanlsr28;
+use usda28;
 
 -- Tolerable upper (daily) intake levels.
 create table tuil (

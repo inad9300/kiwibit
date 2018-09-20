@@ -1,4 +1,4 @@
-use usdanlsr28;
+use usda28;
 
 alter table fd_group
 add column color char(7) not null default '#000000',

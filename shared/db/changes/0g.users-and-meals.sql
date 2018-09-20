@@ -1,4 +1,4 @@
-use usdanlsr28;
+use usda28;
 
 create table users (
     id int unsigned auto_increment primary key,

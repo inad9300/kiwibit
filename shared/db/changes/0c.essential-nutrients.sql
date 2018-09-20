@@ -1,4 +1,4 @@
-use usdanlsr28;
+use usda28;
 
 alter table nutr_def
 add column is_essential char(1) not null default 'N',

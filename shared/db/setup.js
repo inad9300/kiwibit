@@ -40,7 +40,7 @@ console.log('> Loading data.')
         execSync(`mv ${file} ${file}.old`)
         execSync(`iconv -f LATIN1 -t UTF-8 ${file}.old -o ${file}`)
         const table = file.slice(0, -('.txt'.length))
-        const script = `use usdanlsr28; load data local infile '${file}' into table ${table.toLowerCase()} fields terminated by '^' enclosed by '\\~';`
+        const script = `use usda28; load data local infile '${file}' into table ${table.toLowerCase()} fields terminated by '^' enclosed by '\\~';`
         execSync(`mysql -u root -p"${secrets.usda_db}" --local-infile -e "${script}"`)
     })
     execSync('rm *.old')

@@ -1,4 +1,4 @@
-use usdanlsr28;
+use usda28;
 
 -- Reference daily intakes.
 create table rdi (

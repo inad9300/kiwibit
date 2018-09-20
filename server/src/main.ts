@@ -23,7 +23,7 @@ const db = mysql.createPool({
     port: 3306,
     password: secrets.usda_db,
     user: 'root',
-    database: 'usdanlsr28',
+    database: 'usda28',
     connectionLimit: 16
 })
 

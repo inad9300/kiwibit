@@ -1,4 +1,4 @@
-use usdanlsr28;
+use usda28;
 
 alter table fd_group add column interest int unsigned not null default 0;
 
