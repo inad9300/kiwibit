@@ -1,5 +1,3 @@
-use usda28;
-
 alter table nutr_def add column display_name char(30);
 
 update nutr_def set display_name = 'Vitamin B1' where NutrDesc = 'Thiamin';

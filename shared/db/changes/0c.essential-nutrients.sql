@@ -1,5 +1,3 @@
-use usda28;
-
 alter table nutr_def
 add column is_essential char(1) not null default 'N',
 add constraint chk_nutr_is_essential check (is_essential in ('Y', 'N'));

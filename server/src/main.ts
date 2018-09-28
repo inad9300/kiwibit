@@ -21,7 +21,7 @@ Error.prototype.toJSON = function () {
 const db = mysql.createPool({
     host: 'localhost',
     port: 3306,
-    password: secrets.usda_db,
+    password: secrets.db,
     user: 'root',
     database: 'usda28',
     connectionLimit: 16

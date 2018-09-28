@@ -1,8 +1,6 @@
-use usda28;
-
 alter table fd_group
 add column color char(7) not null default '#000000',
-add constraint chk_fd_group_color check (fd_group regexp '#[0-9a-f]{6}' = 1);
+add constraint chk_fd_group_color check (color ~ '#[0-9a-f]{6}');
 
 update fd_group set color = '#f4f4f4' where FdGrp_Desc = 'Dairy and Egg Products';
 update fd_group set color = '#5fb356' where FdGrp_Desc = 'Spices and Herbs';

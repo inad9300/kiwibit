@@ -1,17 +1,11 @@
--- sudo -u postgres psql -- createuser? createdb?
--- create user kiwibit encrypted password '****';
-
-drop database if exists usda28;
-create database usda28 owner kiwibit encoding 'UTF8';
-
 /*
-* Source Code.
-*
-* This table contains codes indicating the type of data (analytical, calculated,
-* assumed zero, and so on) in the Nutrient Data file. To improve the usability
-* of the database and to provide values for the FNDDS, NDL staff imputed nutrient
-* values for a number of proximate components, total dietary fiber, total sugar,
-* and vitamin and mineral values.
+Source Code.
+
+This table contains codes indicating the type of data (analytical, calculated,
+assumed zero, and so on) in the Nutrient Data file. To improve the usability
+of the database and to provide values for the FNDDS, NDL staff imputed nutrient
+values for a number of proximate components, total dietary fiber, total sugar,
+and vitamin and mineral values.
 */
 create table src_cd (
 	Src_Cd char(2) not null, -- a 2-digit code indicating type of data.
@@ -20,10 +14,10 @@ create table src_cd (
 );
 
 /*
-* Data Derivation Code Description.
-*
-* This table provides information on how the nutrient values were determined.
-* The file contains the derivation codes and their descriptions.
+Data Derivation Code Description.
+
+This table provides information on how the nutrient values were determined.
+The file contains the derivation codes and their descriptions.
 */
 create table deriv_cd (
 	Deriv_Cd char(4) not null, -- derivation code
@@ -32,9 +26,9 @@ create table deriv_cd (
 );
 
 /*
-* Sources of Data.
-*
-* This table provides a citation to the DataSrc_ID in the Sources of Data Link file.
+Sources of Data.
+
+This table provides a citation to the DataSrc_ID in the Sources of Data Link file.
 */
 create table data_src (
 	DataSrc_ID char(6) not null, -- unique ID identifying the reference/source.
@@ -50,10 +44,10 @@ create table data_src (
 );
 
 /*
-* Footnote.
-*
-* This table contains additional information about the food item, household weight,
-* and nutrient value.
+Footnote.
+
+This table contains additional information about the food item, household weight,
+and nutrient value.
 */
 create table footnote (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item
@@ -64,11 +58,11 @@ create table footnote (
 );
 
 /*
-* LanguaL Factors Description.
-*
-* This table is a support file to the LanguaL Factor file and contains
-* the descriptions for only those factors used in coding the selected
-* food items codes in this release of SR.
+LanguaL Factors Description.
+
+This table is a support file to the LanguaL Factor file and contains
+the descriptions for only those factors used in coding the selected
+food items codes in this release of SR.
 */
 create table langdesc (
 	Factor_Code char(5) not null, -- the LanguaL factor from the Thesaurus.
@@ -77,11 +71,11 @@ create table langdesc (
 );
 
 /*
-* Nutrient Definition.
-*
-* This table is a support file to the Nutrient Data file.
-* It provides the 3-digit nutrient code, unit of measure, INFOODS
-* tagname, and description.
+Nutrient Definition.
+
+This table is a support file to the Nutrient Data file.
+It provides the 3-digit nutrient code, unit of measure, INFOODS
+tagname, and description.
 */
 create table nutr_def (
 	Nutr_No char(3) not null, -- unique 3-digit identifier code for a nutrient.
@@ -94,10 +88,10 @@ create table nutr_def (
 );
 
 /*
-* Food Group Description.
-*
-* This table is a support file to the Food Description file and contains
-* a list of food groups and their descriptions.
+Food Group Description.
+
+This table is a support file to the Food Description file and contains
+a list of food groups and their descriptions.
 */
 create table fd_group (
 	FdGrp_Cd char(4) not null, -- 4-digit code identifying a food group.
@@ -106,14 +100,14 @@ create table fd_group (
 );
 
 /*
-* Food Description.
-*
-* This table contains long and short descriptions and food group
-* designators for all food items, along with common names, manufacturer
-* name, scientific name, percentage and description of refuse, and
-* factors used for calculating protein and kilocalories, if applicable.
-* Items used in the FNDDS are also identified by value of “Y” in the
-* Survey field.
+Food Description.
+
+This table contains long and short descriptions and food group
+designators for all food items, along with common names, manufacturer
+name, scientific name, percentage and description of refuse, and
+factors used for calculating protein and kilocalories, if applicable.
+Items used in the FNDDS are also identified by value of “Y” in the
+Survey field.
 */
 create table food_des (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item.
@@ -136,10 +130,10 @@ create table food_des (
 );
 
 /*
-* Nutrient Data.
-*
-* This table contains the nutrient values and information about the values,
-* including expanded statistical information.
+Nutrient Data.
+
+This table contains the nutrient values and information about the values,
+including expanded statistical information.
 */
 create table nut_data (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item.
@@ -159,35 +153,35 @@ create table nut_data (
 	Up_EB decimal(10,3), -- Upper 95% error bound.
 	Stat_cmt char(10), -- Statistical comments (see documentation for definitions)
 	AddMod_Date char(10), -- indicates when a value was either added to the database or last modified
-	CC char(1), -- confidence code indicating data quality, based on evaluation (NYI)
+	-- CC char(1), -- confidence code indicating data quality, based on evaluation (NYI)
 	constraint nut_data_pk primary key (NDB_No, Nutr_No),
 	constraint nut_data_ndbno_fk foreign key (NDB_No) references food_des(NDB_No),
 	constraint nut_data_nutdef_fk foreign key (Nutr_No) references nutr_def(Nutr_No)
 );
 
 /*
-* Weight.
-*
-* This table contains the weight in grams of a number of common measures
-* for each food item.
+Weight.
+
+This table contains the weight in grams of a number of common measures
+for each food item.
 */
 create table weight (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item
 	Seq char(2) not null, -- sequence number
-	Amount decimal(5,3) not null, -- unit modifier (e.g. 1 in "1 cup")
+	Amount decimal(6,3) not null, -- unit modifier (e.g. 1 in "1 cup")
 	Msre_Desc char(84) not null, -- description (e.g. cup, diced, 1" pieces)
 	Gm_Wgt decimal(7,1) not null, -- gram weight
-	Num_Data_Pts decimal(3,0), -- number of data points
+	Num_Data_Pts decimal(4,0), -- number of data points
 	Std_Dev decimal(7,3), -- standard deviation
 	constraint weight_pk primary key (NDB_No,Seq),
 	constraint weight_ndbno_fk foreign key (NDB_No) references food_des(NDB_No)
 );
 
 /*
-* LanguaL Factor.
-*
-* This table is a support file to the Food Description file and contains
-* the factors from the LanguaL Thesaurus used to code a particular food.
+LanguaL Factor.
+
+This table is a support file to the Food Description file and contains
+the factors from the LanguaL Thesaurus used to code a particular food.
 */
 create table langual (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item.
@@ -198,10 +192,10 @@ create table langual (
 );
 
 /*
-* Sources of Data Link.
-*
-* This table is used to link the Nutrient Data file with the Sources of Data table.
-* It is needed to resolve the many-to-many relationship between the two tables.
+Sources of Data Link.
+
+This table is used to link the Nutrient Data file with the Sources of Data table.
+It is needed to resolve the many-to-many relationship between the two tables.
 */
 create table datsrcln (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item.

@@ -1,6 +1,6 @@
-use usda28;
-
-alter table fd_group add column interest int unsigned not null default 0;
+alter table fd_group
+add column interest int not null default 0,
+add constraint chk_fg_interest check (interest >= 0);
 
 update fd_group set interest = 10 where FdGrp_Desc in (
     'Spices and Herbs',
@@ -11,7 +11,9 @@ update fd_group set interest = 10 where FdGrp_Desc in (
     'Vegetables and Vegetable Products'
 );
 
-alter table nutr_def add column interest int unsigned not null default 0;
+alter table nutr_def
+add column interest int not null default 0,
+add constraint chk_ndf_interest check (interest >= 0);
 
 update nutr_def set interest = 10 where NutrDesc in (
     '18:3 n-3 c,c,c (ALA)',
