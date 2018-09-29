@@ -1,10 +1,9 @@
-import * as http from 'http'
-import * as mysql from 'mysql'
-import * as bcrypt from 'bcrypt'
-import * as querystring from 'querystring'
-import * as dbm from '../../shared/db/model'
 import * as api from '../../shared/api'
-import * as secrets from '../../shared/secrets'
+import * as bcrypt from 'bcrypt'
+import * as db from './db'
+import * as dbm from '../../shared/db/model'
+import * as http from 'http'
+import * as querystring from 'querystring'
 
 console.debug('Starting execution.')
 
@@ -17,15 +16,6 @@ declare global {
 Error.prototype.toJSON = function () {
     return {msg: this.message}
 }
-
-const db = mysql.createPool({
-    host: 'localhost',
-    port: 3306,
-    password: secrets.db,
-    user: 'root',
-    database: 'usda28',
-    connectionLimit: 16
-})
 
 http
     .createServer(server)
@@ -214,58 +204,16 @@ function getRawBody(req: http.IncomingMessage): Promise<string> {
     })
 }
 
-function select<T = any>(sql: string, params: any[] = []): Promise<T[]> {
-    return new Promise((resolve, reject) => {
-        db.query(sql, params, (err, results) => {
-            err ? reject(err) : resolve(results)
-        })
-    })
-}
-
-function insert(tableName: string, data: object): Promise<number> {
-    return new Promise((resolve, reject) => {
-        db.query(`insert into ${tableName} set ?`, data, (err, results) => {
-            if (err) {
-                reject(err)
-            } else if (results.affectedRows === 0) {
-                reject(new Error(`Failed to insert data in "${tableName}".`))
-            } else {
-                resolve(results.insertId)
-            }
-        })
-    })
-}
-
-interface WriteQueryResult {
-    affectedRows: number
-}
-
-function update(sql: string, dataAndParams: any[]): Promise<WriteQueryResult> {
-    return new Promise((resolve, reject) => {
-        db.query(sql, dataAndParams, (err, results) => {
-            err ? reject(err) : resolve(results)
-        })
-    })
-}
-
-function remove(sql: string, params: any[]): Promise<WriteQueryResult> {
-    return new Promise((resolve, reject) => {
-        db.query(sql, params, (err, results) => {
-            err ? reject(err) : resolve(results)
-        })
-    })
-}
-
 // End-point handlers.
 
 function findFoodById(foodId: string): Promise<api.FoodDetails> {
-    return select(`
+    return db.selectMany(`
         select fd.Long_Desc, fg.FdGrp_Desc, fg.color, ndt.Nutr_Val, ndf.NutrDesc, ndf.display_name
         from food_des fd
-        join nut_data ndt on (ndt.NDB_No = fd.NDB_No)
-        join nutr_def ndf on (ndf.Nutr_No = ndt.Nutr_No)
-        join fd_group fg on (fg.FdGrp_Cd = fd.FdGrp_Cd)
-        where fd.NDB_No = ?
+        join nut_data ndt using (NDB_No)
+        join nutr_def ndf using (Nutr_No)
+        join fd_group fg using (FdGrp_Cd)
+        where fd.NDB_No = $1
         order by ndf.NutrDesc
     `, [foodId]).then(data => {
         if (data.length === 0) {
@@ -286,23 +234,23 @@ function findFoodById(foodId: string): Promise<api.FoodDetails> {
 }
 
 function findRdisByAgeAndGender(age: number, gender: dbm.GenderString): Promise<api.Rdi[]> {
-    const tuilsSelect = select(`
+    const tuilsSelect = db.selectMany(`
         select tuil.nutr_no, tuil.value
         from tuil
-        where tuil.age_min <= ?
-        and tuil.age_max >= ?
-        and tuil.gender = ?
+        where tuil.age_min <= $1
+        and tuil.age_max >= $2
+        and tuil.gender = $3
         and tuil.pregnancy = 'N'
         and tuil.lactation = 'N'
     `, [age, age, gender])
-    const rdisSelect = select(`
+    const rdisSelect = db.selectMany(`
         select rdi.value, ndf.NutrDesc, ndf.Units, ndf.Nutr_No
         from rdi
-        join nutr_def ndf on (ndf.Nutr_No = rdi.nutr_no)
+        join nutr_def ndf using (nutr_no)
         where ndf.interest >= 10
-        and rdi.age_min <= ?
-        and rdi.age_max >= ?
-        and rdi.gender = ?
+        and rdi.age_min <= $1
+        and rdi.age_max >= $2
+        and rdi.gender = $3
         and rdi.pregnancy = 'N'
         and rdi.lactation = 'N'
         order by ndf.NutrDesc
@@ -326,19 +274,19 @@ function findFoodsByNameAndGroup(name: string, groupId?: number): Promise<api.Fo
     if (groupId) {
         params.push(groupId)
     }
-    return select(`
+    return db.selectMany(`
         select fd.NDB_No, fd.Long_Desc, fg.FdGrp_Desc, fg.color
         from food_des fd
-        join fd_group fg on (fg.FdGrp_Cd = fd.FdGrp_Cd)
+        join fd_group fg using (FdGrp_Cd)
         where fg.interest >= 10
-        and lower(fd.Long_Desc) like lower(?)
-        ${groupId ? 'and fg.FdGrp_Cd = ?' : ''}
+        and lower(fd.Long_Desc) like lower($1)
+        ${groupId ? 'and fg.FdGrp_Cd = $2' : ''}
         limit 100
     `, params)
 }
 
 function findFoodGroups(): Promise<api.FoodGroup[]> {
-    return select(`
+    return db.selectMany(`
         select fg.FdGrp_Cd, fg.FdGrp_Desc
         from fd_group fg
         where fg.interest >= 10
@@ -347,7 +295,7 @@ function findFoodGroups(): Promise<api.FoodGroup[]> {
 }
 
 function findNutrients(): Promise<api.Nutrient[]> {
-    return select(`
+    return db.selectMany(`
         select ndf.Nutr_No, ndf.NutrDesc, ndf.Units, ndf.display_name
         from nutr_def ndf
         where ndf.interest >= 10
@@ -364,13 +312,13 @@ function findTopFoodsForNutrient(nutrientId: string, per: 'gram' | 'calory'): Pr
                where in_nd.Nutr_No = '208'
                and in_nd.NDB_No = nd.NDB_No
            ))`
-    return select(`
+    return db.selectMany(`
         select fd.NDB_No, fd.Long_Desc, ndf.Units, fg.FdGrp_Desc, fg.color, ${orderBy} Nutr_Val
         from food_des fd
-        join nut_data nd on (nd.NDB_No = fd.NDB_No)
-        join fd_group fg on (fg.FdGrp_Cd = fd.FdGrp_Cd)
-        join nutr_def ndf on (nd.Nutr_No = ndf.Nutr_No)
-        where ndf.Nutr_No = ?
+        join nut_data nd using (NDB_No)
+        join fd_group fg using (FdGrp_Cd)
+        join nutr_def ndf using (Nutr_No)
+        where ndf.Nutr_No = $1
         and fg.interest >= 10
         and (nd.Add_Nutr_Mark is null or nd.Add_Nutr_Mark != 'Y')
         order by ${orderBy} desc
@@ -389,11 +337,11 @@ function authenticateUser(req: http.IncomingMessage): Promise<api.User> {
     if (isNaN(id) || !pwd) {
         return Promise.reject(new Error('Wrong authentication format.'))
     }
-    return select(`
+    return db.selectMany(`
         select u.id, u.name, u.email, u.pwd, u.age, u.gender, u.pregnancy, u.lactation,
             u.activity_lvl, u.weight, u.height
         from users u
-        where u.id = ?
+        where u.id = $1
     `, [id]).then(data => {
         if (data.length === 0) {
             throw new Error(`No user found with id "${id}".`)
@@ -409,106 +357,84 @@ function authenticateUser(req: http.IncomingMessage): Promise<api.User> {
     })
 }
 
-function registerUser(user: api.NewUser): Promise<number> {
+function registerUser(user: api.NewUser): Promise<api.User> {
     return bcrypt.hash(user.pwd, 10)
-        .then(hash => insert('users', {...user, pwd: hash}))
+        .then(hash => db.insertOne<dbm.users>('users', {...user, pwd: hash}))
+        .then(user => {
+            delete user.pwd
+            return user
+        })
 }
 
-function updateUser(user: api.NewUser & {id: number}): Promise<void> {
-    return update(`
-        update users u set
-            u.name = ?,
-            u.age = ?,
-            u.gender = ?,
-            u.pregnancy = ?,
-            u.lactation = ?,
-            u.activity_lvl = ?,
-            u.weight = ?,
-            u.height = ?
-        where u.id = ?
-    `, [
-        user.name,
-        user.age,
-        user.gender,
-        user.pregnancy,
-        user.lactation,
-        user.activity_lvl,
-        user.weight,
-        user.height,
-        user.id
-    ]).then(results => {
-        if (results.affectedRows === 0) {
-            throw new Error(`No user found with id "${user.id}".`)
-        }
+function updateUser(user: api.NewUser & {id: number}): Promise<api.User> {
+    return db.updateOne<dbm.users>('users', {
+        name: user.name,
+        age: user.age,
+        gender: user.gender,
+        pregnancy: user.pregnancy,
+        lactation: user.lactation,
+        activity_lvl: user.activity_lvl,
+        weight: user.weight,
+        height: user.height
+    }, {
+        id: user.id
+    })
+    .then(user => {
+        delete user.pwd
+        return user
     })
 }
 
 function findWeekMeals(date: Date, userId: number): Promise<api.Meal[]> {
-    return select(`
+    return db.selectMany(`
         select ml.id, ml.date, ml.type, ml.qty, ml.eaten, ml.dorder, fd.NDB_No, fd.Long_Desc
         from meals ml
-        join food_des fd on (fd.NDB_No = ml.NDB_No)
-        where ml.user_id = ?
-        and yearweek(ml.date, 3) = yearweek(?, 3)
+        join food_des fd using (NDB_No)
+        where ml.user_id = $1
+        and yearweek(ml.date, 3) = yearweek($2, 3)
     `, [userId, date])
 }
 
-function addMeal(meal: api.NewMeal, user_id: number): Promise<number> {
-    return insert('meals', {...meal, user_id})
+function addMeal(meal: api.NewMeal, user_id: number) {
+    return db.insertOne<dbm.meals>('meals', {
+        ...meal,
+        date: new Date(meal.date),
+        user_id
+    })
 }
 
-function updateMeal(meal: api.NewMeal & {id: number}, userId: number): Promise<void> {
-    return update(`
-        update meals ml set
-            ml.type = ?,
-            ml.qty = ?,
-            ml.eaten = ?,
-            ml.NDB_No = ?,
-        where ml.id = ?
-        and ml.user_id = ?
-    `, [
-        meal.type,
-        meal.qty,
-        meal.eaten,
-        meal.NDB_No,
-        meal.id,
-        userId
-    ]).then(results => {
-        if (results.affectedRows === 0) {
-            throw new Error(`No meal found with id "${meal.id}" for user "${userId}".`)
-        }
+function updateMeal(meal: api.NewMeal & {id: number}, userId: number) {
+    return db.updateOne<dbm.meals>('meals', {
+        type: meal.type,
+        qty: meal.qty,
+        eaten: meal.eaten,
+        NDB_No: meal.NDB_No
+    }, {
+        id: meal.id,
+        user_id: userId
     })
 }
 
 function updateMealPosition(newMeal: api.MealPosition & {date: Date}, userId: number): Promise<void> {
-    return select(`select * from meals where id = ? and user_id = ?`, [newMeal.id, userId]).then(data => {
-        if (data.length === 0) {
-            throw new Error(`No meal found with id "${newMeal.id}" for user "${userId}".`)
-        }
-        const oldMeal = data[0] as dbm.meals
+    return db.selectOne<dbm.meals>(`select * from meals where id = $1 and user_id = $2`, [newMeal.id, userId]).then(oldMeal => {
         const dateChanged = oldMeal.date.getTime() !== newMeal.date.getTime()
         const dorderChanged = oldMeal.dorder !== newMeal.dorder
         if (!dateChanged && !dorderChanged) {
             return
         }
-        const sameDayMealsSql = `select * from meals where date = ?`
+        const sameDayMealsSql = `select * from meals where date = $1`
         return Promise.all([
-            select(sameDayMealsSql, [oldMeal.date]),
-            select(sameDayMealsSql, [newMeal.date])
+            db.selectMany(sameDayMealsSql, [oldMeal.date]),
+            db.selectMany(sameDayMealsSql, [newMeal.date])
         ]).then(([_oldMealsSameDay, _newMealsSameDay]) => {
             // TODO
         })
     })
 }
 
-function deleteMeal(mealId: number, userId: number): Promise<void> {
-    return remove(`
-        delete from meals
-        where id = ?
-        and user_id = ?
-    `, [mealId, userId]).then(results => {
-        if (results.affectedRows === 0) {
-            throw new Error(`No meal found with id "${mealId}" for user "${userId}".`)
-        }
+function deleteMeal(mealId: number, userId: number) {
+    return db.deleteOne<dbm.meals>('meals', {
+        id: mealId,
+        user_id: userId
     })
 }

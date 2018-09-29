@@ -16,21 +16,21 @@ export interface deriv_cd {
 
 export interface data_src {
     DataSrc_ID: string
-    Authors?: string
+    Authors: string | undefined
     Title: string
-    Year?: string
-    Journal?: string
-    Vol_City?: string
-    Issue_State?: string
-    Start_Page?: string
-    End_Page?: string
+    Year: string | undefined
+    Journal: string | undefined
+    Vol_City: string | undefined
+    Issue_State: string | undefined
+    Start_Page: string | undefined
+    End_Page: string | undefined
 }
 
 export interface footnote {
     NDB_No: string
     FootNt_No: string
     Footnt_Typ: string
-    Nutr_No?: string
+    Nutr_No: string | undefined
     Footnt_Txt: string
 }
 
@@ -42,9 +42,9 @@ export interface langdesc {
 export interface nutr_def {
     Nutr_No: string
     Units: string
-    Tagname?: string
+    Tagname: string | undefined
     NutrDesc: string
-    display_name?: string
+    display_name: string | undefined
     Num_Dec: number
     SR_Order: number
     interest: number
@@ -63,16 +63,16 @@ export interface food_des {
     FdGrp_Cd: string
     Long_Desc: string
     Shrt_Desc: string
-    ComName?: string
-    ManufacName?: string
-    Survey?: string
-    Ref_desc?: string
-    Refuse?: number
-    SciName?: string
-    N_Factor?: number
-    Pro_Factor?: number
-    Fat_Factor?: number
-    CHO_Factor?: number
+    ComName: string | undefined
+    ManufacName: string | undefined
+    Survey: string | undefined
+    Ref_desc: string | undefined
+    Refuse: number | undefined
+    SciName: string | undefined
+    N_Factor: number | undefined
+    Pro_Factor: number | undefined
+    Fat_Factor: number | undefined
+    CHO_Factor: number | undefined
 }
 
 export interface nut_data {
@@ -80,20 +80,20 @@ export interface nut_data {
     Nutr_No: string
     Nutr_Val: number
     Num_Data_Pts: number
-    Std_Error?: number
+    Std_Error: number | undefined
     Src_Cd: string
-    Deriv_Cd?: string
-    Ref_NDB_No?: string
-    Add_Nutr_Mark?: string
-    Num_Studies?: number
-    Min?: number
-    Max?: number
-    DF?: number
-    Low_EB?: number
-    Up_EB?: number
-    Stat_cmt?: string
-    AddMod_Date?: string
-    CC?: string
+    Deriv_Cd: string | undefined
+    Ref_NDB_No: string | undefined
+    Add_Nutr_Mark: string | undefined
+    Num_Studies: number | undefined
+    Min: number | undefined
+    Max: number | undefined
+    DF: number | undefined
+    Low_EB: number | undefined
+    Up_EB: number | undefined
+    Stat_cmt: string | undefined
+    AddMod_Date: string | undefined
+    // CC: string | undefined
 }
 
 export interface weight {
@@ -102,8 +102,8 @@ export interface weight {
     Amount: number
     Msre_Desc: string
     Gm_Wgt: number
-    Num_Data_Pts?: number
-    Std_Dev?: number
+    Num_Data_Pts: number | undefined
+    Std_Dev: number | undefined
 }
 
 export interface langual {
@@ -145,13 +145,13 @@ export interface users {
     name: string
     email: string
     pwd: string
-    age?: number
-    gender?: GenderString
+    age: number | undefined
+    gender: GenderString | undefined
     pregnancy: BoolString
     lactation: BoolString
     activity_lvl: number
-    weight?: number
-    height?: number
+    weight: number | undefined
+    height: number | undefined
 }
 
 export interface meals {
@@ -159,7 +159,7 @@ export interface meals {
     NDB_No: string
     user_id: number
     date: Date
-    type?: 'Breakfast' | 'Brunch' | 'Lunch' | 'Dinner' | 'Snack'
+    type: 'Breakfast' | 'Brunch' | 'Lunch' | 'Dinner' | 'Snack' | undefined
     qty: number
     eaten: BoolNumber
     dorder: number
