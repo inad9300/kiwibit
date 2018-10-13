@@ -1,8 +1,8 @@
-use usdanlsr28;
+alter table fd_group
+add column interest int not null default 0,
+add constraint chk_fg_interest check (interest >= 0);
 
-alter table fd_group add column interest int unsigned not null default 0;
-
-update fd_group set interest = 10 where FdGrp_Desc in (
+update fd_group set interest = 10 where fdgrp_desc in (
     'Spices and Herbs',
     'Cereal Grains and Pasta',
     'Fruits and Fruit Juices',
@@ -11,9 +11,11 @@ update fd_group set interest = 10 where FdGrp_Desc in (
     'Vegetables and Vegetable Products'
 );
 
-alter table nutr_def add column interest int unsigned not null default 0;
+alter table nutr_def
+add column interest int not null default 0,
+add constraint chk_ndf_interest check (interest >= 0);
 
-update nutr_def set interest = 10 where NutrDesc in (
+update nutr_def set interest = 10 where nutrdesc in (
     '18:3 n-3 c,c,c (ALA)',
     '20:5 n-3 (EPA)',
     '22:6 n-3 (DHA)',
@@ -52,9 +54,9 @@ update nutr_def set interest = 10 where NutrDesc in (
     'Vitamin K (phylloquinone)',
     'Zinc, Zn'
 )
-and Tagname != 'ENERC_KJ';
+and tagname != 'ENERC_KJ';
 
-update nutr_def set interest = 5 where NutrDesc in (
+update nutr_def set interest = 5 where nutrdesc in (
     '18:2 CLAs',
     '22:5 n-3 (DPA)',
     'Alcohol, ethyl',

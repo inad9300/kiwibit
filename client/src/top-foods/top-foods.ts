@@ -8,31 +8,31 @@ import {nutrientSelect} from './nutrientSelect'
 import {getUrlParams} from '../shared/utils/getUrlParams'
 
 const urlParams = getUrlParams()
-const urlPer = urlParams.get('per') || 'gram'
+const urlUnit = urlParams.get('unit') || 'gram'
 
-function reload(nutrientId: string, per: 'gram' | 'calory') {
-    location.href = `/top-foods/index.html?nutrient-id=${nutrientId}&per=${per}`
+function reload(nutrientId: string, unit: api.NutrientReferenceUnit) {
+    location.href = `/top-foods/index.html?nutrient-id=${nutrientId}&unit=${unit}`
 }
 
 const $nutrientSelect = nutrientSelect({
-    onChange: nutrientId => reload(nutrientId, $perParamSelect.value as 'gram' | 'calory'),
+    onChange: nutrientId => reload(nutrientId, $unitParamSelect.value as api.NutrientReferenceUnit),
     onLoad: nutrient => {
-        showTopFoods(nutrient.Nutr_No, $perParamSelect.value as 'gram' | 'calory')
+        showTopFoods(nutrient.Nutr_No, $unitParamSelect.value as api.NutrientReferenceUnit)
         $nutrientSelect.focus()
         title(`Top foods high in ${nutrient.display_name || nutrient.NutrDesc}`)
     }
 })
 
-const $perParamSelect = h.select({
+const $unitParamSelect = h.select({
     className: 's1',
-    onchange: () => reload($nutrientSelect.value, $perParamSelect.value as 'gram' | 'calory')
+    onchange: () => reload($nutrientSelect.value, $unitParamSelect.value as api.NutrientReferenceUnit)
 }, [
     h.option({value: 'gram'}, ['Per 100 grams']),
     h.option({value: 'calory'}, ['Per 100 calories'])
 ])
 
 // TODO $nutrientSelect.value = ''
-$perParamSelect.value = urlPer
+$unitParamSelect.value = urlUnit
 
 const $chartWrapper = h.div({className: 'chart-wrapper hidden'})
 
@@ -76,15 +76,15 @@ const $chart = Highcharts.chart($chartWrapper, {
 document.body.appendChild(h.div({className: 'top-foods v box'}, [
     h.form({className: 'spaced h box'}, [
         Object.assign($nutrientSelect, {className: 's3'}),
-        $perParamSelect
+        $unitParamSelect
     ]),
     h.div({className: 'outer-chart-wrapper s1'}, [
         $chartWrapper
     ])
 ]))
 
-function showTopFoods(nutrientId: string, per: 'gram' | 'calory') {
-    get<api.TopFood[]>(`${serverUrl}/nutrients/${nutrientId}/foods?per=${per}`).then(topFoods => {
+function showTopFoods(nutrientId: string, unit: api.NutrientReferenceUnit) {
+    get<api.TopFood[]>(`${serverUrl}/nutrients/${nutrientId}/foods?unit=${unit}`).then(topFoods => {
         $chartWrapper.classList.remove('hidden')
 
         const data = topFoods.map(f => ({

@@ -1,12 +1,10 @@
-use usdanlsr28;
-
 alter table nutr_def
 add column is_essential char(1) not null default 'N',
 add constraint chk_nutr_is_essential check (is_essential in ('Y', 'N'));
 
 -- Source: https://en.wikipedia.org/wiki/Nutrient#Essential_nutrients.
 
-update nutr_def set is_essential = 'Y' where NutrDesc in (
+update nutr_def set is_essential = 'Y' where nutrdesc in (
     -- Amino acids.
     'Histidine',
     'Isoleucine',

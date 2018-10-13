@@ -2,22 +2,16 @@ const fs = require('fs')
 const {execSync} = require('child_process')
 const secrets = require('../secrets')
 
-/**
- * Before running this script, make sure all commands used below are installed,
- * in particular wget, unzip, dos2unix, iconv and mysql.
- *
- * In addition, the following script needs to be executed by hand on the MySQL
- * database (their effects can be reverted once the script has run):
- *
- *     show global variables like 'local_infile';
- *     set global local_infile = 'ON';
- *
- * Source: https://ndb.nal.usda.gov/ndb/.
- */
+/*
+Before running this script (with `sudo`), make sure all commands used below are
+installed, in particular wget, unzip, dos2unix, iconv and psql.
+
+Source: https://ndb.nal.usda.gov/ndb/.
+*/
 
 console.log('> Downloading raw data.')
 {
-    execSync('rm -r data')
+    execSync('rm -rf data')
     execSync('mkdir data')
     process.chdir('data')
     execSync('wget https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR-Legacy/SR-Leg_ASC.zip')
@@ -27,21 +21,44 @@ console.log('> Downloading raw data.')
     process.chdir('..')
 }
 
-console.log('> Creating schema.')
+function psql(tail, auth) {
+    const connStr = `"host=localhost port=5432 dbname=usda28 user=kiwibit password='${secrets.db}'"`
+    execSync(`sudo -u postgres psql ${auth ? connStr : ''} ${tail}`)
+}
+
+console.log('> Creating database.')
 {
-    execSync(`mysql -u root -p"${secrets.usda_db}" < schema.sql`)
+    psql(`-c "drop database if exists usda28"`)
+    psql(`-c "drop role if exists kiwibit"`)
+    psql(`-c "create role kiwibit superuser login encrypted password '${secrets.db}'"`)
+    psql(`-c "create database usda28 owner kiwibit encoding 'UTF8'"`)
+    psql(`-f schema.sql`, true)
 }
 
 console.log('> Loading data.')
 {
     process.chdir('data')
-    fs.readdirSync('.').forEach(file => {
+    ;[
+        'src_cd',
+        'deriv_cd',
+        'data_src',
+        'footnote',
+        'langdesc',
+        'nutr_def',
+        'fd_group',
+        'food_des',
+        'nut_data',
+        'weight',
+        'langual',
+        'datsrcln'
+    ]
+    .map(file => file.toUpperCase() + '.txt')
+    .forEach(file => {
         console.log(`> Processing ${file}.`)
         execSync(`mv ${file} ${file}.old`)
         execSync(`iconv -f LATIN1 -t UTF-8 ${file}.old -o ${file}`)
-        const table = file.slice(0, -('.txt'.length))
-        const script = `use usdanlsr28; load data local infile '${file}' into table ${table.toLowerCase()} fields terminated by '^' enclosed by '\\~';`
-        execSync(`mysql -u root -p"${secrets.usda_db}" --local-infile -e "${script}"`)
+        const table = file.slice(0, -('.txt'.length)).toLowerCase()
+        psql(`-c "copy ${table} from '${process.cwd()}/${file}' csv delimiter '^' null '' quote '~' encoding 'UTF8'"`, true)
     })
     execSync('rm *.old')
 }
@@ -51,6 +68,6 @@ console.log('> Applying schema changes.')
     process.chdir('../changes')
     fs.readdirSync('.').sort().forEach(file => {
         console.log(`> Processing ${file}.`)
-        execSync(`mysql -u root -p"${secrets.usda_db}" < ${file}`)
+        psql(`-f ${file}`, true)
     })
 }
