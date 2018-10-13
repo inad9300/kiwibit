@@ -1,120 +1,118 @@
-export type BoolString = 'Y' | 'N'
-
 export type BoolNumber = 1 | 0
-
+export type BoolString = 'Y' | 'N'
 export type GenderString = 'M' | 'F'
 
 export interface src_cd {
-    Src_Cd: string
-    SrcCd_Desc: string
+    src_cd: string
+    srccd_desc: string
 }
 
 export interface deriv_cd {
-    Deriv_Cd: string
-    Deriv_Desc: string
+    deriv_cd: string
+    deriv_desc: string
 }
 
 export interface data_src {
-    DataSrc_ID: string
-    Authors: string | undefined
-    Title: string
-    Year: string | undefined
-    Journal: string | undefined
-    Vol_City: string | undefined
-    Issue_State: string | undefined
-    Start_Page: string | undefined
-    End_Page: string | undefined
+    datasrc_id: string
+    authors: string | undefined
+    title: string
+    year: string | undefined
+    journal: string | undefined
+    vol_city: string | undefined
+    issue_state: string | undefined
+    start_page: string | undefined
+    end_page: string | undefined
 }
 
 export interface footnote {
-    NDB_No: string
-    FootNt_No: string
-    Footnt_Typ: string
-    Nutr_No: string | undefined
-    Footnt_Txt: string
+    ndb_no: string
+    footnt_no: string
+    footnt_typ: string
+    nutr_no: string | undefined
+    footnt_txt: string
 }
 
 export interface langdesc {
-    Factor_Code: string
-    Description: string
+    factor_code: string
+    description: string
 }
 
 export interface nutr_def {
-    Nutr_No: string
-    Units: string
-    Tagname: string | undefined
-    NutrDesc: string
+    nutr_no: string
+    units: string
+    tagname: string | undefined
+    nutrdesc: string
     display_name: string | undefined
-    Num_Dec: number
-    SR_Order: number
+    num_dec: number
+    sr_order: number
     interest: number
     is_essential: BoolString
 }
 
 export interface fd_group {
-    FdGrp_Cd: string
-    FdGrp_Desc: string
+    fdgrp_cd: string
+    fdgrp_desc: string
     interest: number
     color: string
 }
 
 export interface food_des {
-    NDB_No: string
-    FdGrp_Cd: string
-    Long_Desc: string
-    Shrt_Desc: string
-    ComName: string | undefined
-    ManufacName: string | undefined
-    Survey: string | undefined
-    Ref_desc: string | undefined
-    Refuse: number | undefined
-    SciName: string | undefined
-    N_Factor: number | undefined
-    Pro_Factor: number | undefined
-    Fat_Factor: number | undefined
-    CHO_Factor: number | undefined
+    ndb_no: string
+    fdgrp_cd: string
+    long_desc: string
+    shrt_desc: string
+    comname: string | undefined
+    manufacname: string | undefined
+    survey: string | undefined
+    ref_desc: string | undefined
+    refuse: number | undefined
+    sciname: string | undefined
+    n_factor: number | undefined
+    pro_factor: number | undefined
+    fat_factor: number | undefined
+    cho_factor: number | undefined
 }
 
 export interface nut_data {
-    NDB_No: string
-    Nutr_No: string
-    Nutr_Val: number
-    Num_Data_Pts: number
-    Std_Error: number | undefined
-    Src_Cd: string
-    Deriv_Cd: string | undefined
-    Ref_NDB_No: string | undefined
-    Add_Nutr_Mark: string | undefined
-    Num_Studies: number | undefined
-    Min: number | undefined
-    Max: number | undefined
-    DF: number | undefined
-    Low_EB: number | undefined
-    Up_EB: number | undefined
-    Stat_cmt: string | undefined
-    AddMod_Date: string | undefined
-    // CC: string | undefined
+    ndb_no: string
+    nutr_no: string
+    nutr_val: number
+    num_data_pts: number
+    std_error: number | undefined
+    src_cd: string
+    deriv_cd: string | undefined
+    ref_ndb_no: string | undefined
+    add_nutr_mark: string | undefined
+    num_studies: number | undefined
+    min: number | undefined
+    max: number | undefined
+    df: number | undefined
+    low_eb: number | undefined
+    up_eb: number | undefined
+    stat_cmt: string | undefined
+    addmod_date: string | undefined
+    // cc: string | undefined
 }
 
 export interface weight {
-    NDB_No: string
-    Seq: string
-    Amount: number
-    Msre_Desc: string
-    Gm_Wgt: number
-    Num_Data_Pts: number | undefined
-    Std_Dev: number | undefined
+    ndb_no: string
+    seq: string
+    amount: number
+    msre_desc: string
+    gm_wgt: number
+    num_data_pts: number | undefined
+    std_dev: number | undefined
 }
 
 export interface langual {
-    NDB_No: string
-    Factor_Code: string
+    ndb_no: string
+    factor_code: string
 }
 
 export interface datsrcln {
-    NDB_No: string
-    Nutr_No: string
-    DataSrc_ID: string
+    ndb_no: string
+    nutr_no: string
+    datasrc_id: string
 }
 
 export interface rdi {
@@ -156,7 +154,7 @@ export interface users {
 
 export interface meals {
     id: number
-    NDB_No: string
+    ndb_no: string
     user_id: number
     date: Date
     type: 'Breakfast' | 'Brunch' | 'Lunch' | 'Dinner' | 'Snack' | undefined

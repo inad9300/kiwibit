@@ -1,8 +1,8 @@
 create table users (
     id serial primary key,
-    name char(50) not null,
-    email char(250) not null,
-    pwd char(250) not null,
+    name varchar(50) not null,
+    email varchar(250) not null,
+    pwd varchar(250) not null,
     age int,
     gender char(1),
     pregnancy char(1) default 'N',
@@ -28,18 +28,18 @@ create table users (
 
 create table meals (
     id serial primary key,
-    NDB_No char(5) not null,
+    ndb_no char(5) not null,
     user_id int not null,
     date date not null,
-    type char(10),
+    type varchar(10),
     qty int not null, -- g
     eaten bool not null default false,
     dorder int not null,
     settled bool null,
 
-    constraint fk_meals_ndbno foreign key (NDB_No) references food_des(NDB_No),
+    constraint fk_meals_ndbno foreign key (ndb_no) references food_des(ndb_no),
     constraint fk_meals_user_id foreign key (user_id) references users(id),
-    constraint uk_meals unique (NDB_No, user_id, date, dorder, settled),
+    constraint uk_meals unique (ndb_no, user_id, date, dorder, settled),
     constraint chk_meals_date check (date >= '2000-01-01' and date <= current_date + interval '1 year'),
     constraint chk_meals_type check (type in ('Breakfast', 'Brunch', 'Lunch', 'Dinner', 'Snack')),
     constraint chk_meals_qty check (qty > 0 and qty <= 3000),

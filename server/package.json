@@ -1,17 +1,19 @@
 {
     "private": true,
     "scripts": {
-        "start": "rm -rf bin && tsc && node bin/server/src/main.js"
+        "start": "rm -rf bin && tsc && export TZ=UTC && node bin/server/src/main.js"
     },
     "dependencies": {
         "bcrypt": "3.0.1",
-        "pg": "7.4.3"
+        "pg": "7.5.0"
     },
     "devDependencies": {
-        "@types/bcrypt": "2.0.0",
-        "@types/node": "10.11.3",
-        "@types/pg": "7.4.10",
+        "@types/bcrypt": "3.0.0",
+        "@types/node-fetch": "2.1.2",
+        "@types/node": "10.11.7",
+        "@types/pg": "7.4.11",
+        "node-fetch": "2.2.0",
         "nodemon": "1.18.4",
-        "typescript": "3.1.1"
+        "typescript": "3.1.2"
     }
 }

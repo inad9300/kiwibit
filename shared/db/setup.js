@@ -58,8 +58,7 @@ console.log('> Loading data.')
         execSync(`mv ${file} ${file}.old`)
         execSync(`iconv -f LATIN1 -t UTF-8 ${file}.old -o ${file}`)
         const table = file.slice(0, -('.txt'.length)).toLowerCase()
-        psql(`-c "copy ${table} from '${process.cwd()}/${file}'
-            csv delimiter '^' null '' quote '~' encoding 'UTF8'"`, true)
+        psql(`-c "copy ${table} from '${process.cwd()}/${file}' csv delimiter '^' null '' quote '~' encoding 'UTF8'"`, true)
     })
     execSync('rm *.old')
 }
