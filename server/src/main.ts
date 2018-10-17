@@ -33,8 +33,6 @@ function server(req: http.IncomingMessage, res: http.ServerResponse) {
 
     console.debug('HTTP request', req.url)
 
-    // TODO Leverage errors coming from the DB.
-
     handle(req, {
         getFoodById: foodId =>
             getFoodById(foodId),

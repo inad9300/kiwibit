@@ -15,7 +15,7 @@ Error.prototype.toJSON = function () {
     return {msg: this.message}
 }
 
-type HttpErrorCode = 400 | 401 | 404
+type HttpErrorCode = 400 | 401 | 404 | 500
 
 export class HttpError extends Error {
     constructor(public code: HttpErrorCode, msg?: string) {

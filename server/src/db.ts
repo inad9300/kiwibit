@@ -1,6 +1,6 @@
 import * as pg from 'pg'
 import * as secrets from '../../shared/secrets'
-import {ok, err} from './utils'
+import {ok, err, HttpError} from './utils'
 
 const pool = new pg.Pool({
     database: 'usda28',
@@ -10,14 +10,25 @@ const pool = new pg.Pool({
     port: 5432,
     max: 16
 })
-
-pool.on('error', (err, client) => {
+.on('error', (err, client) => {
     console.error('Unexpected error on idle client.', err, client)
     process.exit(-1)
 })
 
+function query(sql: string, params: any[]) {
+    return pool
+        .query(sql, params)
+        .catch(err => {
+            const detail = err.detail ? ' ' + err.detail : ''
+            const hint = err.hint ? ' ' + err.hint : ''
+            const at = err.where ? ' At: ' + err.where + '.' : ''
+            const meta = err.table ? ` [${err.table}${err.column ? '.' + err.column : ''}]` : ''
+            throw new HttpError(500, `Database error: ${err.message}.${detail}${hint}${at}${meta}`)
+        })
+}
+
 export function selectOne<T extends {[key: string]: any} = any>(sql: string, params: any[]): Promise<T> {
-    return pool.query(sql, params).then(res => {
+    return query(sql, params).then(res => {
         if (res.rows.length === 0) {
             return err(404, `Item not found.`)
         } else if (res.rows.length > 1) {
@@ -28,7 +39,7 @@ export function selectOne<T extends {[key: string]: any} = any>(sql: string, par
 }
 
 export function selectMany<T extends {[key: string]: any} = any>(sql: string, params: any[] = []): Promise<T[]> {
-    return pool.query(sql, params).then(res => res.rows)
+    return query(sql, params).then(res => res.rows)
 }
 
 export function insertOne<T extends {[key: string]: any}>(table: string, data: Partial<T>): Promise<T> {
@@ -39,8 +50,7 @@ export function insertOne<T extends {[key: string]: any}>(table: string, data: P
         placeholders.push('$' + (idx + 1))
         values.push(data[col])
     })
-    return pool
-        .query(`insert into ${table}(${columns.join(', ')}) values (${placeholders.join(', ')}) returning *`, values)
+    return query(`insert into ${table}(${columns.join(', ')}) values (${placeholders.join(', ')}) returning *`, values)
         .then(res => {
             if (res.rowCount !== 1) {
                 return err(400, `Unexpected result inserting data in "${table}": ${res.rowCount} rows inserted.`)
@@ -64,8 +74,7 @@ export function updateOne<T extends {[key: string]: any}>(table: string, data: P
         values.push(params[col])
         idx++
     })
-    return pool
-        .query(`update ${table} set ${assignments.join(', ')} where ${conditions.join(' and ')} returning *`, values)
+    return query(`update ${table} set ${assignments.join(', ')} where ${conditions.join(' and ')} returning *`, values)
         .then(res => {
             if (res.rowCount !== 1) {
                 return err(400, `Unexpected result updating in "${table}": ${res.rowCount} rows updated.`)
@@ -99,5 +108,5 @@ function remove(table: string, params: any): Promise<pg.QueryResult> {
         conditions.push(col + ' = $' + (idx + 1))
         values.push(params[col])
     })
-    return pool.query(`delete from ${table} where ${conditions.join(' and ')} returning *`, values)
+    return query(`delete from ${table} where ${conditions.join(' and ')} returning *`, values)
 }
