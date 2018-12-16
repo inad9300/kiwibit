@@ -1,4 +1,4 @@
-import {test} from './utils'
+import {test, random} from './utils'
 import * as assert from 'assert'
 
 test('getFoodById', '02003', res => {
@@ -36,12 +36,26 @@ test('getTopFoodsForNutrient', {nutrientId: '303'}, res => {
     assert(Array.isArray(res.body))
 })
 
-test('getCurrentUser', undefined, res => {
-    assert(res.status === 200)
-    assert(res.body.id === 1)
-})
+const name = random.ascii()
 
-test('getWeekMeals', {userId: 1}, res => {
+test('registerUser', {
+    name,
+    email: name + '@example.org',
+    pwd: '1234'
+}, res => {
     assert(res.status === 200)
-    assert(Array.isArray(res.body))
+    assert(res.body.name === name)
+})
+.then(res => {
+    const $token = res.body.id + ':1234'
+
+    test('getUser', {$token}, res => {
+        assert(res.status === 200)
+        assert(res.body.id === 1)
+    })
+    
+    test('getWeekMeals', {$token}, res => {
+        assert(res.status === 200)
+        assert(Array.isArray(res.body))
+    })
 })

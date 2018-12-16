@@ -1,10 +1,21 @@
 import * as http from 'http'
 import * as bcrypt from 'bcrypt'
-import {selectMany, insertOne, updateOne, deleteOne} from './db'
-import {GenderString, users, meals, food_des, nut_data, nutr_def, fd_group, tuil, rdi} from '../../shared/db/model'
+import {selectMany, insertOne, updateOne, deleteOne} from './sql'
+import * as dbm from '../../shared/db/model'
+import * as Q from './Q'
 import {Omit} from '../../shared/Types'
-import {handle, write, all, err, ok, HttpError, validDate, b64} from './utils'
-import {FoodDetails, Rdi, FoundFood, FoodGroup, Nutrient, NutrRefUnit, TopFood, User, NewUser, Meal, NewMeal, MealPosition} from '../../shared/Api'
+import {handle, write, validDate, b64, ServerApi} from './utils'
+import {User, Meal, NewMeal} from '../../shared/Api'
+
+declare global {
+    namespace NodeJS  {
+        interface Global {
+            $debug: boolean
+        }
+    }
+}
+
+global.$debug = true
 
 http
     .createServer(server)
@@ -34,58 +45,86 @@ function server(req: http.IncomingMessage, res: http.ServerResponse) {
     console.debug('HTTP request', req.url)
 
     handle(req, {
-        getFoodById: foodId =>
-            getFoodById(foodId),
-        getFoods: ({name, groupId}) =>
-            getFoods(name, groupId),
-        getTopFoodsForNutrient: ({nutrientId, unit}) =>
-            getTopFoodsForNutrient(nutrientId, unit || 'gram'),
+        getFoodById,
+        getFoods,
+        getTopFoodsForNutrient,
 
-        getRdis: ({age, gender}) =>
-            getRdis(age, gender),
-        getFoodGroups: () =>
-            getFoodGroups(),
-        getNutrients: () =>
-            getNutrients(),
+        getRdis,
+        getFoodGroups,
+        getNutrients,
 
-        getCurrentUser: () =>
+        registerUser,
+        getUser: () =>
             authenticateUser(req),
-        registerUser: user =>
-            registerUser(user),
         updateUser: body =>
             authenticateUser(req)
                 .then(user => updateUser({...body, id: user.id})),
 
         getWeekMeals: ({date}) =>
-            all([
+            Q.all([
                 validDate(date),
                 authenticateUser(req)
             ])
-            .then(([date, user]) => getWeekMeals(date || new Date, user.id)),
-        addMeal: body =>
+            .then(([date, user]) => getWeekMeals(date, user.id)),
+        addMeal: meal =>
             authenticateUser(req)
-                .then(user => addMeal(body, user.id)),
+                .then(user => addMeal(meal, user.id)),
         updateMeal: meal =>
             authenticateUser(req)
                 .then(user => updateMeal(meal, user.id)),
         updateMealPosition: body =>
-            all([
+            Q.all([
                 validDate(body.date),
                 authenticateUser(req)
             ])
             .then(([date, user]) => updateMealPosition({...body, date}, user.id)),
         deleteMeal: ({mealId}) =>
             authenticateUser(req)
-                .then(user => deleteMeal(mealId, user.id))
+                .then(user => deleteMeal({mealId, userId: user.id}))
     })
     .then(data => write(res, 200, data))
-    .catch(err => write(res, err instanceof HttpError ? err.code : 500, err))
+    .catch(err => write(res, err instanceof Q.HttpError ? err.code : 500, err))
+}
+
+function authenticateUser(req: http.IncomingMessage): Promise<User> {
+    const auth = req.headers.authorization
+    if (!auth || auth.indexOf('Basic ') !== 0) {
+        return Q.err(400, 'Wrong authentication format. Basic Authentication expected.')
+    }
+    const idAndPwd = b64.decode(auth.split(' ')[1])
+    const [idStr, pwd] = idAndPwd.split(':')
+    const id = parseInt(idStr)
+    if (isNaN(id) || !pwd) {
+        return Q.err(400, 'Malformed Basic Authentication content found.')
+    }
+    return selectMany(dbm.users, `
+        select u.id, u.name, u.email, u.pwd, u.age, u.gender, u.pregnancy, u.lactation,
+            u.activity_lvl, u.weight, u.height
+        from users u
+        where u.id = $1
+    `, [id]).then(data => {
+        if (data.length === 0) {
+            return Q.err(404, `No user found with id "${id}".`)
+        }
+        const user = data[0] as User & {pwd: dbm.users['pwd']}
+        return bcrypt.compare(pwd, user.pwd).then(same => {
+            if (!same) {
+                return Q.err(401, 'Wrong credentials.')
+            }
+            return Q.ok(getPublishableUser(user))
+        })
+    })
+}
+
+function getPublishableUser(user: dbm.users): User {
+    delete user.pwd
+    return user
 }
 
 // End-point handlers.
 
-function getFoodById(foodId: string): Promise<FoodDetails> {
-    return selectMany<food_des & nut_data & nutr_def & fd_group>(`
+const getFoodById: ServerApi['getFoodById'] = ({id}) => {
+    return selectMany<dbm.food_des & dbm.nut_data & dbm.nutr_def & dbm.fd_group>(void 0, `
         select fd.long_desc, fg.fdgrp_desc, fg.color, nd.nutr_val, ndf.nutrdesc, ndf.display_name
         from food_des fd
         join nut_data nd using (ndb_no)
@@ -93,11 +132,11 @@ function getFoodById(foodId: string): Promise<FoodDetails> {
         join fd_group fg using (fdgrp_cd)
         where fd.ndb_no = $1
         order by ndf.nutrdesc
-    `, [foodId]).then(data => {
+    `, [id]).then(data => {
         if (data.length === 0) {
-            return err(404)
+            return Q.err(404)
         } else {
-            return ok({
+            return Q.ok({
                 long_desc: data[0].long_desc,
                 fdgrp_desc: data[0].fdgrp_desc,
                 color: data[0].color,
@@ -111,8 +150,8 @@ function getFoodById(foodId: string): Promise<FoodDetails> {
     })
 }
 
-function getRdis(age: number, gender: GenderString): Promise<Rdi[]> {
-    const tuilQuery = selectMany<tuil>(`
+const getRdis: ServerApi['getRdis'] = ({age, gender}) => {
+    const tuilQuery = selectMany(dbm.tuil, `
         select tuil.nutr_no, tuil.value
         from tuil
         where tuil.age_min <= $1
@@ -122,7 +161,7 @@ function getRdis(age: number, gender: GenderString): Promise<Rdi[]> {
         and tuil.lactation = 'N'
     `, [age, age, gender])
 
-    const rdiQuery = selectMany<rdi & nutr_def>(`
+    const rdiQuery = selectMany<dbm.rdi & dbm.nutr_def>(void 0, `
         select rdi.value, ndf.nutrdesc, ndf.units, ndf.nutr_no
         from rdi
         join nutr_def ndf using (nutr_no)
@@ -135,9 +174,9 @@ function getRdis(age: number, gender: GenderString): Promise<Rdi[]> {
         order by ndf.nutrdesc
     `, [age, age, gender])
 
-    return all([tuilQuery, rdiQuery]).then(([tuils, rdis]) => {
+    return Q.all([tuilQuery, rdiQuery]).then(([tuils, rdis]) => {
         if (rdis.length === 0) {
-            return err(404, `No RDI information found for ${age}-years-old ${gender === 'M' ? 'males' : 'females'}.`)
+            return Q.err(404, `No RDI information found for ${age}-years-old ${gender === 'M' ? 'males' : 'females'}.`)
         }
         rdis.forEach(rdi => {
             const tuil = tuils.find(tuil => tuil.nutr_no === rdi.nutr_no)
@@ -145,16 +184,16 @@ function getRdis(age: number, gender: GenderString): Promise<Rdi[]> {
                 (rdi as any).max = tuil.value
             }
         })
-        return ok(rdis)
+        return Q.ok(rdis)
     })
 }
 
-function getFoods(name: string, groupId?: string): Promise<FoundFood[]> {
+const getFoods: ServerApi['getFoods'] = ({name, groupId}) => {
     const params: string[] = ['%' + name + '%']
     if (groupId) {
         params.push(groupId)
     }
-    return selectMany<food_des & fd_group>(`
+    return selectMany<dbm.food_des & dbm.fd_group>(void 0, `
         select fd.ndb_no, fd.long_desc, fg.fdgrp_desc, fg.color
         from food_des fd
         join fd_group fg using (fdgrp_cd)
@@ -165,8 +204,8 @@ function getFoods(name: string, groupId?: string): Promise<FoundFood[]> {
     `, params)
 }
 
-function getFoodGroups(): Promise<FoodGroup[]> {
-    return selectMany<fd_group>(`
+const getFoodGroups: ServerApi['getFoodGroups'] = () => {
+    return selectMany(dbm.fd_group, `
         select fg.fdgrp_cd, fg.fdgrp_desc
         from fd_group fg
         where fg.interest >= 10
@@ -174,8 +213,8 @@ function getFoodGroups(): Promise<FoodGroup[]> {
     `)
 }
 
-function getNutrients(): Promise<Nutrient[]> {
-    return selectMany<nutr_def>(`
+const getNutrients: ServerApi['getNutrients'] = () => {
+    return selectMany(dbm.nutr_def, `
         select ndf.nutr_no, ndf.nutrdesc, ndf.units, ndf.display_name
         from nutr_def ndf
         where ndf.interest >= 10
@@ -183,7 +222,7 @@ function getNutrients(): Promise<Nutrient[]> {
     `)
 }
 
-function getTopFoodsForNutrient(nutrientId: string, unit: NutrRefUnit): Promise<TopFood[]> {
+const getTopFoodsForNutrient: ServerApi['getTopFoodsForNutrient'] = ({nutrientId, unit}) => {
     const orderBy = unit === 'gram'
         ? `nd.nutr_val`
         : `if(nd.nutr_no = '208', nd.nutr_val, (100 * nd.nutr_val) / (
@@ -192,7 +231,7 @@ function getTopFoodsForNutrient(nutrientId: string, unit: NutrRefUnit): Promise<
                where in_nd.nutr_no = '208'
                and in_nd.ndb_no = nd.ndb_no
            ))`
-    return selectMany<food_des & nut_data & fd_group & nutr_def>(`
+    return selectMany<dbm.food_des & dbm.nut_data & dbm.fd_group & dbm.nutr_def>(void 0, `
         select fd.ndb_no, fd.long_desc, ndf.Units, fg.FdGrp_Desc, fg.color, ${orderBy} Nutr_Val
         from food_des fd
         join nut_data nd using (ndb_no)
@@ -206,44 +245,14 @@ function getTopFoodsForNutrient(nutrientId: string, unit: NutrRefUnit): Promise<
     `, [nutrientId])
 }
 
-function authenticateUser(req: http.IncomingMessage): Promise<User> {
-    const auth = req.headers.authorization
-    if (!auth || auth.indexOf('Basic ') !== 0) {
-        return err(400, 'Wrong authentication format. Basic Authentication expected.')
-    }
-    const idAndPwd = b64.decode(auth.split(' ')[1])
-    const [idStr, pwd] = idAndPwd.split(':')
-    const id = parseInt(idStr)
-    if (isNaN(id) || !pwd) {
-        return err(400, 'Malformed Basic Authentication content found.')
-    }
-    return selectMany<users>(`
-        select u.id, u.name, u.email, u.pwd, u.age, u.gender, u.pregnancy, u.lactation,
-            u.activity_lvl, u.weight, u.height
-        from users u
-        where u.id = $1
-    `, [id]).then(data => {
-        if (data.length === 0) {
-            return err(404, `No user found with id "${id}".`)
-        }
-        const user = data[0] as User & {pwd: users['pwd']}
-        return bcrypt.compare(pwd, user.pwd).then(same => {
-            if (!same) {
-                return err(401, 'Wrong credentials.')
-            }
-            return ok(getPublishableUser(user))
-        })
-    })
-}
-
-function registerUser(user: NewUser): Promise<User> {
+const registerUser: ServerApi['registerUser'] = user => {
     return bcrypt.hash(user.pwd, 10)
-        .then(hash => insertOne<users>('users', {...user, pwd: hash}))
+        .then(hash => insertOne(dbm.users, {...user, pwd: hash}))
         .then(user => getPublishableUser(user))
 }
 
-function updateUser(user: NewUser & {id: number}): Promise<User> {
-    return updateOne<users>('users', {
+const updateUser = (user: Partial<dbm.users> & {id: number}): Promise<User> => {
+    return updateOne(dbm.users, {
         name: user.name,
         age: user.age,
         gender: user.gender,
@@ -258,13 +267,8 @@ function updateUser(user: NewUser & {id: number}): Promise<User> {
     .then(user => getPublishableUser(user))
 }
 
-function getPublishableUser(user: users): User {
-    delete user.pwd
-    return user
-}
-
-function getWeekMeals(date: Date, userId: number): Promise<Meal[]> {
-    return selectMany<any /* meals & food_des */>(`
+const getWeekMeals = (date = new Date, userId: number): Promise<Meal[]> => {
+    return selectMany<dbm.meals & dbm.food_des & {date: string}>(void 0, `
         select ml.id, ml.date, ml.type, ml.qty, ml.eaten, ml.dorder, fd.ndb_no, fd.long_desc
         from meals ml
         join food_des fd using (ndb_no)
@@ -275,8 +279,8 @@ function getWeekMeals(date: Date, userId: number): Promise<Meal[]> {
     `, [userId, date])
 }
 
-function getDayMeals(date: Date, userId: number): Promise<Meal[]> {
-    return selectMany<any /* meals & food_des */>(`
+const getDayMeals = (date: Date, userId: number): Promise<Meal[]> => {
+    return selectMany<dbm.meals & dbm.food_des & {date: string}>(void 0, `
         select ml.id, ml.date, ml.type, ml.qty, ml.eaten, ml.dorder, fd.ndb_no, fd.long_desc
         from meals ml
         join food_des fd using (ndb_no)
@@ -286,11 +290,11 @@ function getDayMeals(date: Date, userId: number): Promise<Meal[]> {
     `, [userId, date])
 }
 
-function addMeal(meal: NewMeal, userId: number): Promise<meals> {
+const addMeal = (meal: NewMeal, userId: number) => {
     return validDate(meal.date).then(date =>
         getDayMeals(date, userId)
             .then(meals => Math.max(...meals.map(m => m.dorder).concat(-1)))
-            .then(maxOrder => insertOne<meals>('meals', {
+            .then(maxOrder => insertOne(dbm.meals, {
                 ...meal,
                 date,
                 user_id: userId,
@@ -299,8 +303,8 @@ function addMeal(meal: NewMeal, userId: number): Promise<meals> {
     )
 }
 
-function updateMeal(meal: NewMeal & {id: number}, userId: number): Promise<meals> {
-    return updateOne<meals>('meals', {
+const updateMeal = (meal: NewMeal & {id: number}, userId: number): Promise<dbm.meals> => {
+    return updateOne(dbm.meals, {
         type: meal.type,
         qty: meal.qty,
         eaten: meal.eaten,
@@ -312,7 +316,7 @@ function updateMeal(meal: NewMeal & {id: number}, userId: number): Promise<meals
 }
 
 function updateMealPosition(_newMeal: Omit<MealPosition, 'date'> & {date: Date}, _userId: number): Promise<void> {
-    return Promise.resolve()
+    return Q.nil()
     // const sameDayMeals = (date: Date) => selectMany<meals>(`select * from meals where date = $1 and user_id = $2`, [date, userId])
 
     // selectOne(`select * from meals where id = $1 and user_id = $2`, [newMeal.id, userId])
@@ -320,7 +324,7 @@ function updateMealPosition(_newMeal: Omit<MealPosition, 'date'> & {date: Date},
     //         const dateChanged = oldMeal.date.getTime() !== newMeal.date.getTime()
     //         const dorderChanged = oldMeal.dorder !== newMeal.dorder
     //         if (!dateChanged && !dorderChanged) {
-    //             return err(400, 'No changes detected.')
+    //             return Q.err(400, 'No changes detected.')
     //         }
     //         if (dateChanged) {
     //             // TODO Fill in the gaps!
@@ -338,7 +342,6 @@ function updateMealPosition(_newMeal: Omit<MealPosition, 'date'> & {date: Date},
 
     //     })
 
-
     // selectOne(`select * from meals where id = $1 and user_id = $2`, [newMeal.id, userId]).then(oldMeal => {
     //     const dateChanged = oldMeal.date.getTime() !== newMeal.date.getTime()
     //     const dorderChanged = oldMeal.dorder !== newMeal.dorder
@@ -346,7 +349,7 @@ function updateMealPosition(_newMeal: Omit<MealPosition, 'date'> & {date: Date},
     //         return
     //     }
     //     const sameDayMealsSql = `select * from meals where date = $1 and user_id = $2`
-    //     return all([
+    //     return Q.all([
     //         selectMany(sameDayMealsSql, [oldMeal.date, userId]),
     //         selectMany(sameDayMealsSql, [newMeal.date, userId])
     //     ]).then(([_oldMealsSameDay, _newMealsSameDay]) => {
@@ -355,8 +358,8 @@ function updateMealPosition(_newMeal: Omit<MealPosition, 'date'> & {date: Date},
     // })
 }
 
-function deleteMeal(mealId: number, userId: number): Promise<meals> {
-    return deleteOne<meals>('meals', {
+const deleteMeal: ServerApi<'deleteMeal', {userId: number}> = ({mealId, userId}) => {
+    return deleteOne(dbm.meals, {
         id: mealId,
         user_id: userId
     })

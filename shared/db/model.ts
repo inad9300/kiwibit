@@ -1,164 +1,166 @@
+import {Col} from '../../server/src/sql'
+
 export type BoolNumber = 1 | 0
 export type BoolString = 'Y' | 'N'
 export type GenderString = 'M' | 'F'
 
-export interface src_cd {
-    src_cd: string
-    srccd_desc: string
+export class src_cd {
+    @Col src_cd!: string
+    @Col srccd_desc!: string
 }
 
-export interface deriv_cd {
-    deriv_cd: string
-    deriv_desc: string
+export class deriv_cd {
+    @Col deriv_cd!: string
+    @Col deriv_desc!: string
 }
 
-export interface data_src {
-    datasrc_id: string
-    authors: string | undefined
-    title: string
-    year: string | undefined
-    journal: string | undefined
-    vol_city: string | undefined
-    issue_state: string | undefined
-    start_page: string | undefined
-    end_page: string | undefined
+export class data_src {
+    @Col datasrc_id!: string
+    @Col authors?: string
+    @Col title!: string
+    @Col year?: string
+    @Col journal?: string
+    @Col vol_city?: string
+    @Col issue_state?: string
+    @Col start_page?: string
+    @Col end_page?: string
 }
 
-export interface footnote {
-    ndb_no: string
-    footnt_no: string
-    footnt_typ: string
-    nutr_no: string | undefined
-    footnt_txt: string
+export class footnote {
+    @Col ndb_no!: string
+    @Col footnt_no!: string
+    @Col footnt_typ!: string
+    @Col nutr_no?: string
+    @Col footnt_txt!: string
 }
 
-export interface langdesc {
-    factor_code: string
-    description: string
+export class langdesc {
+    @Col factor_code!: string
+    @Col description!: string
 }
 
-export interface nutr_def {
-    nutr_no: string
-    units: string
-    tagname: string | undefined
-    nutrdesc: string
-    display_name: string | undefined
-    num_dec: number
-    sr_order: number
-    interest: number
-    is_essential: BoolString
+export class nutr_def {
+    @Col nutr_no!: string
+    @Col units!: string
+    @Col tagname?: string
+    @Col nutrdesc!: string
+    @Col display_name?: string
+    @Col num_dec!: number
+    @Col sr_order!: number
+    @Col interest!: number
+    @Col is_essential!: BoolString
 }
 
-export interface fd_group {
-    fdgrp_cd: string
-    fdgrp_desc: string
-    interest: number
-    color: string
+export class fd_group {
+    @Col fdgrp_cd!: string
+    @Col fdgrp_desc!: string
+    @Col interest!: number
+    @Col color!: string
 }
 
-export interface food_des {
-    ndb_no: string
-    fdgrp_cd: string
-    long_desc: string
-    shrt_desc: string
-    comname: string | undefined
-    manufacname: string | undefined
-    survey: string | undefined
-    ref_desc: string | undefined
-    refuse: number | undefined
-    sciname: string | undefined
-    n_factor: number | undefined
-    pro_factor: number | undefined
-    fat_factor: number | undefined
-    cho_factor: number | undefined
+export class food_des {
+    @Col ndb_no!: string
+    @Col fdgrp_cd!: string
+    @Col long_desc!: string
+    @Col shrt_desc!: string
+    @Col comname?: string
+    @Col manufacname?: string
+    @Col survey?: string
+    @Col ref_desc?: string
+    @Col refuse?: number
+    @Col sciname?: string
+    @Col n_factor?: number
+    @Col pro_factor?: number
+    @Col fat_factor?: number
+    @Col cho_factor?: number
 }
 
-export interface nut_data {
-    ndb_no: string
-    nutr_no: string
-    nutr_val: number
-    num_data_pts: number
-    std_error: number | undefined
-    src_cd: string
-    deriv_cd: string | undefined
-    ref_ndb_no: string | undefined
-    add_nutr_mark: string | undefined
-    num_studies: number | undefined
-    min: number | undefined
-    max: number | undefined
-    df: number | undefined
-    low_eb: number | undefined
-    up_eb: number | undefined
-    stat_cmt: string | undefined
-    addmod_date: string | undefined
-    // cc: string | undefined
+export class nut_data {
+    @Col ndb_no!: string
+    @Col nutr_no!: string
+    @Col nutr_val!: number
+    @Col num_data_pts!: number
+    @Col std_error?: number
+    @Col src_cd!: string
+    @Col deriv_cd?: string
+    @Col ref_ndb_no?: string
+    @Col add_nutr_mark?: string
+    @Col num_studies?: number
+    @Col min?: number
+    @Col max?: number
+    @Col df?: number
+    @Col low_eb?: number
+    @Col up_eb?: number
+    @Col stat_cmt?: string
+    @Col addmod_date?: string
+    // @Col cc?: string
 }
 
-export interface weight {
-    ndb_no: string
-    seq: string
-    amount: number
-    msre_desc: string
-    gm_wgt: number
-    num_data_pts: number | undefined
-    std_dev: number | undefined
+export class weight {
+    @Col ndb_no!: string
+    @Col seq!: string
+    @Col amount!: number
+    @Col msre_desc!: string
+    @Col gm_wgt!: number
+    @Col num_data_pts?: number
+    @Col std_dev?: number
 }
 
-export interface langual {
-    ndb_no: string
-    factor_code: string
+export class langual {
+    @Col ndb_no!: string
+    @Col factor_code!: string
 }
 
-export interface datsrcln {
-    ndb_no: string
-    nutr_no: string
-    datasrc_id: string
+export class datsrcln {
+    @Col ndb_no!: string
+    @Col nutr_no!: string
+    @Col datasrc_id!: string
 }
 
-export interface rdi {
-    id: number
-    nutr_no: string
-    age_min: number
-    age_max: number
-    gender: GenderString
-    pregnancy: BoolString
-    lactation: BoolString
-    type: 'RDA' | 'AI' | 'UL' | 'AMDR'
-    value: number
+export class rdi {
+    @Col id!: number
+    @Col nutr_no!: string
+    @Col age_min!: number
+    @Col age_max!: number
+    @Col gender!: GenderString
+    @Col pregnancy!: BoolString
+    @Col lactation!: BoolString
+    @Col type!: 'RDA' | 'AI' | 'UL' | 'AMDR'
+    @Col value!: number
 }
 
-export interface tuil {
-    id: number
-    nutr_no: string
-    age_min: number
-    age_max: number
-    gender: GenderString
-    pregnancy: BoolString
-    lactation: BoolString
-    value: number
+export class tuil {
+    @Col id!: number
+    @Col nutr_no!: string
+    @Col age_min!: number
+    @Col age_max!: number
+    @Col gender!: GenderString
+    @Col pregnancy!: BoolString
+    @Col lactation!: BoolString
+    @Col value!: number
 }
 
-export interface users {
-    id: number
-    name: string
-    email: string
-    pwd: string
-    age: number | undefined
-    gender: GenderString | undefined
-    pregnancy: BoolString
-    lactation: BoolString
-    activity_lvl: number
-    weight: number | undefined
-    height: number | undefined
+export class users {
+    @Col id!: number
+    @Col name!: string
+    @Col email!: string
+    @Col pwd!: string
+    @Col age?: number
+    @Col gender?: GenderString
+    @Col pregnancy!: BoolString
+    @Col lactation!: BoolString
+    @Col activity_lvl!: number
+    @Col weight?: number
+    @Col height?: number
 }
 
-export interface meals {
-    id: number
-    ndb_no: string
-    user_id: number
-    date: Date
-    type: 'Breakfast' | 'Brunch' | 'Lunch' | 'Dinner' | 'Snack' | undefined
-    qty: number
-    eaten: BoolNumber
-    dorder: number
+export class meals {
+    @Col id!: number
+    @Col ndb_no!: string
+    @Col user_id!: number
+    @Col date!: Date
+    @Col type?: 'Breakfast' | 'Brunch' | 'Lunch' | 'Dinner' | 'Snack'
+    @Col qty!: number
+    @Col eaten!: BoolNumber
+    @Col dorder!: number
 }

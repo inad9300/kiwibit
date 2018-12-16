@@ -2,15 +2,16 @@ const fs = require('fs')
 const {execSync} = require('child_process')
 const secrets = require('../secrets')
 
-/*
-Before running this script (with `sudo`), make sure all commands used below are
-installed, in particular wget, unzip, dos2unix, iconv and psql.
+// Data source: https://ndb.nal.usda.gov/ndb/.
 
-Source: https://ndb.nal.usda.gov/ndb/.
-*/
-
-console.log('> Downloading raw data.')
+console.log('> Installing dependencies.')
 {
+    execSync('apt-get install wget unzip dos2unix libc6 postgresql postgresql-contrib')
+}
+
+if (process.argv.includes('download')) {
+    console.log('> Downloading raw data.')
+
     execSync('rm -rf data')
     execSync('mkdir data')
     process.chdir('data')
@@ -22,7 +23,7 @@ console.log('> Downloading raw data.')
 }
 
 function psql(tail, auth) {
-    const connStr = `"host=localhost port=5432 dbname=usda28 user=kiwibit password='${secrets.db}'"`
+    const connStr = `"host=localhost port=5432 dbname=usda28 user=kiwibit password='${secrets.usda_db}'"`
     execSync(`sudo -u postgres psql ${auth ? connStr : ''} ${tail}`)
 }
 
@@ -30,7 +31,7 @@ console.log('> Creating database.')
 {
     psql(`-c "drop database if exists usda28"`)
     psql(`-c "drop role if exists kiwibit"`)
-    psql(`-c "create role kiwibit superuser login encrypted password '${secrets.db}'"`)
+    psql(`-c "create role kiwibit superuser login encrypted password '${secrets.usda_db}'"`)
     psql(`-c "create database usda28 owner kiwibit encoding 'UTF8'"`)
     psql(`-f schema.sql`, true)
 }

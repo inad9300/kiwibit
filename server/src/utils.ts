@@ -1,11 +1,9 @@
 import * as http from 'http'
-import {AsyncApi} from '../../shared/Api'
+import {Api} from '../../shared/Api'
+import {In, Out, AsyncFn} from '../../shared/Types'
+import * as Q from './Q'
 
 declare global {
-    interface Promise<T> {
-        finally: (onFinally?: () => void) => Promise<any>
-    }
-
     interface Error {
         toJSON?(): {msg: string}
     }
@@ -15,34 +13,26 @@ Error.prototype.toJSON = function () {
     return {msg: this.message}
 }
 
-type HttpErrorCode = 400 | 401 | 404 | 500
+type MetadataKeys = '$token'
 
-export class HttpError extends Error {
-    constructor(public code: HttpErrorCode, msg?: string) {
-        super(msg)
-        Object.setPrototypeOf(this, HttpError.prototype)
-    }
+type OmitMetadata<T> = Pick<T, Exclude<keyof T, MetadataKeys>>
+
+type Serial<T> = {
+    [P in keyof T]: T[P] extends Date ? string : T[P]
 }
 
-export const ok: PromiseConstructor['resolve'] = Promise.resolve.bind(Promise)
-
-export const all: PromiseConstructor['all'] = Promise.all.bind(Promise)
-
-export function nil() {
-    return ok(undefined)
+export type ServerApi = {
+    [F in keyof Api]: AsyncFn<
+        Serial<OmitMetadata<In<Api[F]>>>,
+        Out<Api[F]>
+    >
 }
 
-export function err(code: HttpErrorCode, msg?: string) {
-    return Promise.reject(new HttpError(code, msg))
-}
-
-export const log = console
-
-export function handle(req: http.IncomingMessage, handlers: AsyncApi): Promise<any> {
-    const fn = req.url!.substr(5) as keyof AsyncApi // Skip "/api/".
+export function handle(req: http.IncomingMessage, handlers: ServerApi): Promise<any> {
+    const fn = req.url!.substr(5) as keyof ServerApi // Skip "/api/".
     const handler = handlers[fn]
     if (!handler) {
-        return err(404, `Unknown API method: "${fn}".`)
+        return Q.err(404, `Unknown API method: "${fn}".`)
     }
     return getBody(req).then(body => (handler as any)(body))
 }
@@ -87,11 +77,11 @@ export function validDate(str: undefined): Promise<undefined>
 export function validDate(str: string | undefined): Promise<Date | undefined>
 export function validDate(str: string | undefined): Promise<Date | undefined> {
     if (str === undefined) {
-        return nil()
+        return Q.nil()
     }
     const date = new Date(str)
     if (isNaN(date.getTime())) {
-        return err(400, `Invalid date: "${str}".`)
+        return Q.err(400, `Invalid date: "${str}".`)
     }
-    return ok(date)
+    return Q.ok(date)
 }

@@ -3,7 +3,8 @@
     "compilerOptions": {
         "outDir": "bin",
         "target": "es5",
-        "lib": ["es6"],
-        "allowJs": true
+        "lib": ["es7"],
+        "allowJs": true,
+        "emitDecoratorMetadata": true
     }
 }
