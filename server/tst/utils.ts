@@ -38,5 +38,11 @@ export function test<F extends keyof Api>(
 }
 
 export const random = {
-    ascii: () => Math.random().toString(36).substr(2)
+    ascii: (size = 8) => {
+        let str = Math.random().toString(36).substr(2)
+        while (str.length < size) {
+            str += Math.random().toString(36).substr(2)
+        }
+        return str.substr(0, size)
+    }
 }

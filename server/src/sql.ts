@@ -16,20 +16,32 @@ const EXPECTED_RESULT_TYPES: {
     }
 } = {}
 
-export function Col(prototype: Object, column: string) {
-    if (global.$debug) {
-        const resultCtorName = prototype.constructor.name
-        if (!EXPECTED_RESULT_TYPES[resultCtorName]) {
-            EXPECTED_RESULT_TYPES[resultCtorName] = {}
-        }
-        const colCtor: ColCtor = Reflect.getMetadata('design:type', prototype, column)
-        assert(
-            VALID_COL_CTORS.includes(colCtor),
-            'Unexpected column type: ' + colCtor.name
-        )
-        EXPECTED_RESULT_TYPES[resultCtorName][column] = colCtor
-    }
+import * as dbs from '../../shared/db/schema'
+
+registerTables(
+    dbs.data_src,
+    dbs.src_cd,
+    // ...
+)
+
+function registerTables(...tables: any[]) {
+    // ...
 }
+
+// export function Field(prototype: Object, column: string) {
+//     if (global.$debug) {
+//         const resultCtorName = prototype.constructor.name
+//         if (!EXPECTED_RESULT_TYPES[resultCtorName]) {
+//             EXPECTED_RESULT_TYPES[resultCtorName] = {}
+//         }
+//         const colCtor: ColCtor = Reflect.getMetadata('design:type', prototype, column)
+//         assert(
+//             VALID_COL_CTORS.includes(colCtor),
+//             'Unexpected column type: ' + colCtor.name
+//         )
+//         EXPECTED_RESULT_TYPES[resultCtorName][column] = colCtor
+//     }
+// }
 
 function typeCheckResult<R>(resultInfo: pg.FieldDef[], resultCtor: Ctor<R>): void {
     const actualTypes: {[colName: string]: PgTypeId} = {}
