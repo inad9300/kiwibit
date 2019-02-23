@@ -1,8 +1,9 @@
 {
     "private": true,
     "scripts": {
-        "compile": "tsc && export TZ=UTC",
-        "test": "npm run compile && node bin/server/test/main.js",
+        "pretest": "export TZ=UTC",
+        "preserve": "export TZ=UTC",
+        "test": "tsc && c8 node bin/test/main.js",
         "serve": "node --inspect=9229 -r ts-node/register src/main.ts",
         "start": "nodemon -w src -w test -e ts -x 'npm run serve'"
     },
@@ -17,6 +18,7 @@
         "@types/node-fetch": "2.1.6",
         "@types/node": "11.9.5",
         "@types/pg": "7.4.13",
+        "c8": "3.4.0",
         "node-fetch": "2.3.0",
         "nodemon": "1.18.10",
         "ts-node": "8.0.2",
