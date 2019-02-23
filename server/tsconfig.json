@@ -5,6 +5,9 @@
         "target": "es5",
         "lib": ["es7"],
         "allowJs": true,
-        "emitDecoratorMetadata": true
-    }
+        "sourceMap": true
+        // "experimentalDecorators": true,
+        // "emitDecoratorMetadata": true
+    },
+    "include": ["src/**/*.ts", "test/**/*.ts"]
 }

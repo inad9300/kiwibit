@@ -1,23 +1,25 @@
 {
     "private": true,
     "scripts": {
-        "compile": "rm -rf bin && tsc && export TZ=UTC",
-        "test": "npm run compile && node bin/server/tst/main.js",
-        "start": "npm run compile && node bin/server/src/main.js"
+        "compile": "tsc && export TZ=UTC",
+        "test": "npm run compile && node bin/server/test/main.js",
+        "serve": "node --inspect=9229 -r ts-node/register src/main.ts",
+        "start": "nodemon -w src -w test -e ts -x 'npm run serve'"
     },
     "dependencies": {
-        "bcrypt": "3.0.2",
-        "pg": "7.7.1",
+        "bcrypt": "3.0.4",
+        "pg": "7.8.1",
         "pg-query-parser": "0.2.3",
-        "reflect-metadata": "0.1.12"
+        "reflect-metadata": "0.1.13"
     },
     "devDependencies": {
         "@types/bcrypt": "3.0.0",
-        "@types/node-fetch": "2.1.4",
-        "@types/node": "10.12.15",
-        "@types/pg": "7.4.11",
+        "@types/node-fetch": "2.1.6",
+        "@types/node": "11.9.5",
+        "@types/pg": "7.4.13",
         "node-fetch": "2.3.0",
-        "nodemon": "1.18.9",
-        "typescript": "3.2.2"
+        "nodemon": "1.18.10",
+        "ts-node": "8.0.2",
+        "typescript": "3.3.3333"
     }
 }
