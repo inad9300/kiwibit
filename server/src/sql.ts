@@ -1,4 +1,5 @@
 import * as pg from 'pg'
+import * as config from '../../database/config'
 import * as secrets from '../../secrets'
 import {PgTypeId} from './PgTypeId'
 import {RowMetadata, Row, Column} from './RowMetadata'
@@ -7,11 +8,11 @@ import {WrapperType} from './WrapperType'
 import {log} from './log'
 
 const pool = new pg.Pool({
-    database: 'usda28',
-    user: 'kiwibit',
+    host: config.host,
+    port: config.port,
+    user: config.user,
+    database: config.name,
     password: secrets.db,
-    host: 'localhost',
-    port: 5432,
     max: 16
 })
 .on('error', (err, client) => {
@@ -37,7 +38,7 @@ export function sql<R extends Row>(
             if (res.command === 'SELECT' || query.toLowerCase().trim().includes(' returning ')) {
                 assert(expectedMetadata !== undefined, 'No metadata provided for read query.')
             } else {
-                return
+                return res
             }
 
             const pgToJsType: {[pgTypeId: number]: Constructor<WrapperType<Exclude<Column, null>>>} = {

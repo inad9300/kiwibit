@@ -2,14 +2,15 @@
 
 const fs = require('fs')
 const pg = require('pg')
+const config = require('../../database/config')
 const secrets = require('../../secrets')
 
 const pool = new pg.Pool({
-    database: 'usda28',
-    user: 'kiwibit',
+    host: config.host,
+    port: config.port,
+    user: config.user,
+    database: config.name,
     password: secrets.db,
-    host: 'localhost',
-    port: 5432,
     max: 16
 })
 .on('error', (err, client) => {
@@ -42,7 +43,7 @@ pool.query(`
       -- numeric_precision_radix, numeric_scale, datetime_precision,
       -- interval_type, interval_precision
     from information_schema.columns
-    where table_catalog = 'usda28'
+    where table_catalog = '${config.name}'
     and table_schema = 'public'
     order by table_name, ordinal_position
 `).then(res => {
