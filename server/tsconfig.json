@@ -1,13 +1,11 @@
 {
-    "extends": "../shared/tsconfig.json",
+    "extends": "../tsconfig.json",
     "compilerOptions": {
         "outDir": "bin",
         "target": "es5",
-        "lib": ["es7"],
+        "lib": ["es7", "esnext"],
         "allowJs": true,
         "sourceMap": true
-        // "experimentalDecorators": true,
-        // "emitDecoratorMetadata": true
     },
-    "include": ["src/**/*.ts", "test/**/*.ts"]
+    "include": ["src/**/*.ts"]
 }

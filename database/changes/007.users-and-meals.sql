@@ -5,9 +5,9 @@ create table users (
     pwd varchar(250) not null,
     age int,
     gender char(1),
-    pregnancy char(1) default 'N',
-    lactation char(1) default 'N',
-    activity_lvl int default 0,
+    pregnancy char(1) not null default 'N',
+    lactation char(1) not null default 'N',
+    activity_lvl int not null default 0,
     weight int, -- kg
     height int, -- cm
 

@@ -25,7 +25,7 @@ if (process.argv.includes('download')) {
 }
 
 function psql(tail, auth) {
-    const connStr = `"host=localhost port=5432 dbname=usda28 user=kiwibit password='${secrets.usda_db}'"`
+    const connStr = `"host=localhost port=5432 dbname=usda28 user=kiwibit password='${secrets.db}'"`
     execSync(`sudo -u postgres psql ${auth ? connStr : ''} ${tail}`)
 }
 
@@ -33,7 +33,7 @@ console.log('> Creating database.')
 {
     psql(`-c "drop database if exists usda28"`)
     psql(`-c "drop role if exists kiwibit"`)
-    psql(`-c "create role kiwibit superuser login encrypted password '${secrets.usda_db}'"`)
+    psql(`-c "create role kiwibit superuser login encrypted password '${secrets.db}'"`)
     psql(`-c "create database usda28 owner kiwibit encoding 'UTF8'"`)
     psql(`-f schema.sql`, true)
 }

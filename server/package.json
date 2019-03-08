@@ -1,27 +1,26 @@
 {
     "private": true,
     "scripts": {
+        "postinstall": "cd src && ./schema.generator.js",
+        "prestart": "export TZ=UTC",
         "pretest": "export TZ=UTC",
-        "preserve": "export TZ=UTC",
-        "test": "tsc && c8 node bin/test/main.js",
-        "serve": "node --inspect=9229 -r ts-node/register src/main.ts",
-        "start": "nodemon -w src -w test -e ts -x 'npm run serve'"
+        "start": "nodemon -w src -e ts -x 'clear && npm run serve'",
+        "serve": "node --inspect=9229 -r ts-node/register src/server.ts --debug",
+        "test": "c8 node -r ts-node/register src/tests.ts"
     },
     "dependencies": {
         "bcrypt": "3.0.4",
-        "pg": "7.8.1",
-        "pg-query-parser": "0.2.3",
-        "reflect-metadata": "0.1.13"
+        "pg": "7.8.2"
     },
     "devDependencies": {
         "@types/bcrypt": "3.0.0",
         "@types/node-fetch": "2.1.6",
-        "@types/node": "11.9.5",
+        "@types/node": "11.10.5",
         "@types/pg": "7.4.13",
         "c8": "3.4.0",
         "node-fetch": "2.3.0",
         "nodemon": "1.18.10",
-        "ts-node": "8.0.2",
+        "ts-node": "8.0.3",
         "typescript": "3.3.3333"
     }
 }

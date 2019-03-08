@@ -1,3 +1,5 @@
+export type Primitive = boolean | number | string | symbol | null | undefined | void
+
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type Mandatory<T> = Exclude<T, void> // `Required` for primitives.
 
@@ -15,8 +17,3 @@ export type Ctor<T = any> = new (...args: any[]) => T
 
 export type In<F extends Fn<any, any>> = Parameters<F>[0]
 export type Out<F extends Fn<any, any>> = ReturnType<F>
-
-export type Json = JsonPrimitive | JsonObject | JsonArray
-export type JsonPrimitive = null | boolean | number | string
-export type JsonObject = {[key: string]: Json}
-export interface JsonArray extends Array<Json> {}
