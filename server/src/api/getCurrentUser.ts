@@ -10,14 +10,13 @@ type Output = {
     id: schema.users['id']
 	name: schema.users['name']
 	email: schema.users['email']
-	pwd: schema.users['pwd']
 	age: schema.users['age']
 	gender: schema.users['gender']
-	pregnancy: schema.users['pregnancy']
-	lactation: schema.users['lactation']
-	activity_lvl: schema.users['activity_lvl']
-	weight: schema.users['weight']
-	height: schema.users['height']
+	is_pregnant: schema.users['is_pregnant']
+	is_lactating: schema.users['is_lactating']
+	activity_level: schema.users['activity_level']
+	weight_kg: schema.users['weight_kg']
+	height_cm: schema.users['height_cm']
 }
 
 export const getCurrentUser: ApiFn<Input, Output> = () => {

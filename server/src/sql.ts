@@ -55,7 +55,8 @@ export function sql<R extends Row>(
                 [PgTypeId.VARCHAR]: String,
                 [PgTypeId.DATE]: Date,
                 [PgTypeId.TIMESTAMP]: Date,
-                [PgTypeId.TIMESTAMPTZ]: Date
+                [PgTypeId.TIMESTAMPTZ]: Date,
+                [PgTypeId.BYTEA]: Uint8Array
             }
 
             const actualMetadata = res.fields

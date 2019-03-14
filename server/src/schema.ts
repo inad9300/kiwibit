@@ -1,323 +1,353 @@
 import {RowMetadata} from './RowMetadata'
 
-export type data_src = {
-    datasrc_id: string
-	authors: string | null
+export type cup_gram_ratios = {
+    food_id: number
+	cups: number
+	grams: number
+}
+
+export const cup_gram_ratios: RowMetadata<cup_gram_ratios> = {
+    food_id: {type: Number, optional: false},
+	cups: {type: Number, optional: false},
+	grams: {type: Number, optional: false}
+}
+
+export type data_sources = {
+    id: number | null
+	name: string
+	abbr: string | null
+}
+
+export const data_sources: RowMetadata<data_sources> = {
+    id: {type: Number, optional: true},
+	name: {type: String, optional: false},
+	abbr: {type: String, optional: true}
+}
+
+export type files = {
+    id: number | null
+	name: string
+	type: string
+	data: Uint8Array
+}
+
+export const files: RowMetadata<files> = {
+    id: {type: Number, optional: true},
+	name: {type: String, optional: false},
+	type: {type: String, optional: false},
+	data: {type: Uint8Array, optional: false}
+}
+
+export type food_label_definitions = {
+    id: number | null
+	name: string
+}
+
+export const food_label_definitions: RowMetadata<food_label_definitions> = {
+    id: {type: Number, optional: true},
+	name: {type: String, optional: false}
+}
+
+export type food_labels = {
+    food_id: number
+	label_id: number
+}
+
+export const food_labels: RowMetadata<food_labels> = {
+    food_id: {type: Number, optional: false},
+	label_id: {type: Number, optional: false}
+}
+
+export type food_nutrients = {
+    food_id: number
+	nutrient_id: number
+	amount: number
+}
+
+export const food_nutrients: RowMetadata<food_nutrients> = {
+    food_id: {type: Number, optional: false},
+	nutrient_id: {type: Number, optional: false},
+	amount: {type: Number, optional: false}
+}
+
+export type foods = {
+    id: number | null
+	source_id: number
+	external_id: string
+	is_public: boolean | null
+	name: string
+	usda_category_id: number
+	nf_dd_category_id: number | null
+	picture: Uint8Array | null
+}
+
+export const foods: RowMetadata<foods> = {
+    id: {type: Number, optional: true},
+	source_id: {type: Number, optional: false},
+	external_id: {type: String, optional: false},
+	is_public: {type: Boolean, optional: true},
+	name: {type: String, optional: false},
+	usda_category_id: {type: Number, optional: false},
+	nf_dd_category_id: {type: Number, optional: true},
+	picture: {type: Uint8Array, optional: true}
+}
+
+export type meal_types = {
+    id: number | null
+	name: string
+}
+
+export const meal_types: RowMetadata<meal_types> = {
+    id: {type: Number, optional: true},
+	name: {type: String, optional: false}
+}
+
+export type nf_dd_categories = {
+    id: number | null
+	name: string
+	servings: number
+}
+
+export const nf_dd_categories: RowMetadata<nf_dd_categories> = {
+    id: {type: Number, optional: true},
+	name: {type: String, optional: false},
+	servings: {type: Number, optional: false}
+}
+
+export type nutrient_categories = {
+    id: number | null
+	name: string
+}
+
+export const nutrient_categories: RowMetadata<nutrient_categories> = {
+    id: {type: Number, optional: true},
+	name: {type: String, optional: false}
+}
+
+export type nutrients = {
+    id: number | null
+	name: string
+	unit_id: number
+	is_essential: boolean
+	is_visible_default: boolean
+	category_id: number
+	source_id: number
+	external_id: string
+}
+
+export const nutrients: RowMetadata<nutrients> = {
+    id: {type: Number, optional: true},
+	name: {type: String, optional: false},
+	unit_id: {type: Number, optional: false},
+	is_essential: {type: Boolean, optional: false},
+	is_visible_default: {type: Boolean, optional: false},
+	category_id: {type: Number, optional: false},
+	source_id: {type: Number, optional: false},
+	external_id: {type: String, optional: false}
+}
+
+export type recipe_ingredients = {
+    recipe_id: number
+	food_id: number
+	amount_g: number
+}
+
+export const recipe_ingredients: RowMetadata<recipe_ingredients> = {
+    recipe_id: {type: Number, optional: false},
+	food_id: {type: Number, optional: false},
+	amount_g: {type: Number, optional: false}
+}
+
+export type recipes = {
+    id: number | null
+	source_id: number
+	external_id: string
+	is_public: boolean | null
 	title: string
-	year: string | null
-	journal: string | null
-	vol_city: string | null
-	issue_state: string | null
-	start_page: string | null
-	end_page: string | null
+	description: string | null
+	estimated_time_min: number | null
+	estimated_difficulty: string | null
+	picture: Uint8Array | null
 }
 
-export const data_src: RowMetadata<data_src> = {
-    datasrc_id: {type: String, optional: false},
-	authors: {type: String, optional: true},
+export const recipes: RowMetadata<recipes> = {
+    id: {type: Number, optional: true},
+	source_id: {type: Number, optional: false},
+	external_id: {type: String, optional: false},
+	is_public: {type: Boolean, optional: true},
 	title: {type: String, optional: false},
-	year: {type: String, optional: true},
-	journal: {type: String, optional: true},
-	vol_city: {type: String, optional: true},
-	issue_state: {type: String, optional: true},
-	start_page: {type: String, optional: true},
-	end_page: {type: String, optional: true}
+	description: {type: String, optional: true},
+	estimated_time_min: {type: Number, optional: true},
+	estimated_difficulty: {type: String, optional: true},
+	picture: {type: Uint8Array, optional: true}
 }
 
-export type datsrcln = {
-    ndb_no: string
-	nutr_no: string
-	datasrc_id: string
+export type reference_intakes = {
+    source_id: number
+	nutrient_id: number
+	age_min: number
+	age_max: number
+	gender: string
+	for_pregnancy: boolean
+	for_lactation: boolean
+	value: number
 }
 
-export const datsrcln: RowMetadata<datsrcln> = {
-    ndb_no: {type: String, optional: false},
-	nutr_no: {type: String, optional: false},
-	datasrc_id: {type: String, optional: false}
+export const reference_intakes: RowMetadata<reference_intakes> = {
+    source_id: {type: Number, optional: false},
+	nutrient_id: {type: Number, optional: false},
+	age_min: {type: Number, optional: false},
+	age_max: {type: Number, optional: false},
+	gender: {type: String, optional: false},
+	for_pregnancy: {type: Boolean, optional: false},
+	for_lactation: {type: Boolean, optional: false},
+	value: {type: Number, optional: false}
 }
 
-export type deriv_cd = {
-    deriv_cd: string
-	deriv_desc: string
+export type tolerable_intakes = {
+    source_id: number
+	nutrient_id: number
+	age_min: number
+	age_max: number
+	gender: string
+	for_pregnancy: boolean
+	for_lactation: boolean
+	value: number
 }
 
-export const deriv_cd: RowMetadata<deriv_cd> = {
-    deriv_cd: {type: String, optional: false},
-	deriv_desc: {type: String, optional: false}
+export const tolerable_intakes: RowMetadata<tolerable_intakes> = {
+    source_id: {type: Number, optional: false},
+	nutrient_id: {type: Number, optional: false},
+	age_min: {type: Number, optional: false},
+	age_max: {type: Number, optional: false},
+	gender: {type: String, optional: false},
+	for_pregnancy: {type: Boolean, optional: false},
+	for_lactation: {type: Boolean, optional: false},
+	value: {type: Number, optional: false}
 }
 
-export type fd_group = {
-    fdgrp_cd: string
-	fdgrp_desc: string
-	interest: number
+export type units = {
+    id: number | null
+	abbr: string
+	name: string
+}
+
+export const units: RowMetadata<units> = {
+    id: {type: Number, optional: true},
+	abbr: {type: String, optional: false},
+	name: {type: String, optional: false}
+}
+
+export type usda_categories = {
+    id: number | null
+	usda_id: string
+	is_visible_default: boolean
 	color: string
 }
 
-export const fd_group: RowMetadata<fd_group> = {
-    fdgrp_cd: {type: String, optional: false},
-	fdgrp_desc: {type: String, optional: false},
-	interest: {type: Number, optional: false},
+export const usda_categories: RowMetadata<usda_categories> = {
+    id: {type: Number, optional: true},
+	usda_id: {type: String, optional: false},
+	is_visible_default: {type: Boolean, optional: false},
 	color: {type: String, optional: false}
 }
 
-export type food_des = {
-    ndb_no: string
-	fdgrp_cd: string
-	long_desc: string
-	shrt_desc: string
-	comname: string | null
-	manufacname: string | null
-	survey: string | null
-	ref_desc: string | null
-	refuse: number | null
-	sciname: string | null
-	n_factor: number | null
-	pro_factor: number | null
-	fat_factor: number | null
-	cho_factor: number | null
-}
-
-export const food_des: RowMetadata<food_des> = {
-    ndb_no: {type: String, optional: false},
-	fdgrp_cd: {type: String, optional: false},
-	long_desc: {type: String, optional: false},
-	shrt_desc: {type: String, optional: false},
-	comname: {type: String, optional: true},
-	manufacname: {type: String, optional: true},
-	survey: {type: String, optional: true},
-	ref_desc: {type: String, optional: true},
-	refuse: {type: Number, optional: true},
-	sciname: {type: String, optional: true},
-	n_factor: {type: Number, optional: true},
-	pro_factor: {type: Number, optional: true},
-	fat_factor: {type: Number, optional: true},
-	cho_factor: {type: Number, optional: true}
-}
-
-export type footnote = {
-    ndb_no: string
-	footnt_no: string
-	footnt_typ: string
-	nutr_no: string | null
-	footnt_txt: string
-}
-
-export const footnote: RowMetadata<footnote> = {
-    ndb_no: {type: String, optional: false},
-	footnt_no: {type: String, optional: false},
-	footnt_typ: {type: String, optional: false},
-	nutr_no: {type: String, optional: true},
-	footnt_txt: {type: String, optional: false}
-}
-
-export type langdesc = {
-    factor_code: string
-	description: string
-}
-
-export const langdesc: RowMetadata<langdesc> = {
-    factor_code: {type: String, optional: false},
-	description: {type: String, optional: false}
-}
-
-export type langual = {
-    ndb_no: string
-	factor_code: string
-}
-
-export const langual: RowMetadata<langual> = {
-    ndb_no: {type: String, optional: false},
-	factor_code: {type: String, optional: false}
-}
-
-export type meals = {
-    id: number
-	ndb_no: string
-	user_id: number
+export type user_daily_foods = {
+    user_id: number
+	food_id: number
 	date: Date
-	type: string | null
-	qty: number
-	eaten: boolean
-	dorder: number
-	settled: boolean | null
+	meal_type_id: number
+	amount_g: number
 }
 
-export const meals: RowMetadata<meals> = {
-    id: {type: Number, optional: false},
-	ndb_no: {type: String, optional: false},
-	user_id: {type: Number, optional: false},
+export const user_daily_foods: RowMetadata<user_daily_foods> = {
+    user_id: {type: Number, optional: false},
+	food_id: {type: Number, optional: false},
 	date: {type: Date, optional: false},
-	type: {type: String, optional: true},
-	qty: {type: Number, optional: false},
-	eaten: {type: Boolean, optional: false},
-	dorder: {type: Number, optional: false},
-	settled: {type: Boolean, optional: true}
+	meal_type_id: {type: Number, optional: false},
+	amount_g: {type: Number, optional: false}
 }
 
-export type nut_data = {
-    ndb_no: string
-	nutr_no: string
-	nutr_val: number
-	num_data_pts: number
-	std_error: number | null
-	src_cd: string
-	deriv_cd: string | null
-	ref_ndb_no: string | null
-	add_nutr_mark: string | null
-	num_studies: number | null
-	min: number | null
-	max: number | null
-	df: number | null
-	low_eb: number | null
-	up_eb: number | null
-	stat_cmt: string | null
-	addmod_date: string | null
+export type user_daily_recipes = {
+    user_id: number
+	recipe_id: number
+	date: Date
+	meal_type_id: number
+	amount_g: number
 }
 
-export const nut_data: RowMetadata<nut_data> = {
-    ndb_no: {type: String, optional: false},
-	nutr_no: {type: String, optional: false},
-	nutr_val: {type: Number, optional: false},
-	num_data_pts: {type: Number, optional: false},
-	std_error: {type: Number, optional: true},
-	src_cd: {type: String, optional: false},
-	deriv_cd: {type: String, optional: true},
-	ref_ndb_no: {type: String, optional: true},
-	add_nutr_mark: {type: String, optional: true},
-	num_studies: {type: Number, optional: true},
-	min: {type: Number, optional: true},
-	max: {type: Number, optional: true},
-	df: {type: Number, optional: true},
-	low_eb: {type: Number, optional: true},
-	up_eb: {type: Number, optional: true},
-	stat_cmt: {type: String, optional: true},
-	addmod_date: {type: String, optional: true}
-}
-
-export type nutr_def = {
-    nutr_no: string
-	units: string
-	tagname: string | null
-	nutrdesc: string
-	num_dec: number
-	sr_order: number
-	interest: number
-	is_essential: string
-	display_name: string | null
-}
-
-export const nutr_def: RowMetadata<nutr_def> = {
-    nutr_no: {type: String, optional: false},
-	units: {type: String, optional: false},
-	tagname: {type: String, optional: true},
-	nutrdesc: {type: String, optional: false},
-	num_dec: {type: Number, optional: false},
-	sr_order: {type: Number, optional: false},
-	interest: {type: Number, optional: false},
-	is_essential: {type: String, optional: false},
-	display_name: {type: String, optional: true}
-}
-
-export type rdi = {
-    id: number
-	nutr_no: string
-	age_min: number
-	age_max: number
-	gender: string
-	pregnancy: string
-	lactation: string
-	type: string
-	value: number
-}
-
-export const rdi: RowMetadata<rdi> = {
-    id: {type: Number, optional: false},
-	nutr_no: {type: String, optional: false},
-	age_min: {type: Number, optional: false},
-	age_max: {type: Number, optional: false},
-	gender: {type: String, optional: false},
-	pregnancy: {type: String, optional: false},
-	lactation: {type: String, optional: false},
-	type: {type: String, optional: false},
-	value: {type: Number, optional: false}
-}
-
-export type src_cd = {
-    src_cd: string
-	srccd_desc: string
-}
-
-export const src_cd: RowMetadata<src_cd> = {
-    src_cd: {type: String, optional: false},
-	srccd_desc: {type: String, optional: false}
-}
-
-export type tuil = {
-    id: number
-	nutr_no: string
-	age_min: number
-	age_max: number
-	gender: string
-	pregnancy: string
-	lactation: string
-	value: number
-}
-
-export const tuil: RowMetadata<tuil> = {
-    id: {type: Number, optional: false},
-	nutr_no: {type: String, optional: false},
-	age_min: {type: Number, optional: false},
-	age_max: {type: Number, optional: false},
-	gender: {type: String, optional: false},
-	pregnancy: {type: String, optional: false},
-	lactation: {type: String, optional: false},
-	value: {type: Number, optional: false}
+export const user_daily_recipes: RowMetadata<user_daily_recipes> = {
+    user_id: {type: Number, optional: false},
+	recipe_id: {type: Number, optional: false},
+	date: {type: Date, optional: false},
+	meal_type_id: {type: Number, optional: false},
+	amount_g: {type: Number, optional: false}
 }
 
 export type users = {
-    id: number
+    id: number | null
 	name: string
 	email: string
-	pwd: string
+	password: string
 	age: number | null
 	gender: string | null
-	pregnancy: string | null
-	lactation: string | null
-	activity_lvl: number | null
-	weight: number | null
-	height: number | null
+	is_verified: boolean | null
+	user_type_id: number
+	is_pregnant: boolean | null
+	is_lactating: boolean | null
+	activity_level: number | null
+	weight_kg: number | null
+	height_cm: number | null
+	picture: Uint8Array | null
 }
 
 export const users: RowMetadata<users> = {
-    id: {type: Number, optional: false},
+    id: {type: Number, optional: true},
 	name: {type: String, optional: false},
 	email: {type: String, optional: false},
-	pwd: {type: String, optional: false},
+	password: {type: String, optional: false},
 	age: {type: Number, optional: true},
 	gender: {type: String, optional: true},
-	pregnancy: {type: String, optional: true},
-	lactation: {type: String, optional: true},
-	activity_lvl: {type: Number, optional: true},
-	weight: {type: Number, optional: true},
-	height: {type: Number, optional: true}
+	is_verified: {type: Boolean, optional: true},
+	user_type_id: {type: Number, optional: false},
+	is_pregnant: {type: Boolean, optional: true},
+	is_lactating: {type: Boolean, optional: true},
+	activity_level: {type: Number, optional: true},
+	weight_kg: {type: Number, optional: true},
+	height_cm: {type: Number, optional: true},
+	picture: {type: Uint8Array, optional: true}
 }
 
-export type weight = {
-    ndb_no: string
-	seq: string
-	amount: number
-	msre_desc: string
-	gm_wgt: number
-	num_data_pts: number | null
-	std_dev: number | null
+export type user_types = {
+    id: number | null
+	name: string
 }
 
-export const weight: RowMetadata<weight> = {
-    ndb_no: {type: String, optional: false},
-	seq: {type: String, optional: false},
-	amount: {type: Number, optional: false},
-	msre_desc: {type: String, optional: false},
-	gm_wgt: {type: Number, optional: false},
-	num_data_pts: {type: Number, optional: true},
-	std_dev: {type: Number, optional: true}
+export const user_types: RowMetadata<user_types> = {
+    id: {type: Number, optional: true},
+	name: {type: String, optional: false}
+}
+
+export type user_visible_nutrients = {
+    user_id: number
+	nutrient_id: number
+	is_visible: boolean
+}
+
+export const user_visible_nutrients: RowMetadata<user_visible_nutrients> = {
+    user_id: {type: Number, optional: false},
+	nutrient_id: {type: Number, optional: false},
+	is_visible: {type: Boolean, optional: false}
+}
+
+export type user_visible_usda_categories = {
+    user_id: number
+	usda_category_id: number
+	is_visible: boolean
+}
+
+export const user_visible_usda_categories: RowMetadata<user_visible_usda_categories> = {
+    user_id: {type: Number, optional: false},
+	usda_category_id: {type: Number, optional: false},
+	is_visible: {type: Boolean, optional: false}
 }

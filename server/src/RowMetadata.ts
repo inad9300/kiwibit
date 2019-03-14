@@ -1,7 +1,7 @@
 import {Constructor} from './Constructor'
 import {WrapperType} from './WrapperType'
 
-export type Column = null | boolean | number | string | Date
+export type Column = null | boolean | number | string | Date | Uint8Array
 
 export type Row = {
     [column: string]: Column

@@ -34,11 +34,12 @@ const pgToJsType = {
     varchar: 'string',
     date: 'Date',
     timestamp: 'Date',
-    timestamptz: 'Date'
+    timestamptz: 'Date',
+    bytea: 'Uint8Array'
 }
 
 pool.query(`
-    select table_name, column_name, udt_name, is_nullable
+    select table_name, column_name, udt_name, is_nullable, column_default
       -- character_maximum_length, is_identity, numeric_precision,
       -- numeric_precision_radix, numeric_scale, datetime_precision,
       -- interval_type, interval_precision
@@ -55,12 +56,14 @@ pool.query(`
         columnsByTable[columnMeta.table_name].push(columnMeta)
     })
 
+    const isOptional = col => col.is_nullable === 'YES' || !!col.column_default
+
     const schema = Object.keys(columnsByTable).map(table =>
 `export type ${table} = {
     ${columnsByTable[table].map(columnMeta => {
         return columnMeta.column_name
             + ': ' + pgToJsType[columnMeta.udt_name]
-            + (columnMeta.is_nullable === 'YES' ? ' | null' : '')
+            + (isOptional(columnMeta) ? ' | null' : '')
     }).join('\n\t')}
 }
 
@@ -68,7 +71,7 @@ export const ${table}: RowMetadata<${table}> = {
     ${columnsByTable[table].map(columnMeta => {
         return columnMeta.column_name + ': {'
             + 'type: ' + ucFirst(pgToJsType[columnMeta.udt_name])
-            + ', optional: ' + (columnMeta.is_nullable === 'YES' ? 'true' : 'false')
+            + ', optional: ' + (isOptional(columnMeta) ? 'true' : 'false')
             + '}'
     }).join(',\n\t')}
 }`).join('\n\n')
