@@ -31,14 +31,6 @@ create table units (
     name varchar(30) not null unique check (length(name) > 0)
 );
 
-create table cup_gram_ratios (
-    food_id int not null,
-    cups smallint not null,
-    grams smallint not null,
-
-    foreign key (food_id) references foods(id)
-);
-
 create table meal_types (
     id serial primary key,
     name varchar(30) not null unique check (length(name) > 0)
@@ -52,6 +44,23 @@ create table food_label_definitions (
 create table user_types (
     id serial primary key,
     name varchar(30) not null unique check (length(name) > 0)
+);
+
+create table nutrients (
+    id serial primary key,
+    name varchar(40) not null check (length(name) > 0),
+    unit_id int not null,
+    is_essential bool not null,
+    is_visible_default bool not null,
+    category_id int not null,
+    source_id int not null,
+    external_id varchar(100) not null,
+
+    unique (name, source_id),
+    unique (source_id, external_id),
+    foreign key (unit_id) references units(id),
+    foreign key (category_id) references nutrient_categories(id),
+    foreign key (source_id) references data_sources(id)
 );
 
 create table users (
@@ -91,23 +100,6 @@ create table user_visible_usda_categories (
 
     foreign key (user_id) references users(id),
     foreign key (usda_category_id) references usda_categories(id)
-);
-
-create table nutrients (
-    id serial primary key,
-    name varchar(40) not null check (length(name) > 0),
-    unit_id int not null,
-    is_essential bool not null,
-    is_visible_default bool not null,
-    category_id int not null,
-    source_id int not null,
-    external_id varchar(100) not null,
-
-    unique (name, source_id),
-    unique (source_id, external_id),
-    foreign key (unit_id) references units(id),
-    foreign key (category_id) references nutrient_categories(id),
-    foreign key (source_id) references data_sources(id)
 );
 
 create table foods (
@@ -150,6 +142,14 @@ create table recipe_ingredients (
     amount_g smallint not null,
 
     foreign key (recipe_id) references recipes(id),
+    foreign key (food_id) references foods(id)
+);
+
+create table cup_gram_ratios (
+    food_id int not null,
+    cups smallint not null,
+    grams smallint not null,
+
     foreign key (food_id) references foods(id)
 );
 

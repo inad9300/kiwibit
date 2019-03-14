@@ -5,6 +5,7 @@ const config = require('./config')
 const {psqlAuth} = require('./setup.utils')
 
 const schema = 'usda'
+let newData = false
 
 console.log('> Installing dependencies.')
 {
@@ -22,6 +23,7 @@ console.log('> Downloading raw data from https://ndb.nal.usda.gov/ndb/.')
     execSync('rm *.zip *.pdf')
     execSync('dos2unix *.txt')
     process.chdir('..')
+    newData = true
 }
 
 console.log('> Creating schema.')
@@ -51,10 +53,10 @@ console.log('> Loading data.')
     .map(file => file.toUpperCase() + '.txt')
     .forEach(file => {
         console.log(`> Processing ${file}.`)
-        execSync(`mv ${file} ${file}.old`)
-        execSync(`iconv -f LATIN1 -t UTF-8 ${file}.old -o ${file}`)
+        newData && execSync(`mv ${file} ${file}.old`)
+        newData && execSync(`iconv -f LATIN1 -t UTF-8 ${file}.old -o ${file}`)
         const table = file.slice(0, -('.txt'.length)).toLowerCase()
         psqlAuth(`-c "copy ${schema}.${table} from '${process.cwd()}/${file}' csv delimiter '^' null '' quote '~' encoding 'UTF8'"`)
+        newData && execSync(`rm ${file}.old`)
     })
-    execSync('rm *.old')
 }
