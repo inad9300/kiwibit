@@ -7,7 +7,7 @@ of the database and to provide values for the FNDDS, NDL staff imputed nutrient
 values for a number of proximate components, total dietary fiber, total sugar,
 and vitamin and mineral values.
 */
-create table usda28.src_cd (
+create table usda.src_cd (
 	Src_Cd char(2) not null, -- a 2-digit code indicating type of data.
 	SrcCd_Desc varchar(60) not null, -- description of source code that identifies the type of nutrient data.
 
@@ -20,7 +20,7 @@ Data Derivation Code Description.
 This table provides information on how the nutrient values were determined.
 The file contains the derivation codes and their descriptions.
 */
-create table usda28.deriv_cd (
+create table usda.deriv_cd (
 	Deriv_Cd varchar(4) not null, -- derivation code
 	Deriv_Desc varchar(120) not null, -- description of derivation code giving specific information on how the value was determined.
 
@@ -32,7 +32,7 @@ Sources of Data.
 
 This table provides a citation to the DataSrc_ID in the Sources of Data Link file.
 */
-create table usda28.data_src (
+create table usda.data_src (
 	DataSrc_ID varchar(6) not null, -- unique ID identifying the reference/source.
 	Authors varchar(255), -- list of authors for a journal article or name of sponsoring organization for other documents.
 	Title varchar(255) not null, -- title of article or name of document, such as a report from a company or trade association.
@@ -52,7 +52,7 @@ Footnote.
 This table contains additional information about the food item, household weight,
 and nutrient value.
 */
-create table usda28.footnote (
+create table usda.footnote (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item
 	FootNt_No varchar(4) not null, -- sequence number. If a given footnote applies to more than one nutrient number, the same footnote number is used.
 	Footnt_Typ char(1) not null, -- type of footnote (D = footnote adding information to the food description; M = footnote adding information to measure description; N = footnote providing additional information on a nutrient value. If the Footnt_Typ = N, the Nutr_No will also be filled in.
@@ -69,7 +69,7 @@ This table is a support file to the LanguaL Factor file and contains
 the descriptions for only those factors used in coding the selected
 food items codes in this release of SR.
 */
-create table usda28.langdesc (
+create table usda.langdesc (
 	Factor_Code char(5) not null, -- the LanguaL factor from the Thesaurus.
 	Description varchar(140) not null, -- the description of the LanguaL Factor Code from the thesaurus.
 
@@ -83,7 +83,7 @@ This table is a support file to the Nutrient Data file.
 It provides the 3-digit nutrient code, unit of measure, INFOODS
 tagname, and description.
 */
-create table usda28.nutr_def (
+create table usda.nutr_def (
 	Nutr_No char(3) not null, -- unique 3-digit identifier code for a nutrient.
 	Units varchar(7) not null, -- units of measure (mg, g, µg, and so on).
 	Tagname varchar(20), -- International Network of Food Data Systems (INFOODS) tagnames.
@@ -100,7 +100,7 @@ Food Group Description.
 This table is a support file to the Food Description file and contains
 a list of food groups and their descriptions.
 */
-create table usda28.fd_group (
+create table usda.fd_group (
 	FdGrp_Cd char(4) not null, -- 4-digit code identifying a food group.
 	FdGrp_Desc varchar(60) not null, -- name of food group
 
@@ -117,7 +117,7 @@ factors used for calculating protein and kilocalories, if applicable.
 Items used in the FNDDS are also identified by value of “Y” in the
 Survey field.
 */
-create table usda28.food_des (
+create table usda.food_des (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item.
 	FdGrp_Cd char(4) not null, -- 4-digit code indicating food group to which a food item belongs.
 	Long_Desc varchar(200) not null, -- 200-character description of food item.
@@ -135,7 +135,7 @@ create table usda28.food_des (
 
 	constraint food_des_pk primary key (NDB_No),
 	constraint food_des_uk unique (NDB_No, FdGrp_Cd),
-	constraint food_des_fk foreign key (FdGrp_Cd) references usda28.fd_group(FdGrp_Cd)
+	constraint food_des_fk foreign key (FdGrp_Cd) references usda.fd_group(FdGrp_Cd)
 );
 
 /*
@@ -144,7 +144,7 @@ Nutrient Data.
 This table contains the nutrient values and information about the values,
 including expanded statistical information.
 */
-create table usda28.nut_data (
+create table usda.nut_data (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item.
 	Nutr_No char(3) not null, -- unique 3-digit identifier code for a nutrient.
 	Nutr_Val decimal(10,3) not null, -- amount in 100 grams, edible portion.
@@ -165,8 +165,8 @@ create table usda28.nut_data (
 	-- CC char(1), -- confidence code indicating data quality, based on evaluation (NYI)
 
 	constraint nut_data_pk primary key (NDB_No, Nutr_No),
-	constraint nut_data_ndbno_fk foreign key (NDB_No) references usda28.food_des(NDB_No),
-	constraint nut_data_nutdef_fk foreign key (Nutr_No) references usda28.nutr_def(Nutr_No)
+	constraint nut_data_ndbno_fk foreign key (NDB_No) references usda.food_des(NDB_No),
+	constraint nut_data_nutdef_fk foreign key (Nutr_No) references usda.nutr_def(Nutr_No)
 );
 
 /*
@@ -175,7 +175,7 @@ Weight.
 This table contains the weight in grams of a number of common measures
 for each food item.
 */
-create table usda28.weight (
+create table usda.weight (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item
 	Seq varchar(2) not null, -- sequence number
 	Amount decimal(6,3) not null, -- unit modifier (e.g. 1 in "1 cup")
@@ -185,7 +185,7 @@ create table usda28.weight (
 	Std_Dev decimal(7,3), -- standard deviation
 
 	constraint weight_pk primary key (NDB_No, Seq),
-	constraint weight_ndbno_fk foreign key (NDB_No) references usda28.food_des(NDB_No)
+	constraint weight_ndbno_fk foreign key (NDB_No) references usda.food_des(NDB_No)
 );
 
 /*
@@ -194,13 +194,13 @@ LanguaL Factor.
 This table is a support file to the Food Description file and contains
 the factors from the LanguaL Thesaurus used to code a particular food.
 */
-create table usda28.langual (
+create table usda.langual (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item.
 	Factor_Code char(5) not null, -- the LanguaL factor from the Thesaurus.
 
 	constraint langual_pk primary key (NDB_No, Factor_Code),
-	constraint langual_food_des_fk foreign key (NDB_No) references usda28.food_des(NDB_No),
-	constraint langual_langdesc_fk foreign key (Factor_Code) references usda28.langdesc(Factor_Code)
+	constraint langual_food_des_fk foreign key (NDB_No) references usda.food_des(NDB_No),
+	constraint langual_langdesc_fk foreign key (Factor_Code) references usda.langdesc(Factor_Code)
 );
 
 /*
@@ -209,13 +209,13 @@ Sources of Data Link.
 This table is used to link the Nutrient Data file with the Sources of Data table.
 It is needed to resolve the many-to-many relationship between the two tables.
 */
-create table usda28.datsrcln (
+create table usda.datsrcln (
 	NDB_No char(5) not null, -- 5-digit Nutrient Databank number that uniquely identifies a food item.
 	Nutr_No char(3) not null, -- unique 3-digit identifier code for a nutrient.
 	DataSrc_ID varchar(6) not null, -- unique ID identifying the reference/source.
 
 	constraint datsrcln_pk primary key (NDB_No, Nutr_No, DataSrc_ID),
-	constraint datsrcln_ndb_fk foreign key (NDB_No) references usda28.food_des(NDB_No),
-	constraint datsrcln_nut_fk foreign key (Nutr_No) references usda28.nutr_def(Nutr_No),
-	constraint datsrcln_src_fk foreign key (DataSrc_ID) references usda28.data_src(DataSrc_ID)
+	constraint datsrcln_ndb_fk foreign key (NDB_No) references usda.food_des(NDB_No),
+	constraint datsrcln_nut_fk foreign key (Nutr_No) references usda.nutr_def(Nutr_No),
+	constraint datsrcln_src_fk foreign key (DataSrc_ID) references usda.data_src(DataSrc_ID)
 );

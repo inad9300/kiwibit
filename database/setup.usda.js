@@ -2,15 +2,13 @@
 
 const {execSync} = require('child_process')
 const config = require('./config')
-const secrets = require('../secrets')
+const {psqlAuth} = require('./setup.utils')
 
-const schema = 'usda28'
-
-const psqlAnon = cmd => execSync(`sudo -u postgres psql ${cmd}`)
-const psqlAuth = cmd => psqlAnon(`"host=${config.host} port=${config.port} user=${config.user} dbname=${config.name} password='${secrets.db}'" ${cmd}`)
+const schema = 'usda'
 
 console.log('> Installing dependencies.')
 {
+    execSync('apt-get update')
     execSync('apt-get install wget unzip dos2unix')
 }
 
