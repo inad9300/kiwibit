@@ -35,6 +35,7 @@ console.log('> Loading data.')
     psqlAuth(`-f data.static.sql`)
     psqlAuth(`-f data.rdi.sql`)
     psqlAuth(`-f data.ul.sql`)
+    psqlAuth(`-f data.usda.sql`)
 }
 
 console.log('> Applying schema changes.')

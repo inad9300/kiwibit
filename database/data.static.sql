@@ -2,7 +2,7 @@ insert into data_sources (abbr, name) values
 ('USDA', 'United States Department of Agriculture'),
 ('ODPHP', 'Office of Disease Prevention and Health Promotion'),
 (null, 'The National Academies of Sciences, Engineering, and Medicine'),
-('User', 'Information entered manually by a user');
+('User', 'Information manually entered by a user');
 
 insert into nutrient_categories (name) values
 ('Vitamins'),

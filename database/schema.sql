@@ -1,3 +1,14 @@
+create table data_sources (
+    id serial primary key,
+    name varchar(70) not null unique check (length(name) > 0),
+    abbr varchar(10) unique check (abbr is null or length(abbr) > 0)
+);
+
+create table nutrient_categories (
+    id serial primary key,
+    name varchar(40) not null unique check (length(name) > 0)
+);
+
 -- Categories from the NutritionFacts.org's Daily Dozen list.
 create table nf_dd_categories (
     id serial primary key,
@@ -14,15 +25,22 @@ create table usda_categories (
     foreign key (usda_id) references usda.fd_group(fdgrp_cd)
 );
 
-create table data_sources (
-    id serial primary key,
-    name varchar(70) not null unique check (length(name) > 0),
-    abbr varchar(10) unique check (abbr is null or length(abbr) > 0)
-);
-
 create table units (
     id serial primary key,
     abbr varchar(30) not null unique check (length(abbr) > 0),
+    name varchar(30) not null unique check (length(name) > 0)
+);
+
+create table cup_gram_ratios (
+    food_id int not null,
+    cups smallint not null,
+    grams smallint not null,
+
+    foreign key (food_id) references foods(id)
+);
+
+create table meal_types (
+    id serial primary key,
     name varchar(30) not null unique check (length(name) > 0)
 );
 
@@ -43,110 +61,87 @@ create table users (
     password varchar(250) not null check (char_length(password) >= 8),
     age smallint check (age >= 0 and age <= 150),
     gender char(1) check (gender in ('M', 'F')),
-    is_public bool not null default false,
+    is_verified bool not null default false,
     user_type_id int not null,
     is_pregnant bool not null default false,
     is_lactating bool not null default false,
     activity_level smallint not null default 1 check (activity_level >= 1 and activity_level <= 5),
     weight_kg smallint check (weight_kg >= 2 and weight_kg <= 500),
     height_cm smallint check (height_cm >= 40 and height_cm <= 250),
+    picture bytea,
 
     foreign key (user_type_id) references user_types(id),
     check (is_pregnant = false or gender = 'F'),
     check (is_lactating = false or gender = 'F')
 );
 
+create table user_visible_nutrients (
+    user_id int not null,
+    nutrient_id int not null,
+    is_visible bool not null,
+
+    foreign key (user_id) references users(id),
+    foreign key (nutrient_id) references nutrients(id)
+);
+
+create table user_visible_usda_categories (
+    user_id int not null,
+    usda_category_id int not null,
+    is_visible bool not null,
+
+    foreign key (user_id) references users(id),
+    foreign key (usda_category_id) references usda_categories(id)
+);
+
+create table nutrients (
+    id serial primary key,
+    name varchar(40) not null check (length(name) > 0),
+    unit_id int not null,
+    is_essential bool not null,
+    is_visible_default bool not null,
+    category_id int not null,
+    source_id int not null,
+    external_id varchar(100) not null,
+
+    unique (name, source_id),
+    unique (source_id, external_id),
+    foreign key (unit_id) references units(id),
+    foreign key (category_id) references nutrient_categories(id),
+    foreign key (source_id) references data_sources(id)
+);
+
 create table foods (
     id serial primary key,
-    name varchar(140) not null unique check (length(name) > 0),
-
-    -- TODO Review.
     source_id int not null,
-    source_usda_id char(5),
-    source_user_id int,
-
+    external_id varchar(100) not null,
+    is_public bool not null default true,
+    name varchar(140) not null check (length(name) > 0),
     usda_category_id int not null,
     nf_dd_category_id int,
+    picture bytea,
 
+    unique (source_id, external_id),
+    unique (source_id, name),
     foreign key (source_id) references data_sources(id),
-    foreign key (source_usda_id) references usda.food_des(ndb_no),
-    foreign key (source_user_id) references users(id),
-    check (
-        (case when source_usda_id is null then 0 else 1 end) +
-        (case when source_user_id is null then 0 else 1 end) = 1
-    ),
-
     foreign key (usda_category_id) references usda_categories(id),
     foreign key (nf_dd_category_id) references nf_dd_categories(id)
 );
 
-create table food_labels (
-    food_id int not null,
-    label_id int not null,
-
-    foreign key (food_id) references foods(id),
-    foreign key (label_id) references food_label_definitions(id)
-);
-
--- create function check_foods_source_id_consistency() return trigger as
--- $body$
--- begin
---     if new.source_usda_id is not null then
---         -- new.source_id
---         null;
---     else if new.source_user_id is not null then
---         null;
---     end if;
--- end;
--- $body$
-
-create table nutrients (
-    id serial primary key,
-    name varchar(40) not null unique check (length(name) > 0),
-    unit_id int not null,
-    is_essential bool not null,
-    is_visible_default bool not null,
-
-    source_id int not null,
-    source_usda_id char(5),
-
-    foreign key (unit_id) references units(id),
-    foreign key (source_id) references data_sources(id),
-    foreign key (source_usda_id) references usda.nutr_def(nutr_no)
-);
-
-create table nutrient_categories (
-    id serial primary key,
-    name varchar(40) not null unique check (length(name) > 0)
-);
-
-create table food_nutrients (
-    food_id int not null,
-    nutrient_id int not null,
-    amount smallint not null,
-
-    foreign key (food_id) references foods(id),
-    foreign key (nutrient_id) references nutrients(id)
-);
-
-create table files (
-    id serial primary key,
-    name varchar(500) not null check (length(name) > 0),
-    type varchar(100) not null check (length(type) > 0),
-    data bytea not null
-);
-
 create table recipes (
     id serial primary key,
-    description varchar(50000),
-    user_id int not null,
+    source_id int not null,
+    external_id varchar(100) not null,
     is_public bool not null default false,
-    main_photo bytea,
+    title varchar(100) not null check (length(title) > 0),
+    description varchar(50000),
     estimated_time_min smallint,
-    estimated_difficulty varchar(10) check (estimated_difficulty in ('easy', 'medium', 'hard')),
+    estimated_difficulty varchar(10) check (estimated_difficulty in ('Beginner', 'Intermediate', 'Advanced')),
+    picture bytea,
 
-    foreign key (user_id) references users(id),
-    check (is_public = false or main_photo is not null)
+    unique (source_id, external_id),
+    unique (source_id, title),
+    foreign key (source_id) references data_sources(id),
+    check (is_public = false or picture is not null)
 );
 
 create table recipe_ingredients (
@@ -158,17 +153,21 @@ create table recipe_ingredients (
     foreign key (food_id) references foods(id)
 );
 
-create table cup_gram_ratios (
+create table food_labels (
     food_id int not null,
-    cups smallint not null,
-    grams smallint not null,
+    label_id int not null,
 
-    foreign key (food_id) references foods(id)
+    foreign key (food_id) references foods(id),
+    foreign key (label_id) references food_label_definitions(id)
 );
 
-create table meal_types (
-    id serial primary key,
-    name varchar(30) not null unique check (length(name) > 0)
+create table food_nutrients (
+    food_id int not null,
+    nutrient_id int not null,
+    amount smallint not null,
+
+    foreign key (food_id) references foods(id),
+    foreign key (nutrient_id) references nutrients(id)
 );
 
 create table user_daily_foods (
@@ -233,4 +232,11 @@ create table tolerable_intakes (
     check (age_min < age_max),
     check (for_pregnancy = false or gender = 'F'),
     check (for_lactation = false or gender = 'F')
+);
+
+create table files (
+    id serial primary key,
+    name varchar(500) not null check (length(name) > 0),
+    type varchar(100) not null check (length(type) > 0),
+    data bytea not null
 );
