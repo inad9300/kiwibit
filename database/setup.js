@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
 const {execSync} = require('child_process')
-const config = require('./config')
-const secrets = require('../secrets')
 const {psqlAnon, psqlAuth} = require('./setup.utils')
 
 console.log('> Installing dependencies.')
@@ -13,6 +11,8 @@ console.log('> Installing dependencies.')
 
 console.log('> Creating database.')
 {
+    const config = require('./config')
+    const secrets = require('../secrets')
     psqlAnon(`-c "drop database if exists ${config.name}"`)
     psqlAnon(`-c "drop role if exists ${config.user}"`)
     psqlAnon(`-c "create role ${config.user} superuser login encrypted password '${secrets.db}'"`)

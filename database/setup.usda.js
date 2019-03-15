@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const {execSync} = require('child_process')
-const config = require('./config')
 const {psqlAuth} = require('./setup.utils')
 
 const schema = 'usda'
@@ -28,6 +27,7 @@ console.log(`[${schema}] > Downloading raw data from https://ndb.nal.usda.gov/nd
 
 console.log(`[${schema}] > Creating schema.`)
 {
+    const config = require('./config')
     psqlAuth(`-c "drop schema if exists ${schema}"`)
     psqlAuth(`-c "create schema ${schema} authorization ${config.user}"`)
     psqlAuth(`-f schema.${schema}.sql`)
