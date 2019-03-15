@@ -32,9 +32,16 @@ console.log('> Creating main schema.')
 
 console.log('> Loading data.')
 {
+    console.log('    > Static data.')
     psqlAuth(`-f data.static.sql`)
+
+    console.log('    > RDI values.')
     psqlAuth(`-f data.rdi.sql`)
+
+    console.log('    > UL values.')
     psqlAuth(`-f data.ul.sql`)
+
+    console.log('    > USDA data.')
     psqlAuth(`-f data.usda.sql`)
 }
 
