@@ -1,27 +1,17 @@
 import {RowMetadata} from './RowMetadata'
 
-export type cup_gram_ratios = {
-    food_id: number
-	cups: number
-	grams: number
-}
-
-export const cup_gram_ratios: RowMetadata<cup_gram_ratios> = {
-    food_id: {type: Number, optional: false},
-	cups: {type: Number, optional: false},
-	grams: {type: Number, optional: false}
-}
-
 export type data_sources = {
     id: number | null
 	name: string
 	abbr: string | null
+	website: string | null
 }
 
 export const data_sources: RowMetadata<data_sources> = {
     id: {type: Number, optional: true},
 	name: {type: String, optional: false},
-	abbr: {type: String, optional: true}
+	abbr: {type: String, optional: true},
+	website: {type: String, optional: true}
 }
 
 export type files = {
@@ -92,6 +82,18 @@ export const foods: RowMetadata<foods> = {
 	picture: {type: Uint8Array, optional: true}
 }
 
+export type food_unit_ratios = {
+    food_id: number
+	unit: string
+	grams: number
+}
+
+export const food_unit_ratios: RowMetadata<food_unit_ratios> = {
+    food_id: {type: Number, optional: false},
+	unit: {type: String, optional: false},
+	grams: {type: Number, optional: false}
+}
+
 export type meal_types = {
     id: number | null
 	name: string
@@ -147,14 +149,18 @@ export const nutrients: RowMetadata<nutrients> = {
 }
 
 export type recipe_ingredients = {
-    recipe_id: number
-	food_id: number
+    id: number | null
+	recipe_id: number
+	ingredient_food_id: number | null
+	ingredient_recipe_id: number | null
 	amount_g: number
 }
 
 export const recipe_ingredients: RowMetadata<recipe_ingredients> = {
-    recipe_id: {type: Number, optional: false},
-	food_id: {type: Number, optional: false},
+    id: {type: Number, optional: true},
+	recipe_id: {type: Number, optional: false},
+	ingredient_food_id: {type: Number, optional: true},
+	ingredient_recipe_id: {type: Number, optional: true},
 	amount_g: {type: Number, optional: false}
 }
 
@@ -240,16 +246,18 @@ export const units: RowMetadata<units> = {
 
 export type usda_categories = {
     id: number | null
-	usda_id: string
+	name: string
 	is_visible_default: boolean
 	color: string
+	usda_id: string
 }
 
 export const usda_categories: RowMetadata<usda_categories> = {
     id: {type: Number, optional: true},
-	usda_id: {type: String, optional: false},
+	name: {type: String, optional: false},
 	is_visible_default: {type: Boolean, optional: false},
-	color: {type: String, optional: false}
+	color: {type: String, optional: false},
+	usda_id: {type: String, optional: false}
 }
 
 export type user_daily_foods = {
