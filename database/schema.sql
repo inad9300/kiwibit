@@ -1,7 +1,8 @@
 create table data_sources (
     id serial primary key,
     name varchar(70) not null unique check (length(name) > 0),
-    abbr varchar(10) unique check (abbr is null or length(abbr) > 0)
+    abbr varchar(10) unique check (abbr is null or length(abbr) > 0),
+    website varchar(100) unique check (website is null or length(name) > 0)
 );
 
 create table nutrient_categories (
@@ -18,9 +19,10 @@ create table nf_dd_categories (
 
 create table usda_categories (
     id serial primary key,
-    usda_id char(5) not null unique,
+    name varchar(40) not null unique,
     is_visible_default bool not null,
     color char(7) not null check (color ~ '#[0-9a-f]{6}'),
+    usda_id char(4) not null unique,
 
     foreign key (usda_id) references usda.fd_group(fdgrp_cd)
 );
@@ -89,6 +91,7 @@ create table user_visible_nutrients (
     nutrient_id int not null,
     is_visible bool not null,
 
+    primary key (user_id, nutrient_id),
     foreign key (user_id) references users(id),
     foreign key (nutrient_id) references nutrients(id)
 );
@@ -98,6 +101,7 @@ create table user_visible_usda_categories (
     usda_category_id int not null,
     is_visible bool not null,
 
+    primary key (user_id, usda_category_id),
     foreign key (user_id) references users(id),
     foreign key (usda_category_id) references usda_categories(id)
 );
@@ -137,19 +141,30 @@ create table recipes (
 );
 
 create table recipe_ingredients (
+    id serial primary key,
     recipe_id int not null,
-    food_id int not null,
-    amount_g smallint not null,
+    ingredient_food_id int,
+    ingredient_recipe_id int,
+    amount_g float not null,
 
+    unique (recipe_id, ingredient_food_id),
+    unique (recipe_id, ingredient_recipe_id),
     foreign key (recipe_id) references recipes(id),
-    foreign key (food_id) references foods(id)
+    foreign key (ingredient_food_id) references foods(id),
+    foreign key (ingredient_recipe_id) references recipes(id),
+    check (recipe_id != ingredient_recipe_id),
+    check (
+        (ingredient_food_id is null and ingredient_recipe_id is not null)
+        or (ingredient_food_id is not null and ingredient_recipe_id is null)
+    )
 );
 
-create table cup_gram_ratios (
+create table food_unit_ratios (
     food_id int not null,
-    cups smallint not null,
+    unit varchar(80) not null,
     grams smallint not null,
 
+    primary key (food_id, unit),
     foreign key (food_id) references foods(id)
 );
 
@@ -157,6 +172,7 @@ create table food_labels (
     food_id int not null,
     label_id int not null,
 
+    primary key (food_id, label_id),
     foreign key (food_id) references foods(id),
     foreign key (label_id) references food_label_definitions(id)
 );
@@ -164,8 +180,9 @@ create table food_labels (
 create table food_nutrients (
     food_id int not null,
     nutrient_id int not null,
-    amount smallint not null,
+    amount float not null,
 
+    primary key (food_id, nutrient_id),
     foreign key (food_id) references foods(id),
     foreign key (nutrient_id) references nutrients(id)
 );
@@ -177,11 +194,10 @@ create table user_daily_foods (
     meal_type_id int not null,
     amount_g smallint not null check (amount_g > 0 and amount_g < 3000),
 
+    primary key (user_id, food_id, date, meal_type_id),
     foreign key (user_id) references users(id),
     foreign key (food_id) references foods(id),
-    foreign key (meal_type_id) references meal_types(id),
-
-    unique (user_id, food_id, date, meal_type_id)
+    foreign key (meal_type_id) references meal_types(id)
 );
 
 create table user_daily_recipes (
@@ -191,11 +207,10 @@ create table user_daily_recipes (
     meal_type_id int not null,
     amount_g smallint not null check (amount_g > 0 and amount_g < 3000),
 
+    primary key (user_id, recipe_id, date, meal_type_id),
     foreign key (user_id) references users(id),
     foreign key (recipe_id) references recipes(id),
-    foreign key (meal_type_id) references meal_types(id),
-
-    unique (user_id, recipe_id, date, meal_type_id)
+    foreign key (meal_type_id) references meal_types(id)
 );
 
 create table reference_intakes (

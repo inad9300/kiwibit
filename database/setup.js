@@ -22,7 +22,7 @@ console.log('> Creating database.')
 
 console.log('> Creating external schemas.')
 {
-    execSync('./setup.usda.js')
+    execSync('./setup.usda.js', {stdio: 'inherit'})
 }
 
 console.log('> Creating main schema.')

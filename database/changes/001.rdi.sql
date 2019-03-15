@@ -1,27 +1,27 @@
--- Reference daily intakes.
-create table rdi (
-    id serial primary key,
-    nutr_no char(3) not null,
-    age_min int not null,
-    age_max int not null,
-    gender char(1) not null,
-    pregnancy char(1) not null default 'N',
-    lactation char(1) not null default 'N',
-    type varchar(4) not null default 'RDA',
-    value float not null,
+-- -- Reference daily intakes.
+-- create table rdi (
+--     id serial primary key,
+--     nutr_no char(3) not null,
+--     age_min int not null,
+--     age_max int not null,
+--     gender char(1) not null,
+--     pregnancy char(1) not null default 'N',
+--     lactation char(1) not null default 'N',
+--     type varchar(4) not null default 'RDA',
+--     value float not null,
 
-    constraint uk_rdi_all unique (nutr_no, age_min, age_max, gender, pregnancy, lactation),
-    constraint fk_rdi_nutr_def foreign key (nutr_no) references nutr_def(nutr_no),
-    constraint chk_rdi_age check (age_min < age_max),
-    constraint chk_rdi_age_min check (age_min >= 0 and age_min <= 150),
-    constraint chk_rdi_age_max check (age_max >= 0 and age_max <= 150),
-    constraint chk_rdi_gender check (gender in ('M', 'F')),
-    constraint chk_rdi_pregnancy check (pregnancy in ('Y', 'N')),
-    constraint chk_rdi_lactation check (lactation in ('Y', 'N')),
-    constraint chk_rdi_pregnancy_women check (pregnancy = 'N' or (pregnancy = 'Y' and gender = 'F')),
-    constraint chk_rdi_lactation_women check (lactation = 'N' or (lactation = 'Y' and gender = 'F')),
-    constraint chk_rdi_type check (type in ('RDA', 'AI', 'UL', 'AMDR'))
-);
+--     constraint uk_rdi_all unique (nutr_no, age_min, age_max, gender, pregnancy, lactation),
+--     constraint fk_rdi_nutr_def foreign key (nutr_no) references nutr_def(nutr_no),
+--     constraint chk_rdi_age check (age_min < age_max),
+--     constraint chk_rdi_age_min check (age_min >= 0 and age_min <= 150),
+--     constraint chk_rdi_age_max check (age_max >= 0 and age_max <= 150),
+--     constraint chk_rdi_gender check (gender in ('M', 'F')),
+--     constraint chk_rdi_pregnancy check (pregnancy in ('Y', 'N')),
+--     constraint chk_rdi_lactation check (lactation in ('Y', 'N')),
+--     constraint chk_rdi_pregnancy_women check (pregnancy = 'N' or (pregnancy = 'Y' and gender = 'F')),
+--     constraint chk_rdi_lactation_women check (lactation = 'N' or (lactation = 'Y' and gender = 'F')),
+--     constraint chk_rdi_type check (type in ('RDA', 'AI', 'UL', 'AMDR'))
+-- );
 
 -- Source: https://health.gov/dietaryguidelines/2015/resources/2015-2020_Dietary_Guidelines.pdf, table A7-1.
 

@@ -18,4 +18,4 @@ pattern="\s+name:\s+'([a-zA-Z0-9]+)'"
 pattern="\s+db:\s+'([a-zA-Z0-9]+)'"
 [[ $secrets =~ $pattern ]] && pwd=${BASH_REMATCH[1]}
 
-sudo -u postgres psql "host=$host port=$port user=$user dbname=$name password='$pwd'"
+sudo -u postgres psql "host=$host port=$port user=$user dbname=$name password='$pwd'" "$@"

@@ -7,13 +7,13 @@ const {psqlAuth} = require('./setup.utils')
 const schema = 'usda'
 let newData = false
 
-console.log('> Installing dependencies.')
+console.log(`[${schema}] > Installing dependencies.`)
 {
     execSync('apt-get update')
     execSync('apt-get install wget unzip dos2unix')
 }
 
-console.log('> Downloading raw data from https://ndb.nal.usda.gov/ndb/.')
+console.log(`[${schema}] > Downloading raw data from https://ndb.nal.usda.gov/ndb/.`)
 {
     execSync(`rm -rf data.${schema}`)
     execSync(`mkdir data.${schema}`)
@@ -26,14 +26,14 @@ console.log('> Downloading raw data from https://ndb.nal.usda.gov/ndb/.')
     newData = true
 }
 
-console.log('> Creating schema.')
+console.log(`[${schema}] > Creating schema.`)
 {
     psqlAuth(`-c "drop schema if exists ${schema}"`)
     psqlAuth(`-c "create schema ${schema} authorization ${config.user}"`)
     psqlAuth(`-f schema.${schema}.sql`)
 }
 
-console.log('> Loading data.')
+console.log(`[${schema}] > Loading data.`)
 {
     process.chdir(`data.${schema}`)
     ;[

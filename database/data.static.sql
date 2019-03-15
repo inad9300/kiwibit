@@ -1,13 +1,14 @@
-insert into data_sources (abbr, name) values
-('USDA', 'United States Department of Agriculture'),
-('ODPHP', 'Office of Disease Prevention and Health Promotion'),
-(null, 'The National Academies of Sciences, Engineering, and Medicine'),
-('User', 'Information manually entered by a user');
+insert into data_sources (abbr, name, website) values
+('USDA', 'United States Department of Agriculture', 'https://www.usda.gov/'),
+('ODPHP', 'Office of Disease Prevention and Health Promotion', 'https://health.gov/'),
+(null, 'The National Academies of Sciences, Engineering, and Medicine', 'http://www.nationalacademies.org/'),
+(null, 'Wikipedia', 'https://en.wikipedia.org/'),
+('User', 'Information manually entered by a user', null);
 
 insert into nutrient_categories (name) values
 ('Vitamins'),
 ('Minerals'),
-('Lipids'),
+('Fats'),
 ('Proteins'),
 ('Carbohydrates'),
 ('Other');

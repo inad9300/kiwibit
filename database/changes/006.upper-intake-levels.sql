@@ -1,25 +1,25 @@
 -- Tolerable upper (daily) intake levels.
-create table tuil (
-    id serial primary key,
-    nutr_no char(3) not null,
-    age_min int not null,
-    age_max int not null,
-    gender char(1) not null,
-    pregnancy char(1) not null default 'N',
-    lactation char(1) not null default 'N',
-    value float not null,
+-- create table tuil (
+--     id serial primary key,
+--     nutr_no char(3) not null,
+--     age_min int not null,
+--     age_max int not null,
+--     gender char(1) not null,
+--     pregnancy char(1) not null default 'N',
+--     lactation char(1) not null default 'N',
+--     value float not null,
 
-    constraint uk_tuil_all unique (nutr_no, age_min, age_max, gender, pregnancy, lactation),
-    constraint fk_tuil_nutr_def foreign key (nutr_no) references nutr_def(nutr_no),
-    constraint chk_tuil_age check (age_min < age_max),
-    constraint chk_tuil_age_min check (age_min >= 0 and age_min <= 150),
-    constraint chk_tuil_age_max check (age_max >= 0 and age_max <= 150),
-    constraint chk_tuil_gender check (gender in ('M', 'F')),
-    constraint chk_tuil_pregnancy check (pregnancy in ('Y', 'N')),
-    constraint chk_tuil_lactation check (lactation in ('Y', 'N')),
-    constraint chk_tuil_pregnancy_women check (pregnancy = 'N' or (pregnancy = 'Y' and gender = 'F')),
-    constraint chk_tuil_lactation_women check (lactation = 'N' or (lactation = 'Y' and gender = 'F'))
-);
+--     constraint uk_tuil_all unique (nutr_no, age_min, age_max, gender, pregnancy, lactation),
+--     constraint fk_tuil_nutr_def foreign key (nutr_no) references nutr_def(nutr_no),
+--     constraint chk_tuil_age check (age_min < age_max),
+--     constraint chk_tuil_age_min check (age_min >= 0 and age_min <= 150),
+--     constraint chk_tuil_age_max check (age_max >= 0 and age_max <= 150),
+--     constraint chk_tuil_gender check (gender in ('M', 'F')),
+--     constraint chk_tuil_pregnancy check (pregnancy in ('Y', 'N')),
+--     constraint chk_tuil_lactation check (lactation in ('Y', 'N')),
+--     constraint chk_tuil_pregnancy_women check (pregnancy = 'N' or (pregnancy = 'Y' and gender = 'F')),
+--     constraint chk_tuil_lactation_women check (lactation = 'N' or (lactation = 'Y' and gender = 'F'))
+-- );
 
 -- Source: http://www.nationalacademies.org/hmd/~/media/Files/Activity%20Files/Nutrition/DRI-Tables/4_%20UL%20Values_Vitamins%20and%20Elements.pdf.
 -- NOTE For infants (i.e. younger than 1 year of age), the values are averaged between the two available groups (0-to-6 months and 6-to-12 months).
@@ -157,12 +157,6 @@ insert into tuil (nutr_no, age_min, age_max, gender, value) values
 ((select nutr_no from nutr_def where nutrdesc = 'Choline, total'), 19, 150, 'M', 3500);
 
 -- Minerals. // Not entered: boron, nickel, vanadium.
-
--- Tagname source: http://www.fao.org/infoods/infoods/standards-guidelines/food-component-identifiers-tagnames/en/.
-insert into nutr_def (nutr_no, units, tagname, nutrdesc, num_dec, sr_order, interest, is_essential, display_name) values
-('900', 'µg', 'ID', 'Iodine, I', 0, 6250, 5, 'Y', null),
-('901', 'µg', 'MO', 'Molybdenum, Mo', 0, 6255, 5, 'Y', null),
-('903', 'g', 'CLD', 'Chloride, Cl−', 1, 6260, 5, 'N', null);
 
 insert into tuil (nutr_no, age_min, age_max, gender, value) values
 ((select nutr_no from nutr_def where nutrdesc = 'Calcium, Ca'), 0, 1, 'F', 1250),

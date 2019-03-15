@@ -1,1 +1,17 @@
--- TODO
+-- create table tolerable_intakes (
+--     source_id int not null,
+--     nutrient_id int not null,
+--     age_min smallint not null check (age_min >= 0 and age_min <= 150),
+--     age_max smallint not null check (age_max >= 0 and age_max <= 150),
+--     gender char(1) not null check (gender in ('M', 'F')),
+--     for_pregnancy bool not null,
+--     for_lactation bool not null,
+--     value float not null,
+
+--     primary key (source_id, nutrient_id, age_min, age_max, gender, for_pregnancy, for_lactation),
+--     foreign key (source_id) references data_sources(id),
+--     foreign key (nutrient_id) references nutrients(id),
+--     check (age_min < age_max),
+--     check (for_pregnancy = false or gender = 'F'),
+--     check (for_lactation = false or gender = 'F')
+-- );
