@@ -7,5 +7,5 @@ If you wish to collaborate, please [open a new issue](https://github.com/inad930
 ## Setup
 
 1. `cd database && sudo ./setup.js`
-2. `cd server && npm i`
-3. `cd client && npm i`
+2. `cd server && npm i && npm start`
+3. `cd client && npm i && npm start`

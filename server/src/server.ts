@@ -3,10 +3,9 @@ import * as http from 'http'
 import './$debug'
 import './Error'
 import {log} from './log'
-import {Api, ApiPayload} from './Api'
+import {Api, ApiFn, ApiPayload} from './Api'
+import * as api from './api'
 import {HttpError} from './HttpError'
-import {getCurrentUser} from './api/getCurrentUser'
-import {registerUser} from './api/registerUser'
 
 const clientAddr = 'http://localhost:1234'
 const serverPort = 4000
@@ -17,11 +16,6 @@ http
     .createServer(serve)
     .listen(serverPort, () => log.info(`Server up and running on port ${serverPort}.`))
     .on('error', err => log.error('Server failed to start.', err))
-
-const api: Api = {
-    getCurrentUser,
-    registerUser
-}
 
 function serve(req: http.IncomingMessage, res: http.ServerResponse) {
     req.on('error', err => {
@@ -44,7 +38,7 @@ function serve(req: http.IncomingMessage, res: http.ServerResponse) {
 
     try {
         const fnName = req.url!.substr(5) as keyof Api // Skip "/api/".
-        const fn = api[fnName]
+        const fn = api[fnName] as unknown as ApiFn<ApiPayload, ApiPayload> // TODO Review with new TypeScript versions, aiming at removing the cast to `unknown`.
         if (!fn) {
             reply(res, new HttpError(404, `Unknown API function: "${fnName}".`))
         } else {
