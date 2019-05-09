@@ -1,8 +1,10 @@
 create table data_sources (
     id serial primary key,
-    name varchar(70) not null unique check (length(name) > 0),
-    abbr varchar(10) unique check (abbr is null or length(abbr) > 0),
-    website varchar(100) unique check (website is null or length(name) > 0)
+    url varchar(500) not null unique check (length(url) > 0),
+    title varchar(300) not null unique check (length(title) > 0),
+    short_title varchar(50) unique check (short_title is null or length(short_title) > 0),
+
+    unique (url, title)
 );
 
 create table nutrient_categories (
@@ -51,6 +53,8 @@ create table user_types (
 create table nutrients (
     id serial primary key,
     name varchar(40) not null check (length(name) > 0),
+    abbr varchar(15) check (abbr is null or length(abbr) > 0),
+    alias varchar(40) check (alias is null or length(alias) > 0),
     unit_id int not null,
     is_essential bool not null,
     is_visible_default bool not null,

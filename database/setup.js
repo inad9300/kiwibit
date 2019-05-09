@@ -35,14 +35,14 @@ console.log('> Loading data.')
     console.log('    > Static data.')
     psqlAuth(`-f data.static.sql`)
 
+    console.log('    > USDA data.')
+    psqlAuth(`-f data.usda.sql`)
+
     console.log('    > RDI values.')
     psqlAuth(`-f data.rdi.sql`)
 
     console.log('    > UL values.')
     psqlAuth(`-f data.ul.sql`)
-
-    console.log('    > USDA data.')
-    psqlAuth(`-f data.usda.sql`)
 }
 
 console.log('> Applying schema changes.')
@@ -50,7 +50,7 @@ console.log('> Applying schema changes.')
     const fs = require('fs')
     process.chdir('./changes/next')
     fs.readdirSync('.').sort().forEach(file => {
-        console.log(`> Processing ${file}.`)
+        console.log(`    > Processing ${file}.`)
         psqlAuth(`-f ${file}`)
     })
 }

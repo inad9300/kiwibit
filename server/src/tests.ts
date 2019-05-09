@@ -5,13 +5,15 @@ import {AssertionError} from 'assert'
 const errors: AssertionError[] = []
 
 Promise.all([
+    // TODO Automate.
     import('./api/getCurrentUser.test'),
     import('./api/registerUser.test')
 ])
 .then(modules => {
     return modules
         .map(mod => mod.default)
-        .flatMap(promises => {
+        .map(promises => {
+            // TODO Validate type of `promises` at runtime.
             return promises.map(p => {
                 return p.catch((err: any) => {
                     if (err instanceof AssertionError) {
@@ -23,6 +25,7 @@ Promise.all([
                 })
             })
         })
+        .flat()
 })
 .then(promises => Promise.all(promises))
 .finally(() => {

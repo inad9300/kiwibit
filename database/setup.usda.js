@@ -8,7 +8,6 @@ let newData = false
 
 console.log(`[${schema}] > Installing dependencies.`)
 {
-    execSync('apt-get update')
     execSync('apt-get install wget unzip dos2unix')
 }
 
@@ -52,7 +51,7 @@ console.log(`[${schema}] > Loading data.`)
     ]
     .map(file => file.toUpperCase() + '.txt')
     .forEach(file => {
-        console.log(`> Processing ${file}.`)
+        console.log(`    > Processing ${file}.`)
         newData && execSync(`mv ${file} ${file}.old`)
         newData && execSync(`iconv -f LATIN1 -t UTF-8 ${file}.old -o ${file}`)
         const table = file.slice(0, -('.txt'.length)).toLowerCase()

@@ -11,7 +11,7 @@ export type Row = {
  * Represents the type of objects holding runtime type information equivalent to
  * the given record type.
  *
- * TODO Create corresponding TypeScript transformer.
+ * TODO Rethink as TypeScript transformer.
  */
 export type RowMetadata<R extends Row> = {
     [P in keyof R]-?: {

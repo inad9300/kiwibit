@@ -60,8 +60,9 @@ export function sql<R extends Row>(
             }
 
             const actualMetadata = res.fields
+            const expectedColumns = Object.keys(expectedMetadata!)
 
-            Object.keys(expectedMetadata!).forEach(expectedColumn => {
+            for (const expectedColumn of expectedColumns) {
                 const actualColumn = actualMetadata.find(c => c.name === expectedColumn)!
                 assert(actualColumn !== undefined, `Expected column "${expectedColumn}" was not selected.`)
 
@@ -73,14 +74,25 @@ export function sql<R extends Row>(
                     + ` Expected: ${expectedType.name}.`
                     + ` Actual: ${actualType.name} (${PgTypeId[actualColumn.dataTypeID]}).`
                 )
-            })
+            }
 
-            actualMetadata.forEach(actualColumn => {
+            for (const actualColumn of actualMetadata) {
                 assert(
                     expectedMetadata![actualColumn.name] !== undefined,
                     `Non-expected column "${actualColumn.name}" was selected.`
                 )
-            })
+            }
+
+            const mandatoryColumns = expectedColumns.filter(expectedColumn => expectedMetadata![expectedColumn].optional === false)
+
+            for (const row of res.rows) {
+                for (const col of mandatoryColumns) {
+                    assert(
+                        row[col] !== null && row[col] !== undefined,
+                        `Mandatory column ${col} found to be ${row[col]}.`
+                    )
+                }
+            }
 
             return res
         })

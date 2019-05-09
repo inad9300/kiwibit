@@ -2,16 +2,16 @@ import {RowMetadata} from './RowMetadata'
 
 export type data_sources = {
     id: number | null
-	name: string
-	abbr: string | null
-	website: string | null
+	url: string
+	title: string
+	short_title: string | null
 }
 
 export const data_sources: RowMetadata<data_sources> = {
     id: {type: Number, optional: true},
-	name: {type: String, optional: false},
-	abbr: {type: String, optional: true},
-	website: {type: String, optional: true}
+	url: {type: String, optional: false},
+	title: {type: String, optional: false},
+	short_title: {type: String, optional: true}
 }
 
 export type files = {
@@ -129,6 +129,8 @@ export const nutrient_categories: RowMetadata<nutrient_categories> = {
 export type nutrients = {
     id: number | null
 	name: string
+	abbr: string | null
+	alias: string | null
 	unit_id: number
 	is_essential: boolean
 	is_visible_default: boolean
@@ -140,6 +142,8 @@ export type nutrients = {
 export const nutrients: RowMetadata<nutrients> = {
     id: {type: Number, optional: true},
 	name: {type: String, optional: false},
+	abbr: {type: String, optional: true},
+	alias: {type: String, optional: true},
 	unit_id: {type: Number, optional: false},
 	is_essential: {type: Boolean, optional: false},
 	is_visible_default: {type: Boolean, optional: false},

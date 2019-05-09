@@ -40,24 +40,66 @@ select
     end
 from usda.fd_group;
 
-insert into nutrients (name, unit_id, is_essential, is_visible_default, category_id, source_id, external_id) values
-('Chloride, Cl-',  (select u.id from units u where u.abbr = 'g'), false, false, (select c.id from nutrient_categories c where c.name = 'Minerals'), (select s.id from data_sources s where s.name = 'Wikipedia'), 'Chloride'),
-('Chromium, Cr',   (select u.id from units u where u.abbr = 'µg'), true, false, (select c.id from nutrient_categories c where c.name = 'Minerals'), (select s.id from data_sources s where s.name = 'Wikipedia'), 'Chromium'),
-('Iodine, I',      (select u.id from units u where u.abbr = 'µg'), true, false, (select c.id from nutrient_categories c where c.name = 'Minerals'), (select s.id from data_sources s where s.name = 'Wikipedia'), 'Iodine'),
-('Molybdenum, Mo', (select u.id from units u where u.abbr = 'µg'), true, false, (select c.id from nutrient_categories c where c.name = 'Minerals'), (select s.id from data_sources s where s.name = 'Wikipedia'), 'Molybdenum'),
-('Vitamin B7',     (select u.id from units u where u.abbr = 'µg'), true, false, (select c.id from nutrient_categories c where c.name = 'Vitamins'), (select s.id from data_sources s where s.name = 'Wikipedia'), 'Biotin');
+insert into data_sources (title, url)
+values ('Nutrient – Wikipedia', 'https://en.wikipedia.org/wiki/Nutrient');
 
-insert into nutrients (source_id, external_id, name, unit_id, is_essential, is_visible_default, category_id)
+insert into nutrients (name, abbr, unit_id, is_essential, is_visible_default, category_id, source_id, external_id) values
+('Chloride',   'Cl-',    (select u.id from units u where u.abbr = 'g'), false, false, (select c.id from nutrient_categories c where c.name = 'Minerals'), (select id from data_sources where title = 'Nutrient – Wikipedia'), 'Chloride'),
+('Chromium',   'Cr',     (select u.id from units u where u.abbr = 'µg'), true, false, (select c.id from nutrient_categories c where c.name = 'Minerals'), (select id from data_sources where title = 'Nutrient – Wikipedia'), 'Chromium'),
+('Iodine',     'I',      (select u.id from units u where u.abbr = 'µg'), true, false, (select c.id from nutrient_categories c where c.name = 'Minerals'), (select id from data_sources where title = 'Nutrient – Wikipedia'), 'Iodine'),
+('Molybdenum', 'Mo',     (select u.id from units u where u.abbr = 'µg'), true, false, (select c.id from nutrient_categories c where c.name = 'Minerals'), (select id from data_sources where title = 'Nutrient – Wikipedia'), 'Molybdenum'),
+('Vitamin B7', 'Vit B7', (select u.id from units u where u.abbr = 'µg'), true, false, (select c.id from nutrient_categories c where c.name = 'Vitamins'), (select id from data_sources where title = 'Nutrient – Wikipedia'), 'Biotin');
+
+insert into data_sources (short_title, title, url)
+values ('USDA Food Database', 'USDA "SR Legacy" Food Composition Database', 'https://ndb.nal.usda.gov/ndb/');
+
+insert into nutrients (source_id, external_id, abbr, name, alias, unit_id, is_essential, is_visible_default, category_id)
 select
-    (select s.id from data_sources s where s.abbr = 'USDA'),
+    (select id from data_sources where short_title = 'USDA Food Database'),
     nd.nutr_no,
+    case
+        when nd.nutrdesc = '18:3 n-3 c,c,c (ALA)' then 'ω-3 (ALA)'
+        when nd.nutrdesc = '20:5 n-3 (EPA)' then 'ω-3 (EPA)'
+        when nd.nutrdesc = '22:5 n-3 (DPA)' then 'ω-3 (DPA)'
+        when nd.nutrdesc = '22:6 n-3 (DHA)' then 'ω-3 (DHA)'
+        when nd.nutrdesc = 'Carbohydrate, by difference' then 'Carbs'
+        when nd.nutrdesc = 'Folate, DFE' then 'Vit B9, DFE'
+        when nd.nutrdesc = 'Folate, food' then 'Vit B9, food'
+        when nd.nutrdesc = 'Folate, total' then 'Vit B9, total'
+        when nd.nutrdesc = 'Niacin' then 'Vit B3'
+        when nd.nutrdesc = 'Pantothenic acid' then 'Vit B5'
+        when nd.nutrdesc = 'Riboflavin' then 'Vit B2'
+        when nd.nutrdesc = 'Thiamin' then 'Vit B1'
+        when nd.nutrdesc = 'Vitamin B-12, added' then 'Vit B12, added'
+        when nd.nutrdesc = 'Vitamin B-12' then 'Vit B12'
+        when nd.nutrdesc = 'Vitamin B-6' then 'Vit B6'
+        when nd.nutrdesc = 'Vitamin C, total ascorbic acid' then 'Vit C'
+        when nd.nutrdesc = 'Vitamin D2 (ergocalciferol)' then 'Vit D2'
+        when nd.nutrdesc = 'Vitamin D3 (cholecalciferol)' then 'Vit D3'
+        when nd.nutrdesc = 'Vitamin E (alpha-tocopherol)' then 'Vit E'
+        when nd.nutrdesc = 'Vitamin K (phylloquinone)' then 'Vit K'
+        when nd.nutrdesc = 'Calcium, Ca' then 'Ca'
+        when nd.nutrdesc = 'Copper, Cu' then 'Cu'
+        when nd.nutrdesc = 'Fluoride, F' then 'F'
+        when nd.nutrdesc = 'Iron, Fe' then 'Fe'
+        when nd.nutrdesc = 'Magnesium, Mg' then 'Mg'
+        when nd.nutrdesc = 'Manganese, Mn' then 'Mn'
+        when nd.nutrdesc = 'Phosphorus, P' then 'P'
+        when nd.nutrdesc = 'Potassium, K' then 'K'
+        when nd.nutrdesc = 'Selenium, Se' then 'Se'
+        when nd.nutrdesc = 'Sodium, Na' then 'Na'
+        when nd.nutrdesc = 'Zinc, Zn' then 'Zn'
+        else null
+    end,
     case
         when nd.nutrdesc = '18:3 n-3 c,c,c (ALA)' then 'Omega-3 (ALA)'
         when nd.nutrdesc = '20:5 n-3 (EPA)' then 'Omega-3 (EPA)'
         when nd.nutrdesc = '22:5 n-3 (DPA)' then 'Omega-3 (DPA)'
         when nd.nutrdesc = '22:6 n-3 (DHA)' then 'Omega-3 (DHA)'
         when nd.nutrdesc = 'Carbohydrate, by difference' then 'Carbohydrates'
-        when nd.nutrdesc = 'Folate, total' then 'Vitamin B9'
+        when nd.nutrdesc = 'Folate, DFE' then 'Vitamin B9, DFE'
+        when nd.nutrdesc = 'Folate, food' then 'Vitamin B9, food'
+        when nd.nutrdesc = 'Folate, total' then 'Vitamin B9, total'
         when nd.nutrdesc = 'Niacin' then 'Vitamin B3'
         when nd.nutrdesc = 'Pantothenic acid' then 'Vitamin B5'
         when nd.nutrdesc = 'Riboflavin' then 'Vitamin B2'
@@ -70,7 +112,30 @@ select
         when nd.nutrdesc = 'Vitamin D3 (cholecalciferol)' then 'Vitamin D3'
         when nd.nutrdesc = 'Vitamin E (alpha-tocopherol)' then 'Vitamin E'
         when nd.nutrdesc = 'Vitamin K (phylloquinone)' then 'Vitamin K'
+        when nd.nutrdesc = 'Calcium, Ca' then 'Calcium'
+        when nd.nutrdesc = 'Copper, Cu' then 'Copper'
+        when nd.nutrdesc = 'Fluoride, F' then 'Fluoride'
+        when nd.nutrdesc = 'Iron, Fe' then 'Iron'
+        when nd.nutrdesc = 'Magnesium, Mg' then 'Magnesium'
+        when nd.nutrdesc = 'Manganese, Mn' then 'Manganese'
+        when nd.nutrdesc = 'Phosphorus, P' then 'Phosphorus'
+        when nd.nutrdesc = 'Potassium, K' then 'Potassium'
+        when nd.nutrdesc = 'Selenium, Se' then 'Selenium'
+        when nd.nutrdesc = 'Sodium, Na' then 'Sodium'
+        when nd.nutrdesc = 'Zinc, Zn' then 'Zinc'
         else nd.nutrdesc
+    end,
+    case
+        when nd.nutrdesc in (
+            'Folate, DFE',
+            'Folate, food',
+            'Folate, total',
+            'Niacin',
+            'Pantothenic acid',
+            'Riboflavin',
+            'Thiamin'
+        ) then nd.nutrdesc
+        else null
     end,
     (select u.id from units u where u.abbr = nd.units),
     nd.nutrdesc in (
@@ -320,7 +385,7 @@ or nd.tagname != 'ENERC_KJ';
 
 insert into foods (source_id, external_id, name, usda_category_id)
 select
-    (select s.id from data_sources s where s.abbr = 'USDA'),
+    (select id from data_sources where short_title = 'USDA Food Database'),
     fd.ndb_no,
     fd.long_desc,
     (select c.id from usda_categories c where c.usda_id = fd.fdgrp_cd)
@@ -331,13 +396,13 @@ select
     (
         select f.id
         from foods f
-        where f.source_id = (select s.id from data_sources s where s.abbr = 'USDA')
+        where f.source_id = (select id from data_sources where short_title = 'USDA Food Database')
         and f.external_id = nd.ndb_no
     ),
     (
         select n.id
         from nutrients n
-        where n.source_id = (select s.id from data_sources s where s.abbr = 'USDA')
+        where n.source_id = (select id from data_sources where short_title = 'USDA Food Database')
         and n.external_id = nd.nutr_no
     ),
     nd.nutr_val
@@ -353,7 +418,7 @@ select distinct
     (
         select f.id
         from foods f
-        where f.source_id = (select s.id from data_sources s where s.abbr = 'USDA')
+        where f.source_id = (select id from data_sources where short_title = 'USDA Food Database')
         and f.external_id = w.ndb_no
     ),
     replace(replace(replace(
