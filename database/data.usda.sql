@@ -133,7 +133,11 @@ select
             'Niacin',
             'Pantothenic acid',
             'Riboflavin',
-            'Thiamin'
+            'Thiamin',
+            '18:3 n-3 c,c,c (ALA)',
+            '20:5 n-3 (EPA)',
+            '22:5 n-3 (DPA)',
+            '22:6 n-3 (DHA)'
         ) then nd.nutrdesc
         else null
     end,
