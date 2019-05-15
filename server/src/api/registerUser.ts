@@ -4,6 +4,6 @@ type NewUser = {
     name: string
 }
 
-export const registerUser: ApiFn<NewUser, NewUser> = (_payload) => {
+export const registerUser: ApiFn<NewUser, NewUser> = _payload => {
     return Promise.resolve({name: 'Blues'})
 }

@@ -1,6 +1,6 @@
 import {h} from '@soil/dom'
 import * as Highcharts from 'highcharts'
-import {get} from '../shared/http/get'
+import {get} from '../shared/get'
 import {title} from '../shared/dom/title'
 import * as api from '../../../shared/api'
 import {serverUrl} from '../shared/constants'

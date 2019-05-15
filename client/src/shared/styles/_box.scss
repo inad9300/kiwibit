@@ -1,45 +1,16 @@
 .box {
     display: flex;
+
+    &.h { flex-direction: row }
+    &.v { flex-direction: column }
+    &.spread { justify-content: space-between }
+    &.wrapping { flex-wrap: wrap }
+
+    $margin: 8px;
+    &.spaced.h > *:not(:last-child) { margin-right: $margin }
+    &.spaced.v > *:not(:last-child) { margin-bottom: $margin }
+
+    @for $i from 1 through 16 {
+        > .f#{$i} { flex: #{$i} }
+    }
 }
-
-.h.box {
-    flex-direction: row;
-}
-
-.v.box {
-    flex-direction: column;
-}
-
-$box-space: 8px;
-
-.spaced.h.box > *:not(:last-child) {
-    margin-right: $box-space;
-}
-
-.spaced.v.box > *:not(:last-child) {
-    margin-bottom: $box-space;
-}
-
-.spread.box {
-    justify-content: space-between;
-}
-
-.wrapping.box {
-    flex-wrap: wrap;
-}
-
-.box > .s1 { flex: 1; }
-.box > .s2 { flex: 2; }
-.box > .s3 { flex: 3; }
-.box > .s4 { flex: 4; }
-.box > .s5 { flex: 5; }
-.box > .s6 { flex: 6; }
-.box > .s7 { flex: 7; }
-.box > .s8 { flex: 8; }
-.box > .s9 { flex: 9; }
-.box > .s10 { flex: 10; }
-.box > .s12 { flex: 12; }
-.box > .s13 { flex: 13; }
-.box > .s14 { flex: 14; }
-.box > .s15 { flex: 15; }
-.box > .s16 { flex: 16; }

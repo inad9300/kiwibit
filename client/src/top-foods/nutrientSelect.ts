@@ -1,5 +1,5 @@
 import {h} from '@soil/dom'
-import {get} from '../shared/http/get'
+import {get} from '../shared/get'
 import * as api from '../../../shared/api'
 import {serverUrl} from '../shared/constants'
 import {getUrlParams} from '../shared/utils/getUrlParams'

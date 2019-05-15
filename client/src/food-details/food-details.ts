@@ -1,6 +1,6 @@
 import {h} from '@soil/dom'
 import * as api from '../../../shared/api'
-import {get} from '../shared/http/get'
+import {get} from '../shared/get'
 import {add} from '../shared/utils/add'
 import {pct} from '../shared/utils/pct'
 import {getUrlParams} from '../shared/utils/getUrlParams'

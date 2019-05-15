@@ -1,7 +1,10 @@
 {
     "private": true,
     "scripts": {
-        "start": "rm -rf bin && parcel -d bin src/{food-details,top-foods}/*.html"
+        "start": "rm -rf dist/ .cache/ && parcel src/{home,meals}/index.html",
+        "test": "npm run test:spec && npm run test:test",
+        "test:spec": "c8 node -r ts-node/register ../shared/runner.ts '.spec.ts'",
+        "test:test": "c8 node -r ts-node/register ../shared/runner.ts '.test.ts'"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "5.8.2",
@@ -10,8 +13,12 @@
     },
     "devDependencies": {
         "@types/highcharts": "5.0.39",
+        "@types/puppeteer": "1.12.4",
+        "c8": "4.1.5",
         "node-sass": "4.12.0",
         "parcel": "1.12.3",
+        "puppeteer": "1.16.0",
+        "ts-node": "8.1.0",
         "typescript": "3.4.5"
     }
 }

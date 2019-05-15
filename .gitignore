@@ -1,4 +1,6 @@
 bin/
+dist/
 coverage/
 node_modules/
 secrets.js
+.cache

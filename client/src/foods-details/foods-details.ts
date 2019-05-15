@@ -1,5 +1,5 @@
 import {h} from '@soil/dom'
-import {get} from '../shared/http/get'
+import {get} from '../shared/get'
 import {header} from '../shared/components/header/header'
 
 type BasicFood = any
@@ -39,7 +39,7 @@ const $foodGroupSelect = h.select({
         alignSelf: 'flex-start'
     },
     onchange: () => {
-        get($foodGroupSelect.value, {cache: true})
+        get($foodGroupSelect.value)
             .then(fillFoodList)
     }
 }, [
@@ -97,7 +97,7 @@ function fillFoodList(foods: BasicFood[]) {
 }
 
 function showFoodDetails(id: string) {
-    get('/foods/' + id, {cache: true})
+    get('/foods/' + id)
         .then((data: FoodDetails) => {
             const details = h.dl({}, [
                 h.dt({}, ['Food group']),

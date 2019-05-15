@@ -1,5 +1,5 @@
 import {h} from '@soil/dom'
-import {get} from '../shared/http/get'
+import {get} from '../shared/get'
 import {icon} from '../shared/dom/icon'
 import * as contract from '../../../shared/contract'
 import {serverUrl} from '../shared/constants'
@@ -17,7 +17,7 @@ export function findFoodsModal() {
         h.option({value: '', selected: true}, ['All food groups'])
     ])
 
-    get<contract.FoodGroup[]>(`${serverUrl}/foods/groups`, {cache: true})
+    get<contract.FoodGroup[]>(`${serverUrl}/foods/groups`)
         .then(cats => {
             cats.forEach(cat => {
                 $foodGroupSelect.appendChild(
@@ -70,7 +70,7 @@ export function findFoodsModal() {
         const urlName = 'name=' + name.replace(/\s/g, '%')
         const urlGroupId = groupId ? '&groupId=' + groupId : ''
 
-        get<contract.FoundFood[]>(`${serverUrl}/foods/search?${urlName}${urlGroupId}`, {cache: true})
+        get<contract.FoundFood[]>(`${serverUrl}/foods/search?${urlName}${urlGroupId}`)
             .then(foods => {
                 $resultList.innerHTML = ''
 

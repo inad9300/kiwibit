@@ -3,18 +3,16 @@ import * as http from 'http'
 import './$debug'
 import './Error'
 import {log} from './log'
+import {config} from '../../shared/config'
 import {Api, ApiFn, ApiPayload} from './Api'
 import * as api from './api'
 import {HttpError} from './HttpError'
-
-const clientAddr = 'http://localhost:1234'
-const serverPort = 4000
 
 process.on('uncaughtException', err => log.error('Uncaught exception.', err))
 
 http
     .createServer(serve)
-    .listen(serverPort, () => log.info(`Server up and running on port ${serverPort}.`))
+    .listen(config.server.port, () => log.info(`Server up and running on port ${config.server.port}.`))
     .on('error', err => log.error('Server failed to start.', err))
 
 function serve(req: http.IncomingMessage, res: http.ServerResponse) {
@@ -23,7 +21,7 @@ function serve(req: http.IncomingMessage, res: http.ServerResponse) {
         reply(res, new HttpError(500, 'Unexpected request error. ' + err.message))
     })
 
-    res.setHeader('Access-Control-Allow-Origin', clientAddr)
+    res.setHeader('Access-Control-Allow-Origin', config.client.addr.slice(0, -1))
     res.setHeader('Access-Control-Allow-Methods', 'POST')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 

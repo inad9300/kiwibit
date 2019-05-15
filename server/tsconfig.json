@@ -3,9 +3,7 @@
     "compilerOptions": {
         "outDir": "bin",
         "target": "es5",
-        "lib": ["es7", "esnext"],
-        "allowJs": true,
-        "sourceMap": true
+        "lib": ["es7", "esnext"]
     },
     "include": ["src/**/*.ts"]
 }

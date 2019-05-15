@@ -1,3 +1,3 @@
-export function title(pageTitle: string) {
-    document.title = 'Kiwibit – ' + pageTitle
+export function title(t: string) {
+    document.title = t + ' @ Kiwibit'
 }

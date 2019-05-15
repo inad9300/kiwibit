@@ -1,5 +1,5 @@
 import {h} from '@soil/dom'
-import {get} from '../shared/http/get'
+import {get} from '../shared/get'
 import {header} from '../shared/components/header/header'
 
 type BasicFood = any
@@ -25,7 +25,7 @@ const foodSelector = h.div({className: 'food-selector'}, [
                     return
                 }
 
-                get('/find-foods/' + text, {cache: true})
+                get('/find-foods/' + text)
                     .then((foods: BasicFood[]) => {
                         foodSelect.innerHTML = ''
                         foods
