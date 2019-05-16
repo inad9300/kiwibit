@@ -1,11 +1,11 @@
 {
     "private": true,
     "scripts": {
-        "postinstall": "cd src && ./schema.generator.js",
+        "postinstall": "cd src && ts-node ./schema.generator.ts",
         "prestart": "export TZ=UTC",
         "start": "nodemon -w src -e ts -x 'clear && node --inspect=9229 -r ts-node/register src/main.ts --debug'",
         "pretest": "export TZ=UTC",
-        "test": "c8 node -r ts-node/register ../shared/runner.ts '.test.ts'"
+        "test": "c8 ts-node ../shared/runner.ts"
     },
     "dependencies": {
         "bcrypt": "3.0.6",

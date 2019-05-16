@@ -7,4 +7,4 @@ export interface ApiFn<I extends ApiPayload, O extends ApiPayload> {
     (payload: I): Promise<O>
 }
 
-export type ApiPayload = void | JsonObject | JsonArray
+export type ApiPayload = JsonObject | JsonArray

@@ -2,11 +2,6 @@ import {AssertionError} from 'assert'
 import {flatten} from './flatten'
 import {filesEndingWith} from './filesEndingWith'
 
-const [ext, mainFile] = process.argv.slice(2)
-const dir = process.cwd() + '/src/'
-if (mainFile)
-    require(dir + mainFile)
-
 const errors: AssertionError[] = []
 const timing: [string, number][] = []
 
@@ -26,7 +21,7 @@ function registerTime(testName: string, t: [number, number]) {
 
 type TestFunction = () => (void | Promise<any>)
 
-const testFiles = filesEndingWith(dir, ext)
+const testFiles = filesEndingWith(process.cwd() + '/src/', '.test.ts')
 const testModules = testFiles.map(f => require(f).default) as TestFunction[][]
 const wrappedTestPromises = testModules.map(testObject => {
     if (!testObject

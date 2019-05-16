@@ -2,9 +2,7 @@
     "private": true,
     "scripts": {
         "start": "rm -rf dist/ .cache/ && parcel src/{home,meals}/index.html",
-        "test": "npm run test:spec && npm run test:test",
-        "test:spec": "c8 node -r ts-node/register ../shared/runner.ts '.spec.ts'",
-        "test:test": "c8 node -r ts-node/register ../shared/runner.ts '.test.ts'"
+        "test": "c8 ts-node ../shared/runner.ts"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "5.8.2",
