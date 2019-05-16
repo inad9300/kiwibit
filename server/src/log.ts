@@ -1,18 +1,21 @@
+import {debug} from './debug'
+
 type Logable = void | null | undefined | Object
 
+const now = () => new Date().toISOString()
+
 export const log = {
-    debug: (msg: Object, ...moreInfo: Logable[]): void => {
-        if (global.$debug) {
-            console.debug(new Date().toISOString(), '[DEBUG]', msg, ...moreInfo)
-        }
+    debug: (msg: Object, ...moreInfo: Logable[]) => {
+        if (debug)
+            console.debug(now(), '[DEBUG]', msg, ...moreInfo)
     },
-    info: (msg: Object, ...moreInfo: Logable[]): void => {
-        console.info(new Date().toISOString(), '[INFO]', msg, ...moreInfo)
+    info: (msg: Object, ...moreInfo: Logable[]) => {
+        console.info(now(), '[INFO]', msg, ...moreInfo)
     },
-    warn: (msg: Object, ...moreInfo: Logable[]): void => {
-        console.warn(new Date().toISOString(), '[WARNING]', msg, ...moreInfo)
+    warn: (msg: Object, ...moreInfo: Logable[]) => {
+        console.warn(now(), '[WARNING]', msg, ...moreInfo)
     },
-    error: (msg: Object, ...moreInfo: Logable[]): void => {
-        console.error(new Date().toISOString(), '[ERROR]', msg, ...moreInfo)
+    error: (msg: Object, ...moreInfo: Logable[]) => {
+        console.error(now(), '[ERROR]', msg, ...moreInfo)
     }
 }

@@ -5,9 +5,7 @@
         "prestart": "export TZ=UTC",
         "start": "nodemon -w src -e ts -x 'clear && node --inspect=9229 -r ts-node/register src/main.ts --debug'",
         "pretest": "export TZ=UTC",
-        "test": "npm run test:spec && npm run test:test",
-        "test:spec": "c8 node -r ts-node/register ../shared/runner.ts '.spec.ts'",
-        "test:test": "c8 node -r ts-node/register ../shared/runner.ts '.test.ts' 'main'"
+        "test": "c8 node -r ts-node/register ../shared/runner.ts '.test.ts'"
     },
     "dependencies": {
         "bcrypt": "3.0.6",
@@ -19,7 +17,7 @@
         "@types/node": "12.0.2",
         "@types/pg": "7.4.14",
         "c8": "4.1.5",
-        "node-fetch": "2.5.0",
+        "node-fetch": "2.6.0",
         "nodemon": "1.19.0",
         "ts-node": "8.1.0",
         "typescript": "3.4.5"

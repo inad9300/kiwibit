@@ -1,6 +1,4 @@
 import * as http from 'http'
-
-import './$debug'
 import './Error'
 import {log} from './log'
 import {config} from '../../shared/config'
@@ -66,9 +64,11 @@ function getPayload(req: http.IncomingMessage): Promise<ApiPayload> {
     })
 }
 
+const headers = {'Content-Type': 'application/json; charset=utf-8'}
+
 function reply(res: http.ServerResponse, payload: ApiPayload | HttpError) {
     const statusCode = payload instanceof HttpError ? payload.code : 200
     log.debug('HTTP response.', payload)
-    res.writeHead(statusCode, {'Content-Type': 'application/json; charset=utf-8'})
+    res.writeHead(statusCode, headers)
     res.end(JSON.stringify(payload))
 }

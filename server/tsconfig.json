@@ -4,6 +4,5 @@
         "outDir": "bin",
         "target": "es5",
         "lib": ["es7", "esnext"]
-    },
-    "include": ["src/**/*.ts"]
+    }
 }

@@ -5,6 +5,7 @@ import {PgTypeId} from './PgTypeId'
 import {RowMetadata, Row, Column} from './RowMetadata'
 import {Constructor} from './Constructor'
 import {WrapperType} from './WrapperType'
+import {debug} from './debug'
 import {log} from './log'
 
 const pool = new pg.Pool({
@@ -31,7 +32,7 @@ export function sql<R extends Row>(
 ): Promise<QueryResult<R>> {
     const promise = pool.query(query, params)
 
-    if (global.$debug) {
+    if (debug) {
         promise.then(async res => {
             const assert = await import('assert')
 
