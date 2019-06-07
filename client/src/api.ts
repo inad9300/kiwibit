@@ -1,20 +1,13 @@
-import {Api, ApiPayload} from '../../server/src/Api'
+import {Api} from '../../server/src/Api'
 import {config} from '../../shared/config'
-
-export const api: Api = {
-    getCurrentUser: endpoint('getCurrentUser'),
-    registerUser: endpoint('registerUser')
-}
 
 const headers = {'Content-Type': 'application/json; charset=utf-8'}
 
-function endpoint(fn: keyof Api) {
-    const url = config.server.addr + fn
-
-    return (payload?: ApiPayload) => fetch(url, {
+export function api<Fn extends keyof Api>(fn: Fn, payload: Parameters<Api[Fn]>[0]): Promise<ReturnType<Api[Fn]>> {
+    return fetch(config.server.addr + fn, {
         method: 'POST',
         headers,
-        body: payload ? JSON.stringify(payload) : undefined
+        body: JSON.stringify(payload)
     })
     .then(res => res.text())
     .then(body => body ? JSON.parse(body) : undefined)

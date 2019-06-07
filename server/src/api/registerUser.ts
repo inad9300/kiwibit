@@ -1,9 +1,7 @@
-import {ApiFn} from '../Api'
-
 type NewUser = {
     name: string
 }
 
-export const registerUser: ApiFn<NewUser, NewUser> = _payload => {
+export function registerUser(_user: NewUser) {
     return Promise.resolve({name: 'Blues'})
 }

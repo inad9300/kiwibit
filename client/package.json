@@ -1,22 +1,21 @@
 {
     "private": true,
     "scripts": {
-        "start": "rm -rf dist/ .cache/ && parcel src/{home,meals}/index.html",
-        "test": "c8 ts-node ../shared/runner.ts"
+        "start": "parcel src/index.html",
+        "test": "tsc --noEmit && c8 ts-node ../shared/runner.ts"
     },
     "dependencies": {
-        "@fortawesome/fontawesome-free": "5.8.2",
-        "@soil/dom": "0.7.2",
-        "highcharts": "7.1.1"
+        "@fortawesome/fontawesome-free": "5.9.0",
+        "highcharts": "7.1.2"
     },
     "devDependencies": {
         "@types/highcharts": "5.0.39",
         "@types/puppeteer": "1.12.4",
-        "c8": "4.1.5",
+        "c8": "5.0.1",
         "node-sass": "4.12.0",
         "parcel": "1.12.3",
-        "puppeteer": "1.16.0",
-        "ts-node": "8.1.0",
-        "typescript": "3.4.5"
+        "puppeteer": "1.17.0",
+        "ts-node": "8.2.0",
+        "typescript": "3.5.1"
     }
 }

@@ -1,4 +1,3 @@
-import {ApiFn} from '../Api'
 import {sql} from '../sql'
 import * as schema from '../schema'
 
@@ -19,6 +18,6 @@ type Output = {
 	height_cm: schema.users['height_cm']
 }
 
-export const getCurrentUser: ApiFn<Input, Output> = () => {
+export function getCurrentUser(_input: Input): Promise<Output> {
     return sql(`select * from users`, [], schema.users).then(res => res.rows[0])
 }

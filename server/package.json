@@ -1,7 +1,7 @@
 {
     "private": true,
     "scripts": {
-        "postinstall": "cd src && ts-node ./schema.generator.ts",
+        "postinstall": "ts-node ./src/schema.gen.ts",
         "prestart": "export TZ=UTC",
         "start": "nodemon -w src -e ts -x 'clear && node --inspect=9229 -r ts-node/register src/main.ts --debug'",
         "pretest": "export TZ=UTC",
@@ -13,14 +13,14 @@
     },
     "devDependencies": {
         "@types/bcrypt": "3.0.0",
-        "@types/node-fetch": "2.3.3",
-        "@types/node": "12.0.2",
+        "@types/node-fetch": "2.3.4",
+        "@types/node": "12.0.4",
         "@types/pg": "7.4.14",
-        "c8": "4.1.5",
+        "c8": "5.0.1",
         "node-fetch": "2.6.0",
-        "nodemon": "1.19.0",
-        "ts-node": "8.1.0",
-        "typescript": "3.4.5"
+        "nodemon": "1.19.1",
+        "ts-node": "8.2.0",
+        "typescript": "3.5.1"
     },
     "engines": {
         "node": ">=12.0.0"
