@@ -30,7 +30,9 @@ const pages = {
 export function app() {
     const root = document.createElement('div')
     {
+        root.className = 'kiwibit'
         root.style.height = '100%'
+        root.style.fontFamily = 'sans-serif'
     }
 
     return Object.assign(root, {
@@ -44,7 +46,7 @@ export function app() {
 
             const pageElem = page.render()
             {
-                pageElem.style.height = '100%'
+                pageElem.style.minHeight = '100%'
             }
 
             root.innerHTML = ''

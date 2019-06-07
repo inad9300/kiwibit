@@ -1,10 +1,11 @@
 import {Api} from '../../server/src/Api'
-import {config} from '../../shared/config'
+// FIXME(https://github.com/parcel-bundler/parcel/issues/2978)
+// import {config} from '../../shared/config'
 
 const headers = {'Content-Type': 'application/json; charset=utf-8'}
 
 export function api<Fn extends keyof Api>(fn: Fn, payload: Parameters<Api[Fn]>[0]): Promise<ReturnType<Api[Fn]>> {
-    return fetch(config.server.addr + fn, {
+    return fetch('http://localhost:4000/api/' + fn, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload)

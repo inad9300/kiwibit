@@ -1,14 +1,15 @@
-import {api} from './api'
+import './polyfills'
 import {app} from './app'
-
-api('getCurrentUser', {token: ''}).then(u => {
-    console.log('u rock', u)
-})
 
 document.documentElement.style.height = '100%'
 
-document.body.style.margin = '0'
 document.body.style.height = '100%'
+document.body.style.margin = '0'
+
+const style = document.createElement('style')
+style.textContent = `
+    .kiwibit * { box-sizing: border-box; }
+`
 
 const a = app()
 {
@@ -16,4 +17,4 @@ const a = app()
     a.goTo(urlParams.get('page'))
 }
 
-document.body.append(a)
+document.body.append(style, a)

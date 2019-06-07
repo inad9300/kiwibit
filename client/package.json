@@ -5,6 +5,7 @@
         "test": "tsc --noEmit && c8 ts-node ../shared/runner.ts"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-common-types": "0.2.19",
         "@fortawesome/fontawesome-free": "5.9.0",
         "highcharts": "7.1.2"
     },

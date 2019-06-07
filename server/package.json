@@ -13,8 +13,8 @@
     },
     "devDependencies": {
         "@types/bcrypt": "3.0.0",
-        "@types/node-fetch": "2.3.4",
-        "@types/node": "12.0.4",
+        "@types/node-fetch": "2.3.5",
+        "@types/node": "12.0.7",
         "@types/pg": "7.4.14",
         "c8": "5.0.1",
         "node-fetch": "2.6.0",

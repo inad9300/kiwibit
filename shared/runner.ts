@@ -61,7 +61,7 @@ Promise.all(flatten(wrappedTestPromises)).finally(() => {
         console.error('\n Errors')
         console.table(
             errors.map(err => ({
-                title: (err as any)._title,
+                test: (err as any)._title,
                 message: err.message.replace(/\n+/g, ' '),
                 expected: err.expected,
                 operator: err.operator,
