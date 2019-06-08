@@ -57,9 +57,9 @@ pool.query(`
 `).then(res => {
     const columnsByTable: {[table: string]: ColumnMetadata[]} = {}
     res.rows.forEach(col => {
-        if (!columnsByTable[col.table_name])
+        if (!columnsByTable[col.table_name]) {
             columnsByTable[col.table_name] = []
-
+        }
         columnsByTable[col.table_name].push(col)
     })
 

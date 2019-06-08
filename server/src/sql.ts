@@ -36,10 +36,11 @@ export function sql<R extends Row>(
         promise.then(async res => {
             const assert = await import('assert')
 
-            if (res.command === 'SELECT' || query.toLowerCase().trim().includes(' returning '))
+            if (res.command === 'SELECT' || query.toLowerCase().trim().includes(' returning ')) {
                 assert(expectedMetadata !== undefined, 'No metadata provided for read query.')
-            else
+            } else {
                 return res
+            }
 
             const pgToJsType: {[pgTypeId: number]: Constructor<WrapperType<Exclude<Column, null>>>} = {
                 [PgTypeId.BOOL]: Boolean,
@@ -76,22 +77,25 @@ export function sql<R extends Row>(
                 )
             }
 
-            for (const actualColumn of actualMetadata)
+            for (const actualColumn of actualMetadata) {
                 assert(
                     expectedMetadata![actualColumn.name] !== undefined,
                     `Non-expected column "${actualColumn.name}" was selected.`
                 )
+            }
 
             const mandatoryColumns = expectedColumns.filter(
                 expectedColumn => expectedMetadata![expectedColumn].optional === false
             )
 
-            for (const row of res.rows)
-                for (const col of mandatoryColumns)
+            for (const row of res.rows) {
+                for (const col of mandatoryColumns) {
                     assert(
                         row[col] !== null && row[col] !== undefined,
                         `Mandatory column ${col} found to be ${row[col]}.`
                     )
+                }
+            }
 
             return res
         })

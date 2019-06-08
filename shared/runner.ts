@@ -55,9 +55,9 @@ const wrappedTestPromises = testModules.map(testObject => {
 })
 
 Promise.all(flatten(wrappedTestPromises)).finally(() => {
-    if (errors.length === 0)
+    if (errors.length === 0) {
         console.error('\n No errors!')
-    else {
+    } else {
         console.error('\n Errors')
         console.table(
             errors.map(err => ({

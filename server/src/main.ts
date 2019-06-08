@@ -25,21 +25,23 @@ function serve(req: http.IncomingMessage, res: http.ServerResponse) {
     if (req.method === 'OPTIONS') {
         res.writeHead(200)
         return res.end()
-    } else if (req.method !== 'POST')
+    } else if (req.method !== 'POST') {
         return reply(res, new Error('Only POST requests are allowed.'))
+    }
 
     log.debug('HTTP request.', req.url)
 
     try {
         const fnName = req.url!.substr(5) as keyof Api // Skip "/api/".
         const fn = api[fnName] as unknown as ApiFn<ApiPayload, ApiPayload>
-        if (!fn)
+        if (!fn) {
             reply(res, new Error(`Unknown API function: "${fnName}".`))
-        else
+        } else {
             getPayload(req)
                 .then(reqPayload => fn(reqPayload))
                 .then(resPayload => reply(res, resPayload))
                 .catch(err => reply(res, err))
+        }
     } catch (err) {
         reply(res, err)
     }

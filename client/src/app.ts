@@ -39,10 +39,11 @@ export function app() {
         goTo(pageUrl: string | null) {
             let page = pages[pageUrl as keyof typeof pages]
 
-            if (!pageUrl)
+            if (!pageUrl) {
                 page = pages['home']
-            else if (!page)
+            } else if (!page) {
                 page = pages['not-found']
+            }
 
             const pageElem = page.render()
             {

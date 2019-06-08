@@ -23,9 +23,11 @@ export function mealPlanPage() {
             const nextWeekBtn = planControlBtn('arrow-right')
 
             const btns = [priorWeekBtn, showCalendarBtn, nextWeekBtn]
-            for (let i = 0; i < btns.length; ++i)
-                if (i !== 0)
+            for (let i = 0; i < btns.length; ++i) {
+                if (i !== 0) {
                     btns[i].style.marginLeft = '8px'
+                }
+            }
 
             controls.append(...btns)
         }

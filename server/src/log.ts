@@ -6,8 +6,9 @@ const now = () => new Date().toISOString()
 
 export const log = {
     debug: (msg: Object, ...moreInfo: Logable[]) => {
-        if (debug)
+        if (debug) {
             console.debug(now(), '[DEBUG]', msg, ...moreInfo)
+        }
     },
     info: (msg: Object, ...moreInfo: Logable[]) => {
         console.info(now(), '[INFO]', msg, ...moreInfo)
