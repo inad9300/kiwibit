@@ -1,3 +1,5 @@
+import {html} from './html'
+
 export function homePage() {
-    return document.createElement('div')
+    return html('div')
 }

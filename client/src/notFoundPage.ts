@@ -1,3 +1,5 @@
+import {html} from './html'
+
 export function notFoundPage() {
-    return document.createElement('div')
+    return html('div')
 }

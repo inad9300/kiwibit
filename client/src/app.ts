@@ -1,34 +1,8 @@
-import {homePage} from './homePage'
-import {mealPlanPage} from './mealPlanPage'
-import {chartsPage} from './chartsPage'
-import {settingsPage} from './settingsPage'
-import {notFoundPage} from './notFoundPage'
-
-const pages = {
-    'home': {
-        render: homePage,
-        title: 'Home'
-    },
-    'meal-plan': {
-        render: mealPlanPage,
-        title: 'Meal Plan'
-    },
-    'charts': {
-        render: chartsPage,
-        title: 'Charts'
-    },
-    'settings': {
-        render: settingsPage,
-        title: 'Settings'
-    },
-    'not-found': {
-        render: notFoundPage,
-        title: 'Not Found'
-    }
-}
+import {html} from './html'
+import {pages} from './pages'
 
 export function app() {
-    const root = document.createElement('div')
+    const root = html('div')
     {
         root.className = 'kiwibit'
         root.style.height = '100%'
@@ -36,10 +10,10 @@ export function app() {
     }
 
     return Object.assign(root, {
-        goTo(pageUrl: string | null) {
-            let page = pages[pageUrl as keyof typeof pages]
+        goTo(pageSlug: string | null) {
+            let page = pages[pageSlug as keyof typeof pages]
 
-            if (!pageUrl) {
+            if (!pageSlug) {
                 page = pages['home']
             } else if (!page) {
                 page = pages['not-found']

@@ -1,12 +1,13 @@
 import './polyfills'
 import {app} from './app'
+import {html} from './html'
 
 document.documentElement.style.height = '100%'
 
 document.body.style.height = '100%'
 document.body.style.margin = '0'
 
-const style = document.createElement('style')
+const style = html('style')
 style.textContent = `
     .kiwibit * { box-sizing: border-box; }
 `
