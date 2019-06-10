@@ -6,6 +6,9 @@ import {html} from './html'
 import {IconName} from '@fortawesome/fontawesome-common-types'
 import {randomInt} from './randomInt'
 import {appInstance} from './main' // FIXME?
+import {hbox, vbox} from './box'
+import {button} from './button'
+import {list} from './list'
 
 const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -76,15 +79,13 @@ function weeklyPlan() {
 }
 
 function planControlBtn(iconName: IconName) {
-    const btn = html('button')
+    const btn = button()
     {
         const size = '32px'
         btn.style.width = size
         btn.style.height = size
         btn.style.borderRadius = '50%'
-        btn.style.border = 'none'
         btn.style.backgroundColor = 'white'
-        btn.style.cursor = 'pointer'
         btn.style.fontSize = '16px'
         btn.style.color = '#333'
 
@@ -98,10 +99,9 @@ function planCard() {
     const title = html('h1')
     const body = html('div')
 
-    const root = html('article')
+    const root = vbox({tag: 'article'})
     {
         root.style.display = 'inline-flex'
-        root.style.flexDirection = 'column'
         root.style.height = '500px'
         root.style.width = '360px'
 
@@ -121,16 +121,14 @@ function planCard() {
             body.onmouseenter = () => addBtn.style.display = 'block'
             body.onmouseleave = () => addBtn.style.display = 'none'
 
-            const addBtn = html('button')
+            const addBtn = button()
             {
                 const size = '50px'
                 addBtn.style.display = 'none'
                 addBtn.style.width = size
                 addBtn.style.height = size
                 addBtn.style.borderRadius = '50%'
-                addBtn.style.border = 'none'
                 addBtn.style.backgroundColor = 'darkred'
-                addBtn.style.cursor = 'pointer'
                 addBtn.style.fontSize = '24px'
                 addBtn.style.color = '#eee'
                 addBtn.style.padding = '0'
@@ -151,7 +149,7 @@ function planCard() {
                     popover.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.2)'
                     popover.style.zIndex = '1'
                     popover.style.position = 'absolute'
-                    popover.style.top = '-45px'
+                    popover.style.top = '45px'
                     popover.style.left = '-16px'
 
                     const addFoodIcon = icon('carrot')
@@ -209,11 +207,9 @@ function tabbedSection() {
     {
         root.style.padding = '32px'
 
-        const tabList = html('ul')
+        const tabList = list()
         {
-            tabList.style.margin = '0'
             tabList.style.padding = '0 12px'
-            tabList.style.listStyle = 'none'
             tabList.style.borderBottom = '1px solid #666'
         }
 
@@ -326,11 +322,8 @@ function nutritionalOverviewTab() {
 function dailyDozenTab() {
     const categories = ['Beans', 'Berries', 'Other Fruit', 'Cruciferous Vegetables', 'Greens', 'Other Vegetables', 'Flaxseeds', 'Nuts and Seeds', 'Herbs and Spices', 'Whole Grains', 'Beverages', 'Exercise']
 
-    const root = html('ul')
+    const root = list()
     {
-        root.style.listStyle = 'none'
-        root.style.margin = '0'
-
         for (const category of categories) {
             const id = Math.random() + ''
             const item = html('li')
@@ -357,11 +350,8 @@ function dailyDozenTab() {
 }
 
 function shoppingListTab() {
-    const root = html('ul')
+    const root = list()
     {
-        root.style.listStyle = 'none'
-        root.style.margin = '0'
-
         const item = html('li')
         {
             const id = Math.random() + ''
@@ -398,10 +388,8 @@ function addFoodModal() {
         backdrop.style.left = '0'
     }
 
-    const root = html('article')
+    const root = hbox({tag: 'article'})
     {
-        root.style.display = 'flex'
-        root.style.flexDirection = 'row'
         root.style.width = '1024px'
         root.style.maxWidth = '90%'
         root.style.position = 'absolute'
@@ -424,7 +412,7 @@ function addFoodModal() {
                 mostUsedListTitle.style.borderBottom = '1px solid black'
             }
 
-            const mostUsedList = html('ul')
+            const mostUsedList = list()
 
             const yourCookbookListTitle = html('h1')
             {
@@ -434,16 +422,14 @@ function addFoodModal() {
                 yourCookbookListTitle.style.borderBottom = '1px solid black'
             }
 
-            const yourCookbookList = html('ul')
+            const yourCookbookList = list()
 
             sidebar.append(mostUsedListTitle, mostUsedList, yourCookbookListTitle, yourCookbookList)
         }
 
-        const rightPart = html('div')
+        const rightPart = vbox()
         {
             rightPart.style.flex = '1'
-            rightPart.style.display = 'flex'
-            rightPart.style.flexDirection = 'column'
 
             const nav = html('nav')
             {
@@ -451,28 +437,24 @@ function addFoodModal() {
                 nav.style.padding = '8px 12px'
                 nav.style.borderTopRightRadius = '3px'
 
-                const findBtn = html('button')
+                const findBtn = button()
                 {
                     findBtn.textContent = 'Find'
                 }
 
-                const importBtn = html('button')
+                const importBtn = button()
                 {
                     importBtn.textContent = 'Import'
                 }
 
-                const newBtn = html('button')
+                const newBtn = button()
                 {
                     newBtn.textContent = 'New'
                 }
 
                 const btns = [findBtn, importBtn, newBtn]
-                for (let i = 0; i < btns.length; ++i) {
-                    btns[i].style.cursor = 'pointer'
-
-                    if (i !== 0) {
-                        btns[i].style.marginLeft = '8px'
-                    }
+                for (let i = 1; i < btns.length; ++i) {
+                    btns[i].style.marginLeft = '8px'
                 }
 
                 nav.append(...btns)
@@ -492,17 +474,15 @@ function addFoodModal() {
                 footer.style.padding = '8px 12px'
                 footer.style.borderBottomRightRadius = '3px'
 
-                const addBtn = html('button')
+                const addBtn = button()
                 {
                     addBtn.textContent = 'Add'
-                    addBtn.style.cursor = 'pointer'
                     addBtn.style.cssFloat = 'right'
                 }
 
-                const cancelBtn = html('button')
+                const cancelBtn = button()
                 {
                     cancelBtn.textContent = 'Cancel'
-                    cancelBtn.style.cursor = 'pointer'
                     cancelBtn.style.marginLeft = '8px'
                     cancelBtn.style.cssFloat = 'right'
                     cancelBtn.onclick = () => backdrop.remove()
