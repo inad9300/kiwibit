@@ -38,6 +38,7 @@ export function header(activePageSlug: keyof typeof pages) {
             mainMenu.style.textAlign = 'center'
 
             const pagesInMainMenu = [pages['meal-plan'], pages['charts']]
+            // TODO Reminders (bell), Settings/Profile.
 
             const menuItems = pagesInMainMenu.map((page, idx) => {
                 const menuItem = html('li')

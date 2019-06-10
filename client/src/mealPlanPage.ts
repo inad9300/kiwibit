@@ -5,6 +5,7 @@ import {checkbox} from './checkbox'
 import {html} from './html'
 import {IconName} from '@fortawesome/fontawesome-common-types'
 import {randomInt} from './randomInt'
+import {appInstance} from './main' // FIXME?
 
 const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -81,25 +82,21 @@ function planControlBtn(iconName: IconName) {
         btn.style.width = size
         btn.style.height = size
         btn.style.borderRadius = '50%'
-        btn.style.fontSize = '16px'
         btn.style.border = 'none'
         btn.style.backgroundColor = 'white'
         btn.style.cursor = 'pointer'
-    }
+        btn.style.fontSize = '16px'
+        btn.style.color = '#333'
 
-    const i = icon(iconName)
-    {
-        i.style.color = '#333'
+        btn.append(icon(iconName))
     }
-
-    btn.append(i)
 
     return btn
 }
 
 function planCard() {
     const title = html('h1')
-    const titleColor = '#333'
+    const body = html('div')
 
     const root = html('article')
     {
@@ -111,15 +108,84 @@ function planCard() {
         {
             title.style.textAlign = 'center'
             title.style.margin = '0 0 4px 0'
-            title.style.color = titleColor
+            title.style.color = '#333'
         }
 
-        const body = html('div')
         {
             body.style.flex = '1'
             body.style.backgroundColor = 'white'
             body.style.borderRadius = '3px'
             body.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.2)'
+            body.style.position = 'relative'
+
+            body.onmouseenter = () => addBtn.style.display = 'block'
+            body.onmouseleave = () => addBtn.style.display = 'none'
+
+            const addBtn = html('button')
+            {
+                const size = '50px'
+                addBtn.style.display = 'none'
+                addBtn.style.width = size
+                addBtn.style.height = size
+                addBtn.style.borderRadius = '50%'
+                addBtn.style.border = 'none'
+                addBtn.style.backgroundColor = 'darkred'
+                addBtn.style.cursor = 'pointer'
+                addBtn.style.fontSize = '24px'
+                addBtn.style.color = '#eee'
+                addBtn.style.padding = '0'
+                addBtn.style.position = 'absolute'
+                addBtn.style.bottom = '16px'
+                addBtn.style.right = '16px'
+
+                addBtn.onmouseenter = () => popover.style.display = 'block'
+                addBtn.onmouseleave = () => popover.style.display = 'none'
+
+                const popover = html('div')
+                {
+                    popover.style.display = 'none'
+                    popover.style.backgroundColor = 'white'
+                    popover.style.borderRadius = '3px'
+                    popover.style.color = '#333'
+                    popover.style.padding = '4px'
+                    popover.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.2)'
+                    popover.style.zIndex = '1'
+                    popover.style.position = 'absolute'
+                    popover.style.top = '-45px'
+                    popover.style.left = '-16px'
+
+                    const addFoodIcon = icon('carrot')
+                    {
+                        addFoodIcon.title = 'Add food'
+
+                        addFoodIcon.onclick = () => appInstance.prepend(addFoodModal())
+                    }
+
+                    const addRecipeIcon = icon('utensils')
+                    {
+                        addRecipeIcon.title = 'Add recipe'
+                    }
+
+                    // const addSmoothieIcon = icon('blender')
+                    // const addSaladIcon = icon('seedling')
+
+                    const icons = [addFoodIcon, addRecipeIcon]
+
+                    for (const i of icons) {
+                        i.style.padding = '8px'
+                        i.style.borderRadius = '3px'
+
+                        i.onmouseenter = () => i.style.backgroundColor = '#ddd'
+                        i.onmouseleave = () => i.style.backgroundColor = 'transparent'
+                    }
+
+                    popover.append(...icons)
+                }
+
+                addBtn.append(icon('plus'), popover)
+            }
+
+            body.append(addBtn)
         }
 
         root.append(title, body)
@@ -130,10 +196,10 @@ function planCard() {
             title.textContent = t
         },
         activate() {
-            title.style.color = 'crimson'
+            body.style.border = '2px solid darkred'
         },
         deactivate() {
-            title.style.color = titleColor
+            body.style.border = 'none'
         }
     })
 }
@@ -152,6 +218,7 @@ function tabbedSection() {
         }
 
         const tabInfo = [
+            // TODO Counters.
             {name: 'Nutritional Overview', side: 'left' as 'left', content: nutritionalOverviewTab},
             {name: 'Daily Dozen', side: 'left' as 'left', content: dailyDozenTab},
             {name: 'Shopping List', side: 'right' as 'right', content: shoppingListTab}
@@ -317,4 +384,140 @@ function shoppingListTab() {
     }
 
     return root
+}
+
+function addFoodModal() {
+    const backdrop = html('div')
+    {
+        backdrop.style.width = '100%'
+        backdrop.style.height = '100%'
+        backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
+        backdrop.style.position = 'fixed'
+        backdrop.style.zIndex = '1'
+        backdrop.style.top = '0'
+        backdrop.style.left = '0'
+    }
+
+    const root = html('article')
+    {
+        root.style.display = 'flex'
+        root.style.flexDirection = 'row'
+        root.style.width = '1024px'
+        root.style.maxWidth = '90%'
+        root.style.position = 'absolute'
+        root.style.left = '0'
+        root.style.right = '0'
+        root.style.margin = '32px auto'
+        root.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.2)'
+
+        const sidebar = html('aside')
+        {
+            sidebar.style.padding = '8px 12px'
+            sidebar.style.backgroundColor = '#ccc'
+            sidebar.style.borderRadius = '3px 0 0 3px'
+
+            const mostUsedListTitle = html('h1')
+            {
+                mostUsedListTitle.textContent = 'Most used'
+                mostUsedListTitle.style.margin = '0'
+                mostUsedListTitle.style.fontWeight = 'normal'
+                mostUsedListTitle.style.borderBottom = '1px solid black'
+            }
+
+            const mostUsedList = html('ul')
+
+            const yourCookbookListTitle = html('h1')
+            {
+                yourCookbookListTitle.textContent = 'Your cookbook'
+                yourCookbookListTitle.style.margin = '0'
+                yourCookbookListTitle.style.fontWeight = 'normal'
+                yourCookbookListTitle.style.borderBottom = '1px solid black'
+            }
+
+            const yourCookbookList = html('ul')
+
+            sidebar.append(mostUsedListTitle, mostUsedList, yourCookbookListTitle, yourCookbookList)
+        }
+
+        const rightPart = html('div')
+        {
+            rightPart.style.flex = '1'
+            rightPart.style.display = 'flex'
+            rightPart.style.flexDirection = 'column'
+
+            const nav = html('nav')
+            {
+                nav.style.backgroundColor = '#eee'
+                nav.style.padding = '8px 12px'
+                nav.style.borderTopRightRadius = '3px'
+
+                const findBtn = html('button')
+                {
+                    findBtn.textContent = 'Find'
+                }
+
+                const importBtn = html('button')
+                {
+                    importBtn.textContent = 'Import'
+                }
+
+                const newBtn = html('button')
+                {
+                    newBtn.textContent = 'New'
+                }
+
+                const btns = [findBtn, importBtn, newBtn]
+                for (let i = 0; i < btns.length; ++i) {
+                    btns[i].style.cursor = 'pointer'
+
+                    if (i !== 0) {
+                        btns[i].style.marginLeft = '8px'
+                    }
+                }
+
+                nav.append(...btns)
+            }
+
+            const main = html('main')
+            {
+                main.style.flex = '1'
+                main.style.backgroundColor = 'white'
+                main.style.padding = '8px 12px'
+                main.textContent = 'Main'
+            }
+
+            const footer = html('footer')
+            {
+                footer.style.backgroundColor = '#eee'
+                footer.style.padding = '8px 12px'
+                footer.style.borderBottomRightRadius = '3px'
+
+                const addBtn = html('button')
+                {
+                    addBtn.textContent = 'Add'
+                    addBtn.style.cursor = 'pointer'
+                    addBtn.style.cssFloat = 'right'
+                }
+
+                const cancelBtn = html('button')
+                {
+                    cancelBtn.textContent = 'Cancel'
+                    cancelBtn.style.cursor = 'pointer'
+                    cancelBtn.style.marginLeft = '8px'
+                    cancelBtn.style.cssFloat = 'right'
+                    cancelBtn.onclick = () => backdrop.remove()
+                }
+
+                footer.append(cancelBtn, addBtn)
+            }
+
+            rightPart.append(nav, main, footer)
+        }
+
+        root.append(sidebar, rightPart)
+    }
+
+    backdrop.append(root)
+
+    return backdrop
 }

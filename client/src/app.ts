@@ -1,3 +1,4 @@
+import './polyfills'
 import {html} from './html'
 import {pages} from './pages'
 
@@ -7,6 +8,14 @@ export function app() {
         root.className = 'kiwibit'
         root.style.height = '100%'
         root.style.fontFamily = 'sans-serif'
+        root.style.position = 'relative'
+
+        const style = html('style')
+        {
+            style.textContent = `.kiwibit * { box-sizing: border-box; }`
+        }
+
+        root.prepend(style)
     }
 
     return Object.assign(root, {
@@ -25,7 +34,7 @@ export function app() {
             }
 
             root.innerHTML = ''
-            root.appendChild(pageElem)
+            root.append(pageElem)
 
             document.title = page.title + ' @ Kiwibit'
         }
