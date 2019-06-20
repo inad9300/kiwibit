@@ -5,5 +5,6 @@ export function list() {
     root.style.listStyle = 'none'
     root.style.margin = '0'
     root.style.padding = '0'
+
     return root
 }

@@ -7,27 +7,27 @@ import {notFoundPage} from './notFoundPage'
 export const pages = {
     'home': {
         slug: 'home',
-        render: homePage,
-        title: 'Home'
+        title: 'Home',
+        render: homePage
     },
     'meal-plan': {
         slug: 'meal-plan',
-        render: mealPlanPage,
-        title: 'Meal Plan'
+        title: 'Meal Plan',
+        render: mealPlanPage
     },
     'charts': {
         slug: 'charts',
-        render: chartsPage,
-        title: 'Charts'
+        title: 'Charts',
+        render: chartsPage
     },
     'settings': {
         slug: 'settings',
-        render: settingsPage,
-        title: 'Settings'
+        title: 'Settings',
+        render: settingsPage
     },
     'not-found': {
         slug: 'not-found',
-        render: notFoundPage,
-        title: 'Not Found'
+        title: 'Not Found',
+        render: notFoundPage
     }
 }

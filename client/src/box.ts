@@ -10,29 +10,29 @@ interface BoxOptions {
 function box(
     direction: 'row' | 'column',
     marginProp: 'marginLeft' | 'marginTop',
+    children: HTMLElement[],
     options: BoxOptions = {}
 ) {
     const root = html(options.tag || 'div')
-
     root.style.display = 'flex'
     root.style.flexDirection = direction
+    root.append(...children)
 
-    if (options.justify !== undefined)
+    if (options.justify !== undefined) {
         root.style.justifyContent = options.justify
+    }
 
-    if (options.wrap !== undefined)
+    if (options.wrap !== undefined) {
         root.style.flexWrap = options.wrap
+    }
 
-    return Object.assign(root, {
-        setChildren(items: HTMLElement[]) {
-            if (options.gap !== undefined)
-                for (let i = 1; i < items.length; ++i)
-                    items[i].style[marginProp] = options.gap
-
-            root.innerHTML = ''
-            root.append(...items)
+    if (options.gap !== undefined) {
+        for (let i = 1; i < children.length; ++i) {
+            children[i].style[marginProp] = options.gap
         }
-    })
+    }
+
+    return root
 }
 
 export const hbox = box.bind(null, 'row', 'marginLeft')

@@ -7,5 +7,6 @@ import {IconName} from '@fortawesome/fontawesome-common-types'
 export function icon(name: IconName) {
     const root = html('i')
     root.className = 'fas fa-' + name
+
     return root
 }

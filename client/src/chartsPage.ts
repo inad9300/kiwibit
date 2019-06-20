@@ -3,9 +3,7 @@ import {header} from './header'
 
 export function chartsPage() {
     const root = html('div')
-    {
-        root.append(header('charts'))
-    }
+    root.append(header('charts'))
 
     return root
 }
