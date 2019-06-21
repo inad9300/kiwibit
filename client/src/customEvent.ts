@@ -5,11 +5,11 @@ export function customEvent<T>() {
     const elems: HTMLElement[] = []
 
     return {
-        listen: (elem: HTMLElement, listener: (evt: CustomEvent<T>) => void) => {
+        addListener: (elem: HTMLElement, listener: (evt: CustomEvent<T>) => void) => {
             elems.push(elem)
             elem.addEventListener(name, listener)
         },
-        send: (detail: T) => {
+        dispatch: (detail: T) => {
             elems.forEach(elem => elem.dispatchEvent(new CustomEvent<T>(name, {detail}))
         }
     }
