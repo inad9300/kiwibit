@@ -247,8 +247,8 @@ function dailyDozenTab() {
 
     const root = list()
     root.append(
-        ...categories.map(cat => {
-            const id = Math.random() + ''
+        ...categories.map((cat, idx) => {
+            const id = 'dailyDozenCheckbox' + idx
 
             const check = checkbox()
             check.id = id
@@ -268,7 +268,7 @@ function dailyDozenTab() {
 }
 
 function shoppingListTab() {
-    const id = Math.random() + ''
+    const id = 'shoppingListCheckbox1'
 
     const check = checkbox()
     check.id = id
