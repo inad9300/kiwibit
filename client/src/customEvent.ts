@@ -14,3 +14,14 @@ export function customEvent<T>() {
         }
     }
 }
+
+type Listener<T> = (msg: T) => void
+
+function _customEvent<T>() {
+    const listeners: Listener<T>[] = []
+
+    return {
+        addListener: (l: Listener<T>) => listeners.push(l),
+        dispatch: (msg: T) => listeners.forEach(l => l(msg))
+    }
+}
