@@ -41,7 +41,7 @@ export function header(activePageSlug: keyof typeof pages) {
     return root
 }
 
-function menuItem(page: typeof pages[0], isFirst: boolean, isActive: boolean) {
+function menuItem(page: typeof pages['home'], isFirst: boolean, isActive: boolean) {
     const itemLink = html('a')
     itemLink.textContent = page.title
     itemLink.href = '?page=' + page.slug

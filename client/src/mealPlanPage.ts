@@ -80,8 +80,8 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
 
     const addFoodIcon = addItemBtn('carrot', 'Add food', () => appInstance.prepend(addFoodModal()))
     const addRecipeIcon = addItemBtn('utensils', 'Add recipe', () => void 0)
-    const addSmoothieIcon = addItemBtn('blender', 'Add smoothie', () => void 0)
-    const addSaladIcon = addItemBtn('seedling', 'Add salad', () => void 0)
+    // const addSmoothieIcon = addItemBtn('blender', 'Add smoothie', () => void 0)
+    // const addSaladIcon = addItemBtn('seedling', 'Add salad', () => void 0)
 
     const addPopover = html('div')
     addPopover.style.display = 'none'
@@ -130,11 +130,10 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
         body.style.border = '2px solid darkred'
     }
 
-    const root = vbox({tag: 'article'})
+    const root = vbox([title, body], {tag: 'article'})
     root.style.display = 'inline-flex'
     root.style.height = '500px'
     root.style.width = '360px'
-    root.append(title, body)
 
     if (isFirst)
         root.style.margin = '0 8px 0 32px'
@@ -169,7 +168,7 @@ function tabbedSection() {
 
     let tabContent: HTMLElement = html('div')
 
-    const tabs: HTMLLiElement[] = []
+    const tabs: HTMLLIElement[] = []
     tabInfo.forEach(ti => tabs.push(
         tab(ti.name, ti.side, tabs, () => {
             const nextTabContent = ti.content()
@@ -193,7 +192,7 @@ function tabbedSection() {
     return root
 }
 
-function tab(name: string, side: 'left' | 'right', tabs: HTMLLiElement[], onClick: () => void) {
+function tab(name: string, side: 'left' | 'right', tabs: HTMLLIElement[], onClick: () => void) {
     const root = html('li')
     root.textContent = name
     root.style.display = 'inline-block'
@@ -395,11 +394,10 @@ function addFoodModal() {
     main.style.padding = '8px 12px'
     main.textContent = 'Main'
 
-    const rightPart = vbox()
+    const rightPart = vbox([nav, main])
     rightPart.style.flex = '1'
-    rightPart.append(nav, main)
 
-    const root = hbox({tag: 'article'})
+    const root = hbox([sidebar, rightPart], {tag: 'article'})
     root.style.width = '1024px'
     root.style.maxWidth = '90%'
     root.style.position = 'absolute'
@@ -407,7 +405,6 @@ function addFoodModal() {
     root.style.right = '0'
     root.style.margin = '32px auto'
     root.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.2)'
-    root.append(sidebar, rightPart)
 
     const backdrop = html('div')
     backdrop.style.width = '100%'
