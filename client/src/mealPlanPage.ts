@@ -5,7 +5,7 @@ import {checkbox} from './checkbox'
 import {html} from './html'
 import {IconName} from '@fortawesome/fontawesome-common-types'
 import {randomInt} from './randomInt'
-import {appInstance} from './main' // FIXME?
+import {appRoot} from './main'
 import {hbox, vbox} from './box'
 import {button} from './button'
 import {list} from './list'
@@ -78,7 +78,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
     title.style.color = '#333'
     title.textContent = cardTitle
 
-    const addFoodIcon = addItemBtn('carrot', 'Add food', () => appInstance.prepend(addFoodModal()))
+    const addFoodIcon = addItemBtn('carrot', 'Add food', () => appRoot.prepend(addFoodModal()))
     const addRecipeIcon = addItemBtn('utensils', 'Add recipe', () => void 0)
     // const addSmoothieIcon = addItemBtn('blender', 'Add smoothie', () => void 0)
     // const addSaladIcon = addItemBtn('seedling', 'Add salad', () => void 0)
