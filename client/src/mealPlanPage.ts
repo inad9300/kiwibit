@@ -5,7 +5,7 @@ import {checkbox} from './checkbox'
 import {html} from './html'
 import {IconName} from '@fortawesome/fontawesome-common-types'
 import {randomInt} from './randomInt'
-import {appRoot} from './main'
+import {appRoot} from './main' // FIXME
 import {hbox, vbox} from './box'
 import {button} from './button'
 import {list} from './list'
