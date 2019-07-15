@@ -3,6 +3,7 @@ import {footer} from './footer'
 import {icon} from './icon'
 import {checkbox} from './checkbox'
 import {html} from './html'
+import {style} from './style'
 import {IconName} from '@fortawesome/fontawesome-common-types'
 import {randomInt} from './randomInt'
 import {appRoot} from './main' // FIXME
@@ -10,11 +11,6 @@ import {hbox, vbox} from './box'
 import {button} from './button'
 import {list} from './list'
 import {weekDays, currentWeekDay} from './cal'
-
-// TODO Move to separate file.
-const style = {
-    radius: '3px'
-}
 
 export function mealPlanPage() {
     const root = html('div')
