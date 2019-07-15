@@ -1,8 +1,7 @@
-import {html} from './html'
 import {header} from './header'
 
 export function chartsPage() {
-    const root = html('div')
+    const root = document.createElement('div')
     root.append(header('charts'))
 
     return root

@@ -1,7 +1,5 @@
-import {html} from './html'
-
 export function button() {
-    const root = html('button')
+    const root = document.createElement('button')
     root.style.cursor = 'pointer'
     root.style.border = 'none'
 

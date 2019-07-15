@@ -1,8 +1,7 @@
-import {html} from './html'
 import {pages} from './pages'
 
 export function header(activePageSlug: keyof typeof pages) {
-    const titleLink = html('a')
+    const titleLink = document.createElement('a')
     titleLink.textContent = 'Kiwibit'
     titleLink.href = '?page=home'
     titleLink.style.textDecoration = 'none'
@@ -13,12 +12,12 @@ export function header(activePageSlug: keyof typeof pages) {
     titleLink.onmouseenter = () => titleLink.style.color = 'darkseagreen'
     titleLink.onmouseleave = () => titleLink.style.color = 'white'
 
-    const appTitle = html('h1')
+    const appTitle = document.createElement('h1')
     appTitle.style.margin = '7px 0 0 0'
     appTitle.style.lineHeight = '0'
     appTitle.append(titleLink)
 
-    const mainMenu = html('ul')
+    const mainMenu = document.createElement('ul')
     mainMenu.style.margin = '0'
     mainMenu.style.padding = '0'
     mainMenu.style.listStyle = 'none'
@@ -32,7 +31,7 @@ export function header(activePageSlug: keyof typeof pages) {
         )
     )
 
-    const root = html('header')
+    const root = document.createElement('header')
     root.style.backgroundColor = '#333'
     root.style.padding = '12px 32px'
     root.style.display = 'flex'
@@ -42,7 +41,7 @@ export function header(activePageSlug: keyof typeof pages) {
 }
 
 function menuItem(page: typeof pages['home'], isFirst: boolean, isActive: boolean) {
-    const itemLink = html('a')
+    const itemLink = document.createElement('a')
     itemLink.textContent = page.title
     itemLink.href = '?page=' + page.slug
     itemLink.style.padding = '6px 12px'
@@ -69,7 +68,7 @@ function menuItem(page: typeof pages['home'], isFirst: boolean, isActive: boolea
         itemLink.style.backgroundColor = 'transparent'
     }
 
-    const root = html('li')
+    const root = document.createElement('li')
     root.style.display = 'inline-block'
     root.appendChild(itemLink)
 

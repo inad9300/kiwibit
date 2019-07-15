@@ -1,5 +1,3 @@
-import {html} from './html'
-
 interface BoxOptions {
     tag?: keyof HTMLElementTagNameMap
     gap?: string
@@ -13,7 +11,7 @@ function box(
     children: HTMLElement[],
     options: BoxOptions = {}
 ) {
-    const root = html(options.tag || 'div')
+    const root = document.createElement(options.tag || 'div')
     root.style.display = 'flex'
     root.style.flexDirection = direction
     root.append(...children)

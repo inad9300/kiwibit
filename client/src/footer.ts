@@ -1,7 +1,5 @@
-import {html} from './html'
-
 export function footer() {
-    const root = html('footer')
+    const root = document.createElement('footer')
     root.style.minHeight = '200px'
     root.style.backgroundColor = '#333'
 

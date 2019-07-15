@@ -1,7 +1,5 @@
-import {html} from './html'
-
 export function checkbox() {
-    const root = html('input')
+    const root = document.createElement('input')
     root.type = 'checkbox'
 
     return root

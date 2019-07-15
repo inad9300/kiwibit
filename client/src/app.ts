@@ -1,9 +1,8 @@
 import './polyfills'
-import {html} from './html'
 import {pages} from './pages'
 
 export function app(pageSlug: string | null) {
-    const appStyle = html('style')
+    const appStyle = document.createElement('style')
     appStyle.textContent = `.kiwibit * { box-sizing: border-box; }`
 
     let page = pages[pageSlug as keyof typeof pages]
@@ -15,7 +14,7 @@ export function app(pageSlug: string | null) {
     const pageElem = page.render()
     pageElem.style.minHeight = '100%'
 
-    const root = html('div')
+    const root = document.createElement('div')
     root.className = 'kiwibit'
     root.style.height = '100%'
     root.style.fontFamily = 'sans-serif'

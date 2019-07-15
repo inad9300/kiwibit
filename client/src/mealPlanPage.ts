@@ -1,6 +1,5 @@
 import {header} from './header'
 import {footer} from './footer'
-import {html} from './html'
 import {list} from './list'
 import {weeklyPlanBoard} from './weeklyPlanBoard'
 import {nutritionalOverview} from './nutritionalOverview'
@@ -8,7 +7,7 @@ import {dailyDozen} from './dailyDozen'
 import {shoppingList} from './shoppingList'
 
 export function mealPlanPage() {
-    const root = html('div')
+    const root = document.createElement('div')
     root.append(header('meal-plan'), weeklyPlanBoard(), tabbedSection(), footer())
 
     return root
@@ -22,7 +21,7 @@ function tabbedSection() {
         {name: 'Shopping List', side: 'right' as 'right', content: shoppingList}
     ]
 
-    let tabContent: HTMLElement = html('div')
+    let tabContent: HTMLElement = document.createElement('div')
 
     const tabs: HTMLLIElement[] = []
     tabInfo.forEach(ti => tabs.push(
@@ -39,7 +38,7 @@ function tabbedSection() {
     tabList.style.borderBottom = '1px solid #666'
     tabList.append(...tabs)
 
-    const root = html('div')
+    const root = document.createElement('div')
     root.style.padding = '32px'
     root.append(tabList, tabContent)
 
@@ -49,7 +48,7 @@ function tabbedSection() {
 }
 
 function tab(name: string, side: 'left' | 'right', tabs: HTMLLIElement[], onClick: () => void) {
-    const root = html('li')
+    const root = document.createElement('li')
     root.textContent = name
     root.style.display = 'inline-block'
     root.style.color = '#333'
