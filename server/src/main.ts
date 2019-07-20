@@ -6,6 +6,7 @@ import {Api, ApiFn, ApiPayload} from './Api'
 import * as api from './api'
 
 process.on('uncaughtException', err => log.error('Uncaught exception.', err))
+process.on('unhandledRejection', err => log.error('Unhandled rejection.', err))
 
 http
     .createServer(serve)

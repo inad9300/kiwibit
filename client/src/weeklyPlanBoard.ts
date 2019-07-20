@@ -22,15 +22,29 @@ export function weeklyPlanBoard() {
     planDeck.style.overflowX = 'auto'
     planDeck.style.whiteSpace = 'nowrap'
     planDeck.style.paddingBottom = '32px'
-
+    planDeck.style.cursor = 'grab'
     planDeck.append(
         ...weekDays.map((weekDay, idx) =>
             planCard(weekDay, weekDay === currentWeekDay(), idx === 0, idx === weekDays.length - 1)
         )
     )
 
+    let x: number | undefined
+
     const root = document.createElement('div')
     root.style.backgroundColor = 'darkseagreen'
+    root.onmousedown = evt => x = evt.pageX
+    root.onmousemove = evt => {
+        if (x !== undefined) {
+            planDeck.style.cursor = 'grabbing'
+            planDeck.scrollLeft += (x - evt.pageX)
+            x = evt.pageX
+        }
+    }
+    root.onmouseup = () => {
+        planDeck.style.cursor = 'grab'
+        x = undefined
+    }
     root.append(planControls, planDeck)
 
     return root

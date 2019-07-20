@@ -1,4 +1,3 @@
-import './polyfills'
 import {pages} from './pages'
 
 export function app(pageSlug: string | null) {
