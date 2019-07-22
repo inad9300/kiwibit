@@ -13,7 +13,7 @@ export type Row = {
  *
  * TODO Rethink as TypeScript transformer.
  */
-export type RowMetadata<R extends Row> = {
+export type Table<R extends Row> = {
     [P in keyof R]-?: {
         type: Constructor<WrapperType<Exclude<R[P], null>>>,
         optional: null extends R[P] ? true : false

@@ -1,47 +1,33 @@
 import * as pg from 'pg'
-import * as config from '../../database/config'
-import * as secrets from '../../secrets'
+import {pool} from './pool'
 import {PgTypeId} from './PgTypeId'
-import {RowMetadata, Row, Column} from './RowMetadata'
+import {Table, Row, Column} from './Table'
 import {Constructor} from './Constructor'
 import {WrapperType} from './WrapperType'
 import {debug} from './debug'
-import {log} from './log'
-
-const pool = new pg.Pool({
-    host: config.host,
-    port: config.port,
-    user: config.user,
-    database: config.name,
-    password: secrets.db,
-    max: 16
-})
-.on('error', (err, client) => {
-    log.error('Unexpected error on idle client.', err, client)
-    process.exit(-1)
-})
 
 interface QueryResult<R extends Row> extends pg.QueryResult {
     rows: R[]
 }
 
-export function sql<R extends Row>(
-    query: string,
+export function query<R extends Row>(
+    text: string,
     params: Column[] = [],
-    expectedMetadata?: RowMetadata<R>
+    expectedMetadata?: Table<R>
 ): Promise<QueryResult<R>> {
-    const promise = pool.query(query, params)
+    const promise = pool.query(text, params)
 
     if (debug) {
         promise.then(async res => {
             const assert = await import('assert')
 
-            if (res.command === 'SELECT' || query.toLowerCase().trim().includes(' returning ')) {
+            if (res.command === 'SELECT' || text.toLowerCase().trim().includes(' returning ')) {
                 assert(expectedMetadata !== undefined, 'No metadata provided for read query.')
             } else {
                 return res
             }
 
+            
             const pgToJsType: {[pgTypeId: number]: Constructor<WrapperType<Exclude<Column, null>>>} = {
                 [PgTypeId.BOOL]: Boolean,
                 [PgTypeId.INT2]: Number,

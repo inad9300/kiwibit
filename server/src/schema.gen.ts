@@ -1,21 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as pg from 'pg'
 import * as config from '../../database/config'
-import * as secrets from '../../secrets'
-
-const pool = new pg.Pool({
-    host: config.host,
-    port: config.port,
-    user: config.user,
-    database: config.name,
-    password: secrets.db,
-    max: 16
-})
-.on('error', (err, client) => {
-    console.error('Unexpected error on idle client.', err, client)
-    process.exit(-1)
-})
+import {pool} from './pool'
 
 const ucFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
