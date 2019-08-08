@@ -4,59 +4,47 @@
 import * as fs from 'fs'
 import * as ts from 'typescript'
 import * as pg from 'pg-query-native'
-// import {filesEndingWith} from '../../shared/filesEndingWith'
-import {log} from './log'
 import {pool} from './pool'
+import {pgToJsType} from './pg-types'
+import {filesEndingWith} from '../../shared/filesEndingWith'
 
-import {PgTypeId} from './PgTypeId'
-import {Constructor} from './Constructor'
-import {WrapperType} from './WrapperType'
-import {Column} from './Table'
-
-// TODO Move somewhere else.
-const pgToJsType: {[pgTypeId: number]: Constructor<WrapperType<Exclude<Column, null>>>} = {
-    [PgTypeId.BOOL]: Boolean,
-    [PgTypeId.INT2]: Number,
-    [PgTypeId.INT4]: Number,
-    [PgTypeId.INT8]: Number,
-    [PgTypeId.FLOAT4]: Number,
-    [PgTypeId.FLOAT8]: Number,
-    [PgTypeId.NUMERIC]: Number,
-    [PgTypeId.TEXT]: String,
-    [PgTypeId.CHAR]: String,
-    [PgTypeId.BPCHAR]: String,
-    [PgTypeId.VARCHAR]: String,
-    [PgTypeId.DATE]: Date,
-    [PgTypeId.TIMESTAMP]: Date,
-    [PgTypeId.TIMESTAMPTZ]: Date,
-    [PgTypeId.BYTEA]: Uint8Array
-}
+const program = ts.createProgram([], {})
+const typeChecker = program.getTypeChecker()
 
 export function lintFile(sourceFile: ts.SourceFile) {
     lintNode(sourceFile)
 
     function lintNode(node: ts.Node) {
         if (node.kind === ts.SyntaxKind.Identifier
-            && node.getText() === 'query'
-            && node.parent.kind === ts.SyntaxKind.CallExpression) {
-            const fnCall = node.parent as ts.CallExpression
-            const querySrc = fnCall.arguments[0].getText()
+            && node.getText() === 'ssql'
+            && ts.isTaggedTemplateExpression(node.parent)) {
+            const parent = node.parent as ts.TaggedTemplateExpression
 
-            // TODO Query could be stored in a variable.
-            // TODO Query string could contain placeholders, e.g. `${t}`.
-            // IDEA Use tagged strings, e.g. sql`select 1`.
-
+            let querySrc = parent.template.getText()
             let query: string
-            try {
-                query = eval(querySrc)
-            } catch (err) {
-                log.warn(`Failed to evaluate query source in ${nodeRef(node)}: ${err.message}`)
-                return
+            while (true) {
+                try {
+                    query = eval(querySrc)
+                    break
+                } catch (err) {
+                    // TODO A function could be used inside the placeholders...
+                    if (err instanceof ReferenceError) {
+                        const undefinedVar = err.message.split(' ')[0]
+                        if (!/^[_a-zA-Z][_a-zA-Z0-9]+$/.test(undefinedVar)) {
+                            console.warn(`Failed to capture undefined variable in query. Captured value: "${undefinedVar}".`)
+                            return
+                        }
+                        querySrc = `let ${undefinedVar} = null; ` + querySrc
+                        continue
+                    }
+                    console.warn(`Failed to evaluate query source in ${nodeRef(node)}: ${err.message}`)
+                    return
+                }
             }
 
             const {query: ast, error: err} = pg.parse(query)
             if (err) {
-                log.error(
+                console.error(
                     `Syntactic error in ${nodeRef(node)}: ${err.message}`,
                     errMsg(query, err.cursorPosition - 1)
                 )
@@ -66,22 +54,28 @@ export function lintFile(sourceFile: ts.SourceFile) {
             pool.query('explain (verbose true) ' + query)
                 .then(() => {
                     if (ast[0].SelectStmt) {
-                        // TODO Replace all placeholders with `null`.
                         pool.query(`select * from (${query}) x limit 0`).then(res => {
-                            console.debug(res.fields)
+                            // TODO Verify the function's declared return type and the actual return type match.
                             console.debug(
                                 res.fields.map(f => ({
-                                    // f.tableID, f.columnID // Can be 0.
                                     name: f.name,
                                     type: pgToJsType[f.dataTypeID]
                                 }))
                             )
+
+                            // FIXME Gives `TypeError: Cannot read property 'exports' of undefined` from deep inside TypeScript.
+                            const signature = typeChecker.getResolvedSignature(parent)
+                            console.debug('signature', signature)
+
+                            // const type = typeChecker.getTypeFromTypeNode(node.typeArguments[0])
+                            // const properties = typeChecker.getPropertiesOfType(type)
+                            // typeChecker.typeToString(signature.getReturnType())
                         })
-                        .catch(log.error)
+                        .catch(console.error)
                     }
                 })
                 .catch((err: Error & {position: number}) => {
-                    log.error(
+                    console.error(
                         `Semantic error in ${nodeRef(node)}: ${err.message}`,
                         errMsg(query, err.position - 1)
                     )
@@ -102,19 +96,20 @@ export function lintFile(sourceFile: ts.SourceFile) {
             + '\x1b[31m' + query.substr(errPos + 1) + '\x1b[0m\n'
     }
 
+    // TODO Remove $HOME from filename.
     function nodeRef(node: ts.Node) {
         const {line, character} = sourceFile.getLineAndCharacterOfPosition(node.getStart())
         return `${sourceFile.fileName}:${line + 1}:${character + 1}`
     }
 }
 
-for (const fileName of [__dirname + '/api/getCurrentUser.ts'] /* filesEndingWith(__dirname, '.ts') */) {
+for (const fileName of filesEndingWith(__dirname, '.ts')) {
     lintFile(
         ts.createSourceFile(
             fileName,
             fs.readFileSync(fileName).toString(),
             ts.ScriptTarget.ES2015,
-            /* setParentNodes */ true
+            true
         )
     )
 }

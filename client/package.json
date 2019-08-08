@@ -5,17 +5,17 @@
         "test": "tsc --noEmit && c8 ts-node ../shared/runner.ts"
     },
     "dependencies": {
-        "@fortawesome/fontawesome-common-types": "0.2.19",
-        "@fortawesome/fontawesome-free": "5.9.0",
+        "@fortawesome/fontawesome-common-types": "0.2.21",
+        "@fortawesome/fontawesome-free": "5.10.1",
         "highcharts": "7.1.2"
     },
     "devDependencies": {
-        "@types/highcharts": "5.0.41",
-        "@types/puppeteer": "1.12.4",
+        "@types/highcharts": "5.0.44",
+        "@types/puppeteer": "1.19.0",
         "c8": "5.0.1",
         "node-sass": "4.12.0",
         "parcel": "1.12.3",
-        "puppeteer": "1.18.1",
+        "puppeteer": "1.19.0",
         "ts-node": "8.3.0",
         "typescript": "3.5.3"
     }

@@ -1,3 +1,7 @@
+import {Constructor} from './Constructor'
+import {WrapperType} from './WrapperType'
+import {Column} from './Table'
+
 // Source: https://github.com/pgjdbc/pgjdbc/blob/master/pgjdbc/src/main/java/org/postgresql/core/Oid.java.
 export enum PgTypeId {
     BIT = 1560,
@@ -60,4 +64,22 @@ export enum PgTypeId {
     VOID = 2278,
     XML = 142,
     XML_ARRAY = 143
+}
+
+export const pgToJsType: {[pgTypeId: number]: Constructor<WrapperType<Exclude<Column, null>>>} = {
+    [PgTypeId.BOOL]: Boolean,
+    [PgTypeId.INT2]: Number,
+    [PgTypeId.INT4]: Number,
+    [PgTypeId.INT8]: Number,
+    [PgTypeId.FLOAT4]: Number,
+    [PgTypeId.FLOAT8]: Number,
+    [PgTypeId.NUMERIC]: Number,
+    [PgTypeId.TEXT]: String,
+    [PgTypeId.CHAR]: String,
+    [PgTypeId.BPCHAR]: String,
+    [PgTypeId.VARCHAR]: String,
+    [PgTypeId.DATE]: Date,
+    [PgTypeId.TIMESTAMP]: Date,
+    [PgTypeId.TIMESTAMPTZ]: Date,
+    [PgTypeId.BYTEA]: Uint8Array
 }

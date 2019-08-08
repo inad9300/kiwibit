@@ -88,3 +88,21 @@ function tab(name: string, side: 'left' | 'right', tabs: HTMLLIElement[], onClic
 
     return root
 }
+
+/*
+function tabs(tabs: HTMLLIElement[], contents: HTMLElement[]) {
+    const root = document.createElement('div')
+    root.onclick = evt => {
+        if (tabs.indexOf(evt.target as HTMLLIElement) > -1) {
+
+        }
+    }
+
+    const tabsContainer = document.createElement('div')
+    tabsContainer.append(...tabs)
+
+    root.append(tabsContainer)
+
+    return root
+}
+*/

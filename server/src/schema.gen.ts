@@ -57,21 +57,21 @@ pool.query(`
         return col.column_name
             + ': ' + pgToJsType[col.udt_name]
             + (isOptional(col) ? ' | null' : '')
-    }).join('\n\t')}
+    }).join('\n    ')}
 }
 
-export const ${table}: RowMetadata<${table}> = {
+export const ${table}: Table<${table}> = {
     ${columnsByTable[table].map(col => {
         return col.column_name + ': {'
             + 'type: ' + ucFirst(pgToJsType[col.udt_name])
             + ', optional: ' + (isOptional(col) ? 'true' : 'false')
             + '}'
-    }).join(',\n\t')}
+    }).join(',\n    ')}
 }`).join('\n\n')
 
     fs.writeFileSync(
         path.resolve(__dirname, 'schema.ts'),
-        `import {RowMetadata} from './RowMetadata'\n\n` + schema + '\n'
+        `import {Table} from './Table'\n\n` + schema + '\n'
     )
 })
 .catch(err => console.error('Failed to query schema metadata.', err))
