@@ -6,11 +6,12 @@
         "start": "nodemon -w src -e ts -x 'clear && node --inspect=9229 -r ts-node/register src/main.ts --debug'",
         "pretest": "export TZ=UTC",
         "test": "c8 ts-node ../shared/runner.ts",
-        "lint": "ts-node ./src/sql.lint.ts"
+        "lint": "pgeon scan src/"
     },
     "dependencies": {
         "bcrypt": "3.0.6",
-        "pg": "7.12.0"
+        "pg": "7.12.0",
+        "pgeon": "0.0.1"
     },
     "devDependencies": {
         "@types/bcrypt": "3.0.0",

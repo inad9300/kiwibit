@@ -1,8 +1,8 @@
 import * as pg from 'pg'
-import {pool} from './pool'
+// import {pool} from './pool'
 import {pgToJsType, PgTypeId} from './pg-types'
-import {Table, Row, Column} from './Table'
-import {debug} from './debug'
+import {Table, Row/*, Column */} from './Table'
+// import {debug} from './debug'
 
 interface QueryResult<R extends Row> extends pg.QueryResult {
     rows: R[]
@@ -11,34 +11,34 @@ interface QueryResult<R extends Row> extends pg.QueryResult {
 /**
  * Execute queries known at compile time.
  */
-export function ssql<R extends Row>(queryParts: TemplateStringsArray, ...params: Column[]): Promise<QueryResult<R>> {
-    let text = ''
-
-    for (let i = 0; i < params.length; i++) {
-        text += queryParts[i] + '$' + (i + 1)
-    }
-
-    text += queryParts[queryParts.length - 1]
-
-    return pool.query(text, params)
-}
+// export function ssql<R extends Row>(queryParts: TemplateStringsArray, ...params: Column[]): Promise<QueryResult<R>> {
+//     let text = ''
+//
+//     for (let i = 0; i < params.length; i++) {
+//         text += queryParts[i] + '$' + (i + 1)
+//     }
+//
+//     text += queryParts[queryParts.length - 1]
+//
+//     return pool.query(text, params)
+// }
 
 /**
  * Execute dynamic queries.
  */
-export function dsql<R extends Row>(text: string, params: Column[] = [], expectedMetadata?: Table<R>): Promise<QueryResult<R>> {
-    const promise = pool.query(text, params)
+// export function dsql<R extends Row>(text: string, params: Column[] = [], expectedMetadata?: Table<R>): Promise<QueryResult<R>> {
+//     const promise = pool.query(text, params)
+//
+//     if (debug) {
+//         promise.then(res => {
+//             runtimeQueryVerification(text, res, expectedMetadata)
+//         })
+//     }
+//
+//     return promise
+// }
 
-    if (debug) {
-        promise.then(res => {
-            runtimeQueryVerification(text, res, expectedMetadata)
-        })
-    }
-
-    return promise
-}
-
-async function runtimeQueryVerification<R extends Row>(text: string, res: QueryResult<R>, expectedMetadata?: Table<R>) {
+export async function runtimeQueryVerification<R extends Row>(text: string, res: QueryResult<R>, expectedMetadata?: Table<R>) {
     const assert = await import('assert')
 
     if (res.command === 'SELECT' || text.toLowerCase().trim().includes(' returning ')) {
