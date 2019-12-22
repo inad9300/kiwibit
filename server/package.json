@@ -9,21 +9,21 @@
         "lint": "pgeon scan src/"
     },
     "dependencies": {
-        "bcrypt": "3.0.6",
-        "pg": "7.12.0",
+        "bcrypt": "3.0.7",
+        "pg": "7.15.1",
         "pgeon": "0.0.1"
     },
     "devDependencies": {
         "@types/bcrypt": "3.0.0",
-        "@types/node-fetch": "2.5.0",
-        "@types/node": "12.7.1",
-        "@types/pg": "7.4.14",
-        "c8": "5.0.1",
+        "@types/node-fetch": "2.5.4",
+        "@types/node": "12.12.21",
+        "@types/pg": "7.11.2",
+        "c8": "7.0.0",
         "node-fetch": "2.6.0",
-        "nodemon": "1.19.1",
+        "nodemon": "2.0.2",
         "pg-query-native": "1.2.0",
-        "ts-node": "8.3.0",
-        "typescript": "3.5.3"
+        "ts-node": "8.5.4",
+        "typescript": "3.7.4"
     },
     "engines": {
         "node": ">=12.0.0"
