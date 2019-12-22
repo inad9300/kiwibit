@@ -1,12 +1,12 @@
-insert into reference_intakes (source_id, nutrient_id, age_min, age_max, gender, for_pregnancy, for_lactation, value) values
-((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 1, 3, 'F', false, false, 1500),
-((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 1, 3, 'M', false, false, 1500),
-((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 4, 8, 'F', false, false, 1900),
-((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 4, 8, 'M', false, false, 1900),
-((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 9, 13, 'F', false, false, 2200),
-((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 9, 13, 'M', false, false, 2200),
-((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 14, 150, 'F', false, false, 2300),
-((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 14, 150, 'M', false, false, 2300);
+-- insert into reference_intakes (source_id, nutrient_id, age_min, age_max, gender, for_pregnancy, for_lactation, value) values
+-- ((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 1, 3, 'F', false, false, 1500),
+-- ((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 1, 3, 'M', false, false, 1500),
+-- ((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 4, 8, 'F', false, false, 1900),
+-- ((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 4, 8, 'M', false, false, 1900),
+-- ((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 9, 13, 'F', false, false, 2200),
+-- ((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 9, 13, 'M', false, false, 2200),
+-- ((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 14, 150, 'F', false, false, 2300),
+-- ((select id from data_sources where short_title = 'USA''s Dietary Guidelines'), (select id from nutrients where name = 'Sodium'), 14, 150, 'M', false, false, 2300);
 
 -- NOTE For infants (i.e. younger than 1 year of age), the values are averaged between the two available groups (0–5.9 months and 6–11.9 months).
 -- NOTE Access to source documents: http://nationalacademies.org/hmd/Activities/Nutrition/SummaryDRIs/DRI-Tables.aspx

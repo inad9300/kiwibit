@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as config from '../../database/config'
+import * as config from '../../shared/config'
 import {pool} from './pool'
 
 const ucFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)

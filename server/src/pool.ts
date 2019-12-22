@@ -1,6 +1,6 @@
 import * as pg from 'pg'
 import * as secrets from '../../secrets'
-import * as config from '../../database/config'
+import * as config from '../../shared/config'
 import {log} from './log'
 import 'pgeon'
 

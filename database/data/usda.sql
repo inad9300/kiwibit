@@ -396,26 +396,17 @@ select
 from usda.food_des fd;
 
 insert into food_nutrients (food_id, nutrient_id, amount)
-select
-    (
-        select f.id
-        from foods f
-        where f.source_id = (select id from data_sources where short_title = 'USDA Food Database')
-        and f.external_id = nd.ndb_no
-    ),
-    (
-        select n.id
-        from nutrients n
-        where n.source_id = (select id from data_sources where short_title = 'USDA Food Database')
-        and n.external_id = nd.nutr_no
-    ),
-    nd.nutr_val
+select f.id, n.id, nd.nutr_val
 from usda.nut_data nd
+left join foods f on (f.external_id = nd.ndb_no)
+left join nutrients n on (n.external_id = nd.nutr_no)
 where nd.nutr_no != (
     select nutr_no
     from usda.nutr_def
     where tagname = 'ENERC_KJ'
-);
+)
+and f.source_id = (select id from data_sources where short_title = 'USDA Food Database')
+and n.source_id = (select id from data_sources where short_title = 'USDA Food Database');
 
 insert into food_unit_ratios (food_id, unit, grams)
 select distinct
