@@ -1,7 +1,7 @@
 interface Error {
-    toJSON(): {error: string}
+  toJSON(): { error: string }
 }
 
-Error.prototype.toJSON = function () {
-    return {error: this.message}
+Error.prototype.toJSON = function() {
+  return { error: this.message }
 }

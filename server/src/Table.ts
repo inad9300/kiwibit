@@ -1,10 +1,10 @@
-import {Constructor} from './Constructor'
-import {WrapperType} from './WrapperType'
+import { Constructor } from './Constructor'
+import { WrapperType } from './WrapperType'
 
 export type Column = null | boolean | number | string | Date | Uint8Array
 
 export type Row = {
-    [column: string]: Column
+  [column: string]: Column
 }
 
 /**
@@ -14,8 +14,8 @@ export type Row = {
  * TODO Create TypeScript transformer that returns `Table`s (see https://github.com/kimamula/ts-transformer-keys).
  */
 export type Table<R extends Row> = {
-    [P in keyof R]-?: {
-        type: Constructor<WrapperType<Exclude<R[P], null>>>,
-        optional: null extends R[P] ? true : false
-    }
+  [P in keyof R]-?: {
+    type: Constructor<WrapperType<Exclude<R[P], null>>>
+    optional: null extends R[P] ? true : false
+  }
 }
