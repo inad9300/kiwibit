@@ -1,3 +1,7 @@
+# docker-compose up --detach
+# docker-compose ps
+# docker-compose logs
+
 version: "3.7"
 services:
   database:

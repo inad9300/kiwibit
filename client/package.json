@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "start": "parcel src/index.html",
+    "start": "parcel --port 3000 src/index.html",
     "test": "tsc --noEmit && c8 ts-node ../shared/runner.ts",
     "fmt": "prettier --config ../prettier.config.js --write *.{json,js,ts,html,css,md} src/**/*.{json,js,ts,html,css,md}"
   },

@@ -1,10 +1,10 @@
-import { appRoot } from './main' // FIXME
+import { appRoot } from '../main' // FIXME
 import { weekDays, currentWeekDay } from './cal'
-import { icon } from './icon'
-import { style } from './style'
+import { icon } from '../shared/icon'
+import { style } from '../shared/style'
 import { IconName } from '@fortawesome/fontawesome-common-types'
-import { vbox } from './box'
-import { button } from './button'
+import { vbox } from '../shared/box'
+import { button } from '../shared/button'
 import { addFoodModal } from './addFoodModal'
 
 export function weeklyPlanBoard() {

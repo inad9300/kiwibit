@@ -8,6 +8,6 @@ You can visit the [planning board](https://github.com/inad9300/kiwibit/projects/
 
 ## Setup
 
-1. `cd database && sudo ./setup.js`
+1. `docker-compose up --detach`
 2. `cd server && npm i && npm start`
 3. `cd client && npm i && npm start`

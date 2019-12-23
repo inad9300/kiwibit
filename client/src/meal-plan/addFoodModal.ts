@@ -1,7 +1,7 @@
-import { hbox, vbox } from './box'
-import { style } from './style'
-import { button } from './button'
-import { list } from './list'
+import { hbox, vbox } from '../shared/box'
+import { style } from '../shared/style'
+import { button } from '../shared/button'
+import { list } from '../shared/list'
 
 export function addFoodModal() {
   const mostUsedListTitle = document.createElement('h1')

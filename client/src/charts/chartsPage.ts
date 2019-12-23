@@ -1,4 +1,4 @@
-import { header } from './header'
+import { header } from '../shared/header'
 
 export function chartsPage() {
   const root = document.createElement('div')

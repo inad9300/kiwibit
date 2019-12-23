@@ -1,4 +1,4 @@
-import { randomInt } from './randomInt'
+import { randomInt } from '../shared/randomInt'
 
 export function nutritionalOverview() {
   const root = document.createElement('div')

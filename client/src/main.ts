@@ -1,6 +1,6 @@
 import './polyfills'
 import { app } from './app'
-import { log } from './log'
+import { log } from './shared/log'
 import { debug } from './debug'
 
 window.addEventListener('error', evt => log.error('Uncaught exception.', evt))

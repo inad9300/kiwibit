@@ -1,4 +1,4 @@
-import { pages } from './pages'
+import { pages } from '../pages'
 
 export function header(activePageSlug: keyof typeof pages) {
   const titleLink = document.createElement('a')

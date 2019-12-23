@@ -53,7 +53,7 @@ function getPayload(req: http.IncomingMessage): Promise<ApiPayload> {
     req
       .on('error', err => reject(err))
       .on('data', chunk => body.push(chunk))
-      .on('end', () => resolve(JSON.parse(Buffer.concat(body).toString())))
+      .on('end', () => resolve(body.length > 0 ? JSON.parse(Buffer.concat(body).toString()) : ''))
   })
 }
 

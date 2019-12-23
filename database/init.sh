@@ -22,7 +22,7 @@ done
 
 echo -e "\n> Creating main schema"
 
-psql -f $DIR/schemas/main.sql
+psql -f $DIR/schemas/public.sql
 
 
 echo -e "\n> Loading data"

@@ -1,5 +1,5 @@
-import { list } from './list'
-import { checkbox } from './checkbox'
+import { list } from '../shared/list'
+import { checkbox } from '../shared/checkbox'
 
 export function dailyDozen() {
   const categories = [

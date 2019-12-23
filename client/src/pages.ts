@@ -1,8 +1,8 @@
-import { homePage } from './homePage'
-import { mealPlanPage } from './mealPlanPage'
-import { chartsPage } from './chartsPage'
-import { settingsPage } from './settingsPage'
-import { notFoundPage } from './notFoundPage'
+import { homePage } from './home/homePage'
+import { mealPlanPage } from './meal-plan/mealPlanPage'
+import { chartsPage } from './charts/chartsPage'
+import { settingsPage } from './settings/settingsPage'
+import { notFoundPage } from './not-found/notFoundPage'
 
 export const pages = {
   home: {
