@@ -7,7 +7,7 @@
     "pretest": "export TZ=UTC",
     "test": "c8 ts-node ../shared/runner.ts",
     "lint": "pgeon scan src/",
-    "fmt": "prettier --write *.{json,js,ts,html,css,md} src/**/*.{json,js,ts,html,css,md}"
+    "fmt": "prettier --config ../prettier.config.js --write *.{json,js,ts,html,css,md} src/**/*.{json,js,ts,html,css,md}"
   },
   "dependencies": {
     "bcrypt": "3.0.7",

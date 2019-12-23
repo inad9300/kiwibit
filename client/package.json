@@ -3,7 +3,7 @@
     "scripts": {
         "start": "parcel src/index.html",
         "test": "tsc --noEmit && c8 ts-node ../shared/runner.ts",
-        "fmt": "prettier --write *.{json,js,ts,html,css,md} src/**/*.{json,js,ts,html,css,md}"
+        "fmt": "prettier --config ../prettier.config.js --write *.{json,js,ts,html,css,md} src/**/*.{json,js,ts,html,css,md}"
     },
     "dependencies": {
         "@fortawesome/fontawesome-common-types": "0.2.26",
