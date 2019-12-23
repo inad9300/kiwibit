@@ -1,7 +1,7 @@
 import './polyfills'
 import { app } from './app'
 import { log } from './shared/log'
-import { debug } from './debug'
+import { debug } from './shared/debug'
 
 window.addEventListener('error', evt => log.error('Uncaught exception.', evt))
 window.addEventListener('unhandledRejection', evt => log.error('Unhandled rejection.', evt))

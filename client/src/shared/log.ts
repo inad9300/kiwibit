@@ -1,4 +1,4 @@
-import { debug } from '../debug'
+import { debug } from './debug'
 
 type Logable = void | null | undefined | Object
 

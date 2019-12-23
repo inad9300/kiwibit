@@ -1,4 +1,4 @@
-import { Api } from '../../server/src/Api'
+import { Api } from '../../../server/src/Api'
 // FIXME https://github.com/parcel-bundler/parcel/issues/2978
 // import { config } from '../../shared/config'
 
