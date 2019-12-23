@@ -1,5 +1,4 @@
-import { Constructor } from './Constructor'
-import { WrapperType } from './WrapperType'
+import { Constructor, WrapperType } from './types'
 
 export type Column = null | boolean | number | string | Date | Uint8Array
 

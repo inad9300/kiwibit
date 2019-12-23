@@ -1,12 +1,10 @@
-import { debug } from './debug'
-
 type Logable = void | null | undefined | Object
 
 const now = () => new Date().toISOString()
 
 export const log = {
   debug: (msg: Object, ...moreInfo: Logable[]) => {
-    if (debug) {
+    if (process.argv.includes('--debug')) {
       console.debug(now(), '[DEBUG]', msg, ...moreInfo)
     }
   },

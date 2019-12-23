@@ -1,4 +1,4 @@
-import { JsonObject, JsonArray } from './Json'
+import { JsonObject, JsonArray } from './types'
 import * as api from './api'
 
 export type Api = typeof api

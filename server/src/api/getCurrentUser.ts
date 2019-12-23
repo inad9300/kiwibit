@@ -9,9 +9,9 @@ export async function getCurrentUser(_input: WithToken) {
   let uno = 1
   let dos = 2
   const res = await pool.$query<schema.users>`
-        select *
-        from users
-        where id = ${uno + dos}
-    `
+    select *
+    from users
+    where id = ${uno + dos}
+  `
   return res.rows[0]
 }

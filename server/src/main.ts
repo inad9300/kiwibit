@@ -1,7 +1,6 @@
 import * as http from 'http'
 import './Error'
 import { log } from './log'
-import { config } from '../../shared/config'
 import { Api, ApiFn, ApiPayload } from './Api'
 import * as api from './api'
 
@@ -10,9 +9,7 @@ process.on('unhandledRejection', err => log.error('Unhandled rejection.', err))
 
 http
   .createServer(serve)
-  .listen(config.server.port, () =>
-    log.info(`Server up and running on port ${config.server.port}.`)
-  )
+  .listen(4000, () => log.info(`Server up and running.`))
   .on('error', err => log.error('Server failed to start.', err))
 
 function serve(req: http.IncomingMessage, res: http.ServerResponse) {
@@ -21,7 +18,7 @@ function serve(req: http.IncomingMessage, res: http.ServerResponse) {
     reply(res, new Error('Unexpected request error. ' + err.message))
   })
 
-  res.setHeader('Access-Control-Allow-Origin', config.client.addr.slice(0, -1))
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
   res.setHeader('Access-Control-Allow-Methods', 'POST')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
