@@ -1,3 +1,3 @@
 export function homePage() {
-    return document.createElement('div')
+  return document.createElement('div')
 }

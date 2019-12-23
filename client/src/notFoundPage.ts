@@ -1,3 +1,3 @@
 export function notFoundPage() {
-    return document.createElement('div')
+  return document.createElement('div')
 }

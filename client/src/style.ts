@@ -1,3 +1,3 @@
 export const style = {
-    radius: '3px'
+  radius: '3px'
 }

@@ -1,3 +1,3 @@
 export function settingsPage() {
-    return document.createElement('div')
+  return document.createElement('div')
 }
