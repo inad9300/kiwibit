@@ -1,7 +1,6 @@
 import { appRoot } from '../main' // FIXME
 import { weekDays, currentWeekDay } from './cal'
 import { icon } from '../shared/icon'
-import { style } from '../shared/style'
 import { IconName } from '@fortawesome/fontawesome-common-types'
 import { vbox } from '../shared/box'
 import { button } from '../shared/button'
@@ -84,7 +83,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
   const addPopover = document.createElement('div')
   addPopover.style.display = 'none'
   addPopover.style.backgroundColor = 'white'
-  addPopover.style.borderRadius = style.radius
+  addPopover.style.borderRadius = '3px'
   addPopover.style.color = '#333'
   addPopover.style.padding = '4px'
   addPopover.style.border = '1px solid darkred'
@@ -117,7 +116,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
   const body = document.createElement('div')
   body.style.flex = '1'
   body.style.backgroundColor = 'white'
-  body.style.borderRadius = style.radius
+  body.style.borderRadius = '3px'
   body.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.2)'
   body.style.position = 'relative'
   body.onmouseenter = () => (addBtn.style.display = 'block')
@@ -145,7 +144,7 @@ function addItemBtn(iconName: IconName, title: string, onClick: () => void) {
   root.title = title
   root.style.padding = '8px'
   root.style.cursor = 'pointer'
-  root.style.borderRadius = style.radius
+  root.style.borderRadius = '3px'
   root.onmouseenter = () => (root.style.backgroundColor = '#ddd')
   root.onmouseleave = () => (root.style.backgroundColor = 'transparent')
   root.onclick = () => onClick()

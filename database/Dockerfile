@@ -1,17 +1,17 @@
 # 1. Build image from Dockerfile
-# docker build --tag kiwibitsi .
+# docker build --tag kiwibiti .
 # docker images --all
 
 # 2. Run image as container
-# docker container stop kiwibitsc
+# docker container stop kiwibitc
 # docker container prune
-# docker run --name kiwibitsc --env POSTGRES_PASSWORD=hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E --detach kiwibitsi
+# docker run --name kiwibitc --env POSTGRES_PASSWORD=hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E --detach kiwibiti
 # docker ps --all
-# docker logs kiwibitsc
+# docker logs kiwibitc
 
 # 3. Execute command inside container
-# docker exec --interactive --tty kiwibitsc bash
-# docker exec --interactive --tty kiwibitsc psql -U postgres
+# docker exec --interactive --tty kiwibitc bash
+# docker exec --interactive --tty kiwibitc psql -U postgres
 
 FROM postgres:12.1-alpine
 

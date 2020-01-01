@@ -1,25 +1,35 @@
 import { pages } from './pages'
+import { header } from './header/header'
+import { footer } from './shared/footer'
+import { getUrlParams } from './shared/getUrlParams'
 
-export function app(pageSlug: string | null) {
+export function app() {
   const appStyle = document.createElement('style')
-  appStyle.textContent = `.kiwibit * { box-sizing: border-box; }`
+  appStyle.textContent = `
+    .kiwibit * {
+      box-sizing: border-box;
+    }
+  `
 
-  let page = pages[pageSlug as keyof typeof pages]
-  if (!pageSlug) page = pages['home']
-  else if (!page) page = pages['not-found']
+  const pageSlug = getUrlParams().get('page')
 
-  const pageElem = page.render()
-  pageElem.style.minHeight = '100%'
+  const page = pages.hasOwnProperty(pageSlug!)
+    ? pages[pageSlug as keyof typeof pages]
+    : pages['not-found']
+
+  const pageElem = page.element()
+  pageElem.style.flex = '1'
 
   const root = document.createElement('div')
   root.className = 'kiwibit'
   root.style.height = '100%'
-  root.style.fontFamily = 'sans-serif'
+  root.style.display = 'flex'
+  root.style.flexDirection = 'column'
   root.style.position = 'relative'
-  root.append(appStyle, pageElem)
+  root.style.fontFamily = 'sans-serif'
+  root.append(appStyle, header(), pageElem, footer())
 
-  // FIXME?
-  document.title = page.title + ' @ Kiwibit'
+  document.title = page.title + ' | Kiwibit'
 
   return root
 }

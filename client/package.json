@@ -11,7 +11,6 @@
     "highcharts": "8.0.0"
   },
   "devDependencies": {
-    "@types/highcharts": "7.0.0",
     "@types/puppeteer": "2.0.0",
     "c8": "7.0.0",
     "node-sass": "4.13.0",

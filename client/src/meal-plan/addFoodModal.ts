@@ -1,5 +1,4 @@
 import { hbox, vbox } from '../shared/box'
-import { style } from '../shared/style'
 import { button } from '../shared/button'
 import { list } from '../shared/list'
 
@@ -48,7 +47,7 @@ export function addFoodModal() {
 
   const sidebar = document.createElement('aside')
   sidebar.style.backgroundColor = '#ccc'
-  sidebar.style.borderRadius = `${style.radius} 0 0 ${style.radius}`
+  sidebar.style.borderRadius = `3px 0 0 3px`
   sidebar.append(mostUsedListTitle, mostUsedList, yourCookbookListTitle, yourCookbookList)
 
   const findBtn = button()
@@ -68,15 +67,15 @@ export function addFoodModal() {
     btn.style.backgroundColor = 'white'
     btn.style.border = '1px solid rgba(0, 0, 0, 0.2)'
 
-    if (idx === 0) btn.style.borderRadius = `${style.radius} 0 0 ${style.radius}`
-    else if (idx === btns.length - 1) btn.style.borderRadius = `0 ${style.radius} ${style.radius} 0`
+    if (idx === 0) btn.style.borderRadius = `3px 0 0 3px`
+    else if (idx === btns.length - 1) btn.style.borderRadius = `0 3px 3px 0`
     else btn.style.borderRadius = '0'
   })
 
   const cancelBtn = button()
   cancelBtn.textContent = 'Cancel'
   cancelBtn.style.padding = '4px 8px'
-  cancelBtn.style.borderRadius = style.radius
+  cancelBtn.style.borderRadius = '3px'
   cancelBtn.style.backgroundColor = '#333'
   cancelBtn.style.color = 'white'
   cancelBtn.style.cssFloat = 'right'
@@ -85,7 +84,7 @@ export function addFoodModal() {
   const nav = document.createElement('nav')
   nav.style.backgroundColor = '#eee'
   nav.style.padding = '8px 12px'
-  nav.style.borderTopRightRadius = style.radius
+  nav.style.borderTopRightRadius = '3px'
   nav.append(...btns, cancelBtn)
 
   const main = document.createElement('main')

@@ -31,7 +31,7 @@ interface ColumnMetadata {
   udt_name: keyof typeof pgToJsType
 }
 
-const client = new Client({ ...pgConfig, database: 'postgres' })
+const client = new Client(pgConfig)
 
 client
   .connect()

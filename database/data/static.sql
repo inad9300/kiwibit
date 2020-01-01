@@ -36,6 +36,7 @@ insert into meal_types (name) values
 
 insert into food_label_definitions (name) values
 ('Vegan'),
+('Fermented'),
 ('Whole food');
 
 insert into user_types (name) values

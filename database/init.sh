@@ -1,10 +1,5 @@
 #!/bin/bash
 
-echo -e "\n> Creating database"
-
-psql -c "create database kiwibits owner $POSTGRES_USER encoding 'UTF8'"
-
-
 echo -e "\n> Creating USDA schema"
 
 USDA_SCHEMA=usda

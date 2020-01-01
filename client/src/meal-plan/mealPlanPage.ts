@@ -1,5 +1,3 @@
-import { header } from '../shared/header'
-import { footer } from '../shared/footer'
 import { list } from '../shared/list'
 import { weeklyPlanBoard } from './weeklyPlanBoard'
 import { nutritionalOverview } from './nutritionalOverview'
@@ -8,7 +6,7 @@ import { shoppingList } from './shoppingList'
 
 export function mealPlanPage() {
   const root = document.createElement('div')
-  root.append(header('meal-plan'), weeklyPlanBoard(), tabbedSection(), footer())
+  root.append(weeklyPlanBoard(), tabbedSection())
 
   return root
 }
