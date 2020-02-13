@@ -1,4 +1,4 @@
-  import { pageFinderInput } from './pageFinderInput'
+import { pageFinderInput } from './pageFinderInput'
 
 /**
  * TODO Reminders (bell), Settings/Profile.
