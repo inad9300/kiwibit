@@ -1,6 +1,10 @@
 import { pool } from '../pool'
 
-export async function getIntakeMetadataForNutrient(data: { nutrientId: number, age: number, gender: 'M' | 'F' }) {
+export async function getIntakeMetadataForNutrient(data: {
+  nutrientId: number
+  age: number
+  gender: 'M' | 'F'
+}) {
   const rdi = await pool.query(`
     select rdi.value
     from reference_intakes rdi

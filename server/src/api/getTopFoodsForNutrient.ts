@@ -4,20 +4,24 @@ let energyId: number
 
 pool
   .query(`select id from nutrients where name = 'Energy'`)
-  .then(res => energyId = res.rows[0].id)
+  .then(res => (energyId = res.rows[0].id))
 
-export async function getTopFoodsForNutrient(data: { nutrientId: number, orderBy: 'weight' | 'energy' }) {
-  const orderBy = data.orderBy === 'weight' || data.nutrientId === energyId
-    ? 'fn.amount'
-    : `(
-      100 * fn.amount / (
-        select fe.amount
-        from food_nutrients fe
-        where fe.food_id = fn.food_id
-        and fe.nutrient_id = ${energyId}
-        and fe.amount > 0
-      )
-    )`
+export async function getTopFoodsForNutrient(data: {
+  nutrientId: number
+  orderBy: 'weight' | 'energy'
+}) {
+  const orderBy =
+    data.orderBy === 'weight' || data.nutrientId === energyId
+      ? 'fn.amount'
+      : `(
+        100 * fn.amount / (
+          select fe.amount
+          from food_nutrients fe
+          where fe.food_id = fn.food_id
+          and fe.nutrient_id = ${energyId}
+          and fe.amount > 0
+        )
+      )`
 
   const res = await pool.query(`
     select f.id, f.name, ${orderBy} amount, uc.color, uc.name usda_category_name, (

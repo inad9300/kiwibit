@@ -3,28 +3,26 @@
   "scripts": {
     "postinstall": "ts-node ./src/schema.gen.ts",
     "prestart": "export TZ=UTC",
-    "start": "nodemon -w src -e ts -x 'clear && node --inspect=9229 -r ts-node/register src/main.ts --debug'",
+    "start": "nodemon --watch src/ --ext ts --exec 'clear && node --inspect=9229 --require=ts-node/register src/main.ts --debug'",
     "pretest": "export TZ=UTC",
     "test": "c8 ts-node ../shared/runner.ts",
-    "lint": "pgeon scan src/",
     "fmt": "prettier --config ../prettier.config.js --write *.{json,js,ts,html,css,md} src/**/*.{json,js,ts,html,css,md}"
   },
   "dependencies": {
     "bcryptjs": "2.4.3",
-    "pg": "7.15.1",
-    "pgeon": "0.0.1"
+    "pg": "8.0.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "2.4.2",
-    "@types/node-fetch": "2.5.4",
-    "@types/node": "12.12.21",
-    "@types/pg": "7.11.2",
-    "c8": "7.0.0",
+    "@types/node-fetch": "2.5.6",
+    "@types/node": "13.13.0",
+    "@types/pg": "7.14.3",
+    "c8": "7.1.0",
     "node-fetch": "2.6.0",
-    "nodemon": "2.0.2",
-    "prettier": "1.19.1",
-    "ts-node": "8.5.4",
-    "typescript": "3.7.4"
+    "nodemon": "2.0.3",
+    "prettier": "2.0.4",
+    "ts-node": "8.8.2",
+    "typescript": "3.8.3"
   },
   "engines": {
     "node": ">=12.0.0"

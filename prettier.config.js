@@ -2,5 +2,6 @@ module.exports = {
   printWidth: 100,
   singleQuote: true,
   semi: false,
-  endOfLine: 'lf'
+  arrowParens: 'avoid',
+  trailingComma: 'none'
 }

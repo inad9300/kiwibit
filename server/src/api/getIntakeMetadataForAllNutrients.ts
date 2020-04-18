@@ -1,6 +1,6 @@
 import { pool } from '../pool'
 
-export async function getIntakeMetadataForAllNutrients(data: { age: number, gender: 'M' | 'F' }) {
+export async function getIntakeMetadataForAllNutrients(data: { age: number; gender: 'M' | 'F' }) {
   const res = await pool.query(`
     select *
     from (
