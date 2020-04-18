@@ -8,6 +8,7 @@ You can visit the [planning board](https://github.com/inad9300/kiwibit/projects/
 
 ## Setup
 
-1. `docker-compose up --detach`
-2. `cd server && npm i && npm start`
-3. `cd client && npm i && npm start`
+0. Install Docker and Node.js.
+1. Run `cd database && ./start.sh` (port 5000).
+2. Run `cd server && npm i && npm start` (port 4000).
+3. Run `cd client && npm i && npm start` (port 3000).
