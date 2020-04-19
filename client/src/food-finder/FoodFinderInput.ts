@@ -1,6 +1,6 @@
 import { api } from '../shared/api'
 
-export function foodFinderInput(onSelect: (foodId: number) => void) {
+export function FoodFinderInput(onSelect: (foodId: number) => void) {
   let usdaCategoryId = -1
 
   const input = document.createElement('input')

@@ -1,10 +1,10 @@
-import { nutrientSelect } from './nutrientSelect'
-import { orderBySelect } from './orderBySelect'
-import { topFoodsChart } from './topFoodsChart'
+import { NutrientSelect } from './NutrientSelect'
+import { OrderBySelect } from './OrderBySelect'
+import { TopFoodsChart } from './TopFoodsChart'
 import { api } from '../shared/api'
 
-export function topFoodsPage() {
-  const chart = topFoodsChart()
+export function TopFoodsPage() {
+  const chart = TopFoodsChart()
 
   function reloadChart() {
     const nutrientId = parseInt(_nutrientSelect.value, 10)
@@ -24,10 +24,10 @@ export function topFoodsPage() {
     })
   }
 
-  const _nutrientSelect = nutrientSelect()
+  const _nutrientSelect = NutrientSelect()
   _nutrientSelect.onchange = reloadChart
 
-  const _orderBySelect = orderBySelect()
+  const _orderBySelect = OrderBySelect()
   _orderBySelect.onchange = reloadChart
 
   const root = document.createElement('div')

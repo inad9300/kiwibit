@@ -1,6 +1,6 @@
 import { api } from '../shared/api'
 
-export function usdaCategorySelect() {
+export function UsdaCategorySelect() {
   const select = document.createElement('select')
 
   api('getAllUsdaCategories', undefined).then(categories => {

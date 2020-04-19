@@ -1,8 +1,8 @@
-import { topFoodsPage } from './top-foods/topFoodsPage'
-import { foodFinderPage } from './food-finder/foodFinderPage'
-import { mealPlanPage } from './meal-plan/mealPlanPage'
-import { settingsPage } from './settings/settingsPage'
-import { notFoundPage } from './not-found/notFoundPage'
+import { TopFoodsPage } from './top-foods/TopFoodsPage'
+import { FoodFinderPage } from './food-finder/FoodFinderPage'
+import { MealPlanPage } from './meal-plan/MealPlanPage'
+import { SettingsPage } from './settings/SettingsPage'
+import { NotFoundPage } from './not-found/NotFoundPage'
 
 export enum Page {
   TopFoods = 'top-foods',
@@ -16,26 +16,26 @@ export const pages = {
   [Page.TopFoods]: {
     slug: Page.TopFoods,
     title: 'Top Foods',
-    element: topFoodsPage
+    element: TopFoodsPage
   },
   [Page.FoodFinder]: {
     slug: Page.FoodFinder,
     title: 'Food Finder',
-    element: foodFinderPage
+    element: FoodFinderPage
   },
   [Page.MealPlan]: {
     slug: Page.MealPlan,
     title: 'Meal Plan',
-    element: mealPlanPage
+    element: MealPlanPage
   },
   [Page.Settings]: {
     slug: Page.Settings,
     title: 'Settings',
-    element: settingsPage
+    element: SettingsPage
   },
   [Page.NotFound]: {
     slug: Page.NotFound,
     title: 'Not Found',
-    element: notFoundPage
+    element: NotFoundPage
   }
 }

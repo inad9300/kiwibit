@@ -1,6 +1,6 @@
 import { api } from '../shared/api'
 
-export function nutrientSelect() {
+export function NutrientSelect() {
   const select = document.createElement('select')
 
   api('getAllNutrients', undefined).then(nutrients => {

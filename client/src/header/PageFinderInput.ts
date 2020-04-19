@@ -1,9 +1,9 @@
 import { pages } from '../pages'
-import { list } from '../shared/list'
+import { List } from '../shared/List'
 
 const findablePages = [pages['top-foods'], pages['food-finder'], pages['meal-plan']]
 
-export function pageFinderInput() {
+export function PageFinderInput() {
   const input = document.createElement('input')
   input.style.backgroundColor = '#eee'
   input.style.border = 'none'
@@ -37,7 +37,7 @@ export function pageFinderInput() {
     return li
   })
 
-  const pagesList = list()
+  const pagesList = List()
   pagesList.style.display = 'none'
   pagesList.style.padding = '12px'
   pagesList.style.backgroundColor = 'white'

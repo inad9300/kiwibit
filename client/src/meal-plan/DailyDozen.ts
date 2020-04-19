@@ -1,7 +1,7 @@
-import { list } from '../shared/list'
-import { checkbox } from '../shared/checkbox'
+import { List } from '../shared/List'
+import { Checkbox } from '../shared/Checkbox'
 
-export function dailyDozen() {
+export function DailyDozen() {
   const categories = [
     'Beans',
     'Berries',
@@ -17,12 +17,12 @@ export function dailyDozen() {
     'Exercise'
   ]
 
-  const root = list()
+  const root = List()
   root.append(
     ...categories.map((cat, idx) => {
       const id = 'dailyDozenCheckbox' + idx
 
-      const check = checkbox()
+      const check = Checkbox()
       check.id = id
 
       const label = document.createElement('label')

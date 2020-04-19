@@ -1,10 +1,10 @@
-import { list } from '../shared/list'
-import { checkbox } from '../shared/checkbox'
+import { List } from '../shared/List'
+import { Checkbox } from '../shared/Checkbox'
 
-export function shoppingList() {
+export function ShoppingList() {
   const id = 'shoppingListCheckbox1'
 
-  const check = checkbox()
+  const check = Checkbox()
   check.id = id
 
   const label = document.createElement('label')
@@ -14,7 +14,7 @@ export function shoppingList() {
   const item = document.createElement('li')
   item.append(check, label)
 
-  const root = list()
+  const root = List()
   root.append(item)
 
   return root

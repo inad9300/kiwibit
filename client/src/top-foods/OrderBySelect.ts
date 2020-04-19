@@ -1,4 +1,4 @@
-export function orderBySelect() {
+export function OrderBySelect() {
   const select = document.createElement('select')
 
   const order = [

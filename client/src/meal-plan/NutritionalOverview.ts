@@ -1,6 +1,6 @@
 import { randomInt } from '../shared/randomInt'
 
-export function nutritionalOverview() {
+export function NutritionalOverview() {
   const root = document.createElement('div')
 
   for (let i = 0; i < 16; ++i) {

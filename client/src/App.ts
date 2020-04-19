@@ -1,9 +1,9 @@
 import { pages } from './pages'
-import { header } from './header/header'
-import { footer } from './shared/footer'
+import { Header } from './header/Header'
+import { Footer } from './shared/Footer'
 import { getUrlParams } from './shared/getUrlParams'
 
-export function app() {
+export function App() {
   const appStyle = document.createElement('style')
   appStyle.textContent = `
     .kiwibit * {
@@ -27,7 +27,7 @@ export function app() {
   root.style.flexDirection = 'column'
   root.style.position = 'relative'
   root.style.fontFamily = 'sans-serif'
-  root.append(appStyle, header(), pageElem, footer())
+  root.append(appStyle, Header(), pageElem, Footer())
 
   document.title = page.title + ' | Kiwibit'
 

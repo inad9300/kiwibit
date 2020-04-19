@@ -1,8 +1,8 @@
-import { hbox, vbox } from '../shared/box'
-import { button } from '../shared/button'
-import { list } from '../shared/list'
+import { Hbox, Vbox } from '../shared/Box'
+import { Button } from '../shared/Button'
+import { List } from '../shared/List'
 
-export function addFoodModal() {
+export function AddFoodModal() {
   const mostUsedListTitle = document.createElement('h1')
   mostUsedListTitle.textContent = 'Most used'
   mostUsedListTitle.style.margin = '0'
@@ -11,7 +11,7 @@ export function addFoodModal() {
   mostUsedListTitle.style.fontSize = '16px'
   mostUsedListTitle.style.fontWeight = 'normal'
 
-  const mostUsedList = list()
+  const mostUsedList = List()
   ;['Potato', 'Tomato'].forEach((food, idx) => {
     const li = document.createElement('li')
     li.textContent = food
@@ -32,7 +32,7 @@ export function addFoodModal() {
   yourCookbookListTitle.style.fontSize = '16px'
   yourCookbookListTitle.style.fontWeight = 'normal'
 
-  const yourCookbookList = list()
+  const yourCookbookList = List()
   ;['Lettuce', 'Eggplant', 'Sweet potato', 'Spinach'].forEach((food, idx) => {
     const li = document.createElement('li')
     li.textContent = food
@@ -50,13 +50,13 @@ export function addFoodModal() {
   sidebar.style.borderRadius = `3px 0 0 3px`
   sidebar.append(mostUsedListTitle, mostUsedList, yourCookbookListTitle, yourCookbookList)
 
-  const findBtn = button()
+  const findBtn = Button()
   findBtn.textContent = 'Find'
 
-  const importBtn = button()
+  const importBtn = Button()
   importBtn.textContent = 'Import'
 
-  const newBtn = button()
+  const newBtn = Button()
   newBtn.textContent = 'New'
 
   const btns = [findBtn, importBtn, newBtn]
@@ -72,7 +72,7 @@ export function addFoodModal() {
     else btn.style.borderRadius = '0'
   })
 
-  const cancelBtn = button()
+  const cancelBtn = Button()
   cancelBtn.textContent = 'Cancel'
   cancelBtn.style.padding = '4px 8px'
   cancelBtn.style.borderRadius = '3px'
@@ -93,10 +93,10 @@ export function addFoodModal() {
   main.style.padding = '8px 12px'
   main.textContent = 'Main'
 
-  const rightPart = vbox([nav, main])
+  const rightPart = Vbox([nav, main])
   rightPart.style.flex = '1'
 
-  const root = hbox([sidebar, rightPart], { tag: 'article' })
+  const root = Hbox([sidebar, rightPart], { tag: 'article' })
   root.style.width = '1024px'
   root.style.maxWidth = '90%'
   root.style.position = 'absolute'

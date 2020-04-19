@@ -1,4 +1,4 @@
-export function checkbox() {
+export function Checkbox() {
   const root = document.createElement('input')
   root.type = 'checkbox'
 

@@ -1,16 +1,16 @@
-import { usdaCategorySelect } from './usdaCategorySelect'
-import { foodFinderInput } from './foodFinderInput'
-import { foodDetails } from './foodDetails'
+import { UsdaCategorySelect } from './UsdaCategorySelect'
+import { FoodFinderInput } from './FoodFinderInput'
+import { FoodDetails } from './FoodDetails'
 import { api } from '../shared/api'
 import { getUrlParams } from '../shared/getUrlParams'
 
-export function foodFinderPage() {
-  const _usdaCategorySelect = usdaCategorySelect()
+export function FoodFinderPage() {
+  const _usdaCategorySelect = UsdaCategorySelect()
   _usdaCategorySelect.onchange = () => {
     _foodFinderInput.setUsdaCategoryId(parseInt(_usdaCategorySelect.value, 10))
   }
 
-  const _foodDetails = foodDetails()
+  const _foodDetails = FoodDetails()
 
   function loadFoodDetails(foodId: number) {
     Promise.all([
@@ -21,7 +21,7 @@ export function foodFinderPage() {
     })
   }
 
-  const _foodFinderInput = foodFinderInput(loadFoodDetails)
+  const _foodFinderInput = FoodFinderInput(loadFoodDetails)
 
   const root = document.createElement('div')
   root.style.margin = '20px'

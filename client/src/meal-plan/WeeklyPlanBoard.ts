@@ -1,12 +1,12 @@
-import { appRoot } from '../main' // FIXME
+import { app } from '../main' // FIXME
 import { weekDays, currentWeekDay } from './cal'
-import { icon } from '../shared/icon'
+import { Icon } from '../shared/Icon'
 import { IconName } from '@fortawesome/fontawesome-common-types'
-import { vbox } from '../shared/box'
-import { button } from '../shared/button'
-import { addFoodModal } from './addFoodModal'
+import { Vbox } from '../shared/Box'
+import { Button } from '../shared/Button'
+import { AddFoodModal } from './AddFoodModal'
 
-export function weeklyPlanBoard() {
+export function WeeklyPlanBoard() {
   const planControls = document.createElement('div')
   planControls.style.padding = '32px 0'
   planControls.style.textAlign = 'center'
@@ -52,14 +52,14 @@ export function weeklyPlanBoard() {
 function planControlBtn(iconName: IconName, isFirst: boolean) {
   const size = '32px'
 
-  const btn = button()
+  const btn = Button()
   btn.style.width = size
   btn.style.height = size
   btn.style.borderRadius = '50%'
   btn.style.backgroundColor = 'white'
   btn.style.fontSize = '16px'
   btn.style.color = '#333'
-  btn.append(icon(iconName))
+  btn.append(Icon(iconName))
 
   if (!isFirst) {
     btn.style.marginLeft = '8px'
@@ -75,7 +75,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
   title.style.color = '#333'
   title.textContent = cardTitle
 
-  const addFoodIcon = addItemBtn('carrot', 'Add food', () => appRoot.prepend(addFoodModal()))
+  const addFoodIcon = addItemBtn('carrot', 'Add food', () => app.prepend(AddFoodModal()))
   const addRecipeIcon = addItemBtn('utensils', 'Add recipe', () => void 0)
   // const addSmoothieIcon = addItemBtn('blender', 'Add smoothie', () => void 0)
   // const addSaladIcon = addItemBtn('seedling', 'Add salad', () => void 0)
@@ -93,7 +93,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
   addPopover.style.top = '5px'
   addPopover.append(addFoodIcon, addRecipeIcon)
 
-  const addBtn = button()
+  const addBtn = Button()
   addBtn.style.display = 'none'
   const addBtnSize = 60
   addBtn.style.width = addBtn.style.height = addBtnSize + 'px'
@@ -111,7 +111,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
     addPopover.style.left = '-' + Math.floor((addPopover.offsetWidth - addBtnSize) / 2) + 'px'
   }
   addBtn.onmouseleave = () => (addPopover.style.display = 'none')
-  addBtn.append(icon('plus'), addPopover)
+  addBtn.append(Icon('plus'), addPopover)
 
   const body = document.createElement('div')
   body.style.flex = '1'
@@ -127,7 +127,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
     body.style.border = '2px solid darkred'
   }
 
-  const root = vbox([title, body], { tag: 'article' })
+  const root = Vbox([title, body], { tag: 'article' })
   root.style.display = 'inline-flex'
   root.style.height = '500px'
   root.style.width = '360px'
@@ -140,7 +140,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
 }
 
 function addItemBtn(iconName: IconName, title: string, onClick: () => void) {
-  const root = icon(iconName)
+  const root = Icon(iconName)
   root.title = title
   root.style.padding = '8px'
   root.style.cursor = 'pointer'

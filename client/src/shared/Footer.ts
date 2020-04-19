@@ -1,4 +1,4 @@
-export function footer() {
+export function Footer() {
   const root = document.createElement('footer')
   root.style.minHeight = '200px'
   root.style.backgroundColor = '#333'

@@ -1,7 +1,7 @@
 import * as Highcharts from 'highcharts'
 import { Page } from '../pages'
 
-export function topFoodsChart() {
+export function TopFoodsChart() {
   const root = document.createElement('div')
 
   const chart = Highcharts.chart(root, {

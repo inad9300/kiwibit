@@ -1,9 +1,9 @@
-import { pageFinderInput } from './pageFinderInput'
+import { PageFinderInput } from './PageFinderInput'
 
 /**
  * TODO Reminders (bell), Settings/Profile.
  */
-export function header() {
+export function Header() {
   const logo = document.createElement('h1')
   logo.textContent = 'K'
   logo.title = 'Kiwibit'
@@ -17,7 +17,7 @@ export function header() {
   root.style.justifyContent = 'space-between'
   root.style.padding = '10px 20px'
   root.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.7)'
-  root.append(logo, pageFinderInput(), notificationsIcon)
+  root.append(logo, PageFinderInput(), notificationsIcon)
 
   return root
 }

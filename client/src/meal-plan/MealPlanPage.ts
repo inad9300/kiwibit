@@ -1,22 +1,22 @@
-import { list } from '../shared/list'
-import { weeklyPlanBoard } from './weeklyPlanBoard'
-import { nutritionalOverview } from './nutritionalOverview'
-import { dailyDozen } from './dailyDozen'
-import { shoppingList } from './shoppingList'
+import { List } from '../shared/List'
+import { WeeklyPlanBoard } from './WeeklyPlanBoard'
+import { NutritionalOverview } from './NutritionalOverview'
+import { DailyDozen } from './DailyDozen'
+import { ShoppingList } from './ShoppingList'
 
-export function mealPlanPage() {
+export function MealPlanPage() {
   const root = document.createElement('div')
-  root.append(weeklyPlanBoard(), tabbedSection())
+  root.append(WeeklyPlanBoard(), TabbedSection())
 
   return root
 }
 
-function tabbedSection() {
+function TabbedSection() {
   const tabInfo = [
     // TODO Counters.
-    { name: 'Nutritional Overview', side: 'left' as 'left', content: nutritionalOverview },
-    { name: 'Daily Dozen', side: 'left' as 'left', content: dailyDozen },
-    { name: 'Shopping List', side: 'right' as 'right', content: shoppingList }
+    { name: 'Nutritional Overview', side: 'left' as 'left', content: NutritionalOverview },
+    { name: 'Daily Dozen', side: 'left' as 'left', content: DailyDozen },
+    { name: 'Shopping List', side: 'right' as 'right', content: ShoppingList }
   ]
 
   let tabContent: HTMLElement = document.createElement('div')
@@ -24,7 +24,7 @@ function tabbedSection() {
   const tabs: HTMLLIElement[] = []
   tabInfo.forEach(ti =>
     tabs.push(
-      tab(ti.name, ti.side, tabs, () => {
+      Tab(ti.name, ti.side, tabs, () => {
         const nextTabContent = ti.content()
         nextTabContent.style.padding = '16px'
         root.replaceChild(nextTabContent, tabContent)
@@ -33,7 +33,7 @@ function tabbedSection() {
     )
   )
 
-  const tabList = list()
+  const tabList = List()
   tabList.style.padding = '0 12px'
   tabList.style.borderBottom = '1px solid #666'
   tabList.append(...tabs)
@@ -47,7 +47,7 @@ function tabbedSection() {
   return root
 }
 
-function tab(name: string, side: 'left' | 'right', tabs: HTMLLIElement[], onClick: () => void) {
+function Tab(name: string, side: 'left' | 'right', tabs: HTMLLIElement[], onClick: () => void) {
   const root = document.createElement('li')
   root.textContent = name
   root.style.display = 'inline-block'
@@ -90,7 +90,7 @@ function tab(name: string, side: 'left' | 'right', tabs: HTMLLIElement[], onClic
 }
 
 /*
-function tabs(tabs: HTMLLIElement[], contents: HTMLElement[]) {
+function Tabs(tabs: HTMLLIElement[], contents: HTMLElement[]) {
     const root = document.createElement('div')
     root.onclick = evt => {
         if (tabs.indexOf(evt.target as HTMLLIElement) > -1) {

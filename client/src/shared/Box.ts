@@ -33,5 +33,5 @@ function box(
   return root
 }
 
-export const hbox = box.bind(null, 'row', 'marginLeft')
-export const vbox = box.bind(null, 'column', 'marginTop')
+export const Hbox = box.bind(null, 'row', 'marginLeft')
+export const Vbox = box.bind(null, 'column', 'marginTop')
