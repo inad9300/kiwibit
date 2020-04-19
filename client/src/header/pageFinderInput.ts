@@ -11,10 +11,10 @@ export function pageFinderInput() {
   input.style.padding = '8px 12px'
   input.style.fontSize = '18px'
   input.style.minWidth = '250px'
-  input.onfocus = () => pagesList.style.display = 'block'
+  input.onfocus = () => (pagesList.style.display = 'block')
   // input.onblur = () => pagesList.style.display = 'none'
   input.oninput = () => {
-    pageItems.forEach(pi => pi.style.opacity = '100%')
+    pageItems.forEach(pi => (pi.style.opacity = '100%'))
 
     if (input.value) {
       pageItems.forEach(pi => {

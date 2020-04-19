@@ -32,7 +32,10 @@ export function topFoodsChart() {
         cursor: 'pointer',
         point: {
           events: {
-            click: evt => location.href = `/?page=${Page.FoodFinder}&food-id=${(evt.point as any).originalData.id}`
+            click: evt => {
+              const foodId = (evt.point as any).originalData.id
+              location.href = `/?page=${Page.FoodFinder}&food-id=${foodId}`
+            }
           }
         }
       }

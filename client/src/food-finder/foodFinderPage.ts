@@ -13,14 +13,12 @@ export function foodFinderPage() {
   const _foodDetails = foodDetails()
 
   function loadFoodDetails(foodId: number) {
-    Promise
-      .all([
-        api('getIntakeMetadataForAllNutrients', { age: 25, gender: 'M' }),
-        api('findFoodDetails', { id: foodId })
-      ])
-      .then(([intakeMetadata, foodDetails]) => {
-        _foodDetails.setData(intakeMetadata, foodDetails)
-      })
+    Promise.all([
+      api('getIntakeMetadataForAllNutrients', { age: 25, gender: 'M' }),
+      api('findFoodDetails', { id: foodId })
+    ]).then(([intakeMetadata, foodDetails]) => {
+      _foodDetails.setData(intakeMetadata, foodDetails)
+    })
   }
 
   const _foodFinderInput = foodFinderInput(loadFoodDetails)

@@ -9,8 +9,10 @@ export function avgRgb(hexColorA: string, hexColorB: string): string {
   const greenB = parseInt(hexColorB.substr(3, 2), 16)
   const blueB = parseInt(hexColorB.substr(5, 2), 16)
 
-  return '#'
-    + pad(Math.round((redA + redB) / 2).toString(16))
-    + pad(Math.round((greenA + greenB) / 2).toString(16))
-    + pad(Math.round((blueA + blueB) / 2).toString(16))
+  return (
+    '#' +
+    pad(Math.round((redA + redB) / 2).toString(16)) +
+    pad(Math.round((greenA + greenB) / 2).toString(16)) +
+    pad(Math.round((blueA + blueB) / 2).toString(16))
+  )
 }

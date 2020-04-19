@@ -13,14 +13,7 @@ export function foodDetails() {
   const table = document.createElement('table')
   table.style.borderCollapse = 'collapse'
 
-  const headers = [
-    'Nutrient',
-    'Amount',
-    'RDI',
-    '% of RDI',
-    'UL',
-    '% of UL'
-  ]
+  const headers = ['Nutrient', 'Amount', 'RDI', '% of RDI', 'UL', '% of UL']
 
   const ths = headers.map(h => {
     const th = document.createElement('th')
@@ -46,10 +39,11 @@ export function foodDetails() {
     setData(intakeMetadata: any[], foodDetails: any) {
       heading.textContent = foodDetails.name + ` (100 g)`
 
-      googleImagesLink.href = googleImagesLink.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)
+      googleImagesLink.href = googleImagesLink.href =
+        'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)
 
       const trs = (foodDetails.nutrients as any[])
-        .sort((a: any, b: any) => a.name > b.name ? 1 : -1)
+        .sort((a: any, b: any) => (a.name > b.name ? 1 : -1))
         .map((n: any, idx) => {
           const im = intakeMetadata.find(im => im.nutrient_id === n.id)
 
@@ -85,16 +79,9 @@ export function foodDetails() {
             ulPctTd.style.color = 'red'
           }
 
-          const tds = [
-            nameTd,
-            amountTd,
-            rdiTd,
-            rdiPctTd,
-            ulTd,
-            ulPctTd
-          ]
+          const tds = [nameTd, amountTd, rdiTd, rdiPctTd, ulTd, ulPctTd]
 
-          tds.forEach(td => td.style.padding = '4px 6px')
+          tds.forEach(td => (td.style.padding = '4px 6px'))
 
           tr.append(...tds)
 

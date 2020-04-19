@@ -9,7 +9,7 @@ window.addEventListener('unhandledRejection', evt => log.error('Unhandled reject
 if (debug) {
   const { createElement } = document
 
-  document.createElement = function() {
+  document.createElement = function () {
     const elem = createElement.apply(document, arguments as any)
 
     const callee = new Error().stack!.split('\n')[1].split('@')[0]

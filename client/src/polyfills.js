@@ -1,6 +1,6 @@
 // Source: https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/append.
-;(function(arr) {
-  arr.forEach(function(item) {
+;(function (arr) {
+  arr.forEach(function (item) {
     if (item.hasOwnProperty('append')) {
       return
     }
@@ -12,7 +12,7 @@
         var argArr = Array.prototype.slice.call(arguments),
           docFrag = document.createDocumentFragment()
 
-        argArr.forEach(function(argItem) {
+        argArr.forEach(function (argItem) {
           var isNode = argItem instanceof Node
           docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)))
         })
@@ -24,8 +24,8 @@
 })([Element.prototype, Document.prototype, DocumentFragment.prototype])
 
 // Source: https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/prepend.
-;(function(arr) {
-  arr.forEach(function(item) {
+;(function (arr) {
+  arr.forEach(function (item) {
     if (item.hasOwnProperty('prepend')) {
       return
     }
@@ -37,7 +37,7 @@
         var argArr = Array.prototype.slice.call(arguments),
           docFrag = document.createDocumentFragment()
 
-        argArr.forEach(function(argItem) {
+        argArr.forEach(function (argItem) {
           var isNode = argItem instanceof Node
           docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)))
         })
