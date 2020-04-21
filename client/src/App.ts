@@ -1,7 +1,5 @@
-import { pages } from './pages'
+import { getCurrentPage } from './pages'
 import { Header } from './header/Header'
-import { Footer } from './shared/Footer'
-import { getUrlParams } from './shared/getUrlParams'
 
 export function App() {
   const appStyle = document.createElement('style')
@@ -9,16 +7,15 @@ export function App() {
     .kiwibit * {
       box-sizing: border-box;
     }
+
+    ::-moz-focus-inner {
+      border: 0;
+    }
   `
 
-  const pageSlug = getUrlParams().get('page')
-
-  const page = pages.hasOwnProperty(pageSlug!)
-    ? pages[pageSlug as keyof typeof pages]
-    : pages['not-found']
-
-  const pageElem = page.element()
-  pageElem.style.flex = '1'
+  const page = getCurrentPage()
+  const pageComponent = page.component()
+  pageComponent.style.flex = '1'
 
   const root = document.createElement('div')
   root.className = 'kiwibit'
@@ -27,7 +24,8 @@ export function App() {
   root.style.flexDirection = 'column'
   root.style.position = 'relative'
   root.style.fontFamily = 'sans-serif'
-  root.append(appStyle, Header(), pageElem, Footer())
+
+  root.append(appStyle, Header(), pageComponent)
 
   document.title = page.title + ' | Kiwibit'
 

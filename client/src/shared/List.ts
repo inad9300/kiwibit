@@ -1,5 +1,3 @@
-import { wrap } from './wrap'
-
 export function List(children?: (string | HTMLElement)[]) {
   const root = document.createElement('ul')
   root.style.listStyle = 'none'
@@ -7,7 +5,11 @@ export function List(children?: (string | HTMLElement)[]) {
   root.style.padding = '0'
 
   if (children) {
-    root.append(...children.map(c => wrap(c, 'li')))
+    root.append(...children.map(c => {
+      const li = document.createElement('li')
+      li.append(c)
+      return li
+    }))
   }
 
   return root

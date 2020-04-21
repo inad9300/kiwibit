@@ -5,9 +5,9 @@ import { api } from '../shared/api'
 import { getUrlParams } from '../shared/getUrlParams'
 
 export function FoodFinderPage() {
-  const _usdaCategorySelect = UsdaCategorySelect()
-  _usdaCategorySelect.onchange = () => {
-    _foodFinderInput.setUsdaCategoryId(parseInt(_usdaCategorySelect.value, 10))
+  const usdaCategorySelect = UsdaCategorySelect()
+  usdaCategorySelect.onchange = () => {
+    _foodFinderInput.setUsdaCategoryId(parseInt(usdaCategorySelect.value, 10))
   }
 
   const _foodDetails = FoodDetails()
@@ -25,7 +25,7 @@ export function FoodFinderPage() {
 
   const root = document.createElement('div')
   root.style.margin = '20px'
-  root.append(_usdaCategorySelect, _foodFinderInput, _foodDetails)
+  root.append(usdaCategorySelect, _foodFinderInput, _foodDetails)
 
   const foodIdStr = getUrlParams().get('food-id')
   if (foodIdStr) {

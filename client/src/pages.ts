@@ -3,6 +3,8 @@ import { FoodFinderPage } from './food-finder/FoodFinderPage'
 import { MealPlanPage } from './meal-plan/MealPlanPage'
 import { SettingsPage } from './settings/SettingsPage'
 import { NotFoundPage } from './not-found/NotFoundPage'
+import { IconName } from '@fortawesome/fontawesome-common-types'
+import { getUrlParams } from './shared/getUrlParams'
 
 export enum Page {
   TopFoods = 'top-foods',
@@ -12,30 +14,58 @@ export enum Page {
   NotFound = 'not-found'
 }
 
-export const pages = {
+export function getCurrentPage(): PageMap[Page.NotFound] {
+  const pageSlug = getUrlParams().get('page')
+
+  return pages.hasOwnProperty(pageSlug!)
+    ? pages[pageSlug as keyof typeof pages]
+    : pages['not-found']
+}
+
+type PageMap = {
+  [id in Page]: {
+    slug: Page
+    title: string
+    icon: IconName
+    iconColor: string
+    component: () => HTMLElement
+  }
+}
+
+export const pages: PageMap = {
   [Page.TopFoods]: {
     slug: Page.TopFoods,
     title: 'Top Foods',
-    element: TopFoodsPage
+    icon: 'seedling',
+    iconColor: 'rgb(151, 189, 148)',
+    component: TopFoodsPage
   },
   [Page.FoodFinder]: {
     slug: Page.FoodFinder,
     title: 'Food Finder',
-    element: FoodFinderPage
+    icon: 'binoculars',
+    iconColor: 'rgb(189, 167, 148)',
+    component: FoodFinderPage
   },
   [Page.MealPlan]: {
     slug: Page.MealPlan,
     title: 'Meal Plan',
-    element: MealPlanPage
+    icon: 'calendar-week',
+    iconColor: '#777',
+    component: MealPlanPage
   },
   [Page.Settings]: {
     slug: Page.Settings,
     title: 'Settings',
-    element: SettingsPage
+    icon: 'user-cog',
+    iconColor: '#666',
+    component: SettingsPage
   },
   [Page.NotFound]: {
     slug: Page.NotFound,
     title: 'Not Found',
-    element: NotFoundPage
+    icon: 'question',
+    iconColor: '#888',
+    component: NotFoundPage
   }
 }

@@ -13,17 +13,15 @@ if (debug) {
     const elem = createElement.apply(document, arguments as any)
 
     const callee = new Error().stack!.split('\n')[1].split('@')[0]
-    elem.dataset.type = callee
+    elem.dataset.component = callee
 
     return elem
-  } as any
+  }
 }
 
 document.documentElement.style.height = '100%'
-
 document.body.style.height = '100%'
 document.body.style.margin = '0'
 
 export const app = App()
-
 document.body.append(app)
