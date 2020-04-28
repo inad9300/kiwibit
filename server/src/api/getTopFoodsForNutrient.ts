@@ -6,9 +6,20 @@ pool
   .query(`select id from nutrients where name = 'Energy'`)
   .then(res => (energyId = res.rows[0].id))
 
+export type FoodNutrient = {
+  id: number
+  name: string
+  amount: number
+  unit_abbr: string
+  color: string
+  usda_category_name: string
+}
+
 export async function getTopFoodsForNutrient(data: {
   nutrientId: number
   orderBy: 'weight' | 'energy'
+  categories: number[]
+  offset: number
 }) {
   const orderBy =
     data.orderBy === 'weight' || data.nutrientId === energyId
@@ -23,7 +34,11 @@ export async function getTopFoodsForNutrient(data: {
         )
       )`
 
-  const res = await pool.query(`
+  const categoriesFilter = data.categories.length === 0
+    ? ''
+    : `and uc.id in (${data.categories.join(',')})`
+
+  const res = await pool.query<FoodNutrient>(`
     select f.id, f.name, ${orderBy} amount, uc.color, uc.name usda_category_name, (
         select u.abbr
         from nutrients n
@@ -36,8 +51,10 @@ export async function getTopFoodsForNutrient(data: {
     where fn.nutrient_id = ${data.nutrientId}
     and uc.is_visible_default = true
     and ${orderBy} is not null
+    ${categoriesFilter}
     order by ${orderBy} desc
-    limit 200
+    offset ${data.offset}
+    limit 100
   `)
 
   return res.rows
