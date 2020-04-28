@@ -1,7 +1,7 @@
 import { pages } from '../pages'
-import { List } from '../shared/List'
-import { Icon } from '../shared/Icon'
-import { Link } from '../shared/Link'
+import { List } from '../components/List'
+import { Icon } from '../components/Icon'
+import { Link } from '../components/Link'
 
 const findablePages = [pages['top-foods'], pages['food-finder']]
 

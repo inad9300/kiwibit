@@ -4,7 +4,7 @@ import { MealPlanPage } from './meal-plan/MealPlanPage'
 import { SettingsPage } from './settings/SettingsPage'
 import { NotFoundPage } from './not-found/NotFoundPage'
 import { IconName } from '@fortawesome/fontawesome-common-types'
-import { getUrlParams } from './shared/getUrlParams'
+import { getUrlParams } from './utils/getUrlParams'
 
 export enum Page {
   TopFoods = 'top-foods',

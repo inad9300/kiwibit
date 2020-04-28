@@ -1,9 +1,9 @@
-import { app } from '../main' // FIXME
+import { app } from '../main'
 import { weekDays, currentWeekDay } from './cal'
-import { Icon } from '../shared/Icon'
+import { Icon } from '../components/Icon'
 import { IconName } from '@fortawesome/fontawesome-common-types'
-import { Vbox } from '../shared/Box'
-import { Button } from '../shared/Button'
+import { Vbox } from '../components/Box'
+import { Button } from '../components/Button'
 import { AddFoodModal } from './AddFoodModal'
 
 export function WeeklyPlanBoard() {

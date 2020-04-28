@@ -1,4 +1,4 @@
-import { List } from '../shared/List'
+import { List } from '../components/List'
 import { WeeklyPlanBoard } from './WeeklyPlanBoard'
 import { NutritionalOverview } from './NutritionalOverview'
 import { DailyDozen } from './DailyDozen'

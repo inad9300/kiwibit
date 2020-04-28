@@ -1,8 +1,5 @@
-import { pct } from '../shared/pct'
+import { pct } from '../utils/pct'
 
-/**
- * TODO Overall percentage of nutrients covered by 100 grams of this food.
- */
 export function FoodDetails() {
   const heading = document.createElement('h1')
 

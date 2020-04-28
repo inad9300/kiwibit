@@ -1,7 +1,7 @@
 import { AppsMenu } from './AppsMenu'
 import { getCurrentPage } from '../pages'
-import { Button } from '../shared/Button'
-import { Icon } from '../shared/Icon'
+import { Button } from '../components/Button'
+import { Icon } from '../components/Icon'
 
 const triangle = document.createElement('div')
 triangle.style.borderTop = '47px solid transparent'
@@ -31,14 +31,14 @@ export function Header() {
 
 function Logo() {
   const root = Button()
-  root.textContent = 'Kiwibit'
+  root.textContent = 'meals'
   root.style.position = 'relative'
   root.style.margin = '0'
   root.style.padding = '10px 16px 10px 16px'
   root.style.fontSize = '20px'
   root.style.fontWeight = '600'
-  root.style.color = '#111'
-  root.style.textShadow = '0 -1px 0 rgba(255, 255, 255, 0.9)'
+  root.style.color = '#666'
+  root.style.textShadow = '0 -1px 0 rgba(255, 255, 255, 1)'
 
   root.onclick = () => menu.toggle()
   root.onmouseenter = root.onfocus = () => setActive()
@@ -52,9 +52,11 @@ function Logo() {
   setInactive()
 
   function setActive() {
+    root.style.color = '#111'
     root.style.backgroundColor = triangle.style.borderTopColor = 'rgba(0, 0, 0, 0.09)'
   }
   function setInactive() {
+    root.style.color = '#666'
     root.style.backgroundColor = triangle.style.borderTopColor = 'rgba(0, 0, 0, 0.04)'
   }
 

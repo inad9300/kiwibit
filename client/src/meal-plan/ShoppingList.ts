@@ -1,5 +1,5 @@
-import { List } from '../shared/List'
-import { Checkbox } from '../shared/Checkbox'
+import { List } from '../components/List'
+import { Checkbox } from '../components/Checkbox'
 
 export function ShoppingList() {
   const id = 'shoppingListCheckbox1'

@@ -1,20 +1,26 @@
-import { api } from '../shared/api'
+import { api } from '../utils/api'
+import { Select } from '../components/Select'
+import type { NutrientWithUnit } from '../../../server/src/api/getAllNutrients'
 
 export function NutrientSelect() {
-  const select = document.createElement('select')
+  const select = Select<NutrientWithUnit>(
+    'Nutrient',
+    n => n.id!,
+    n => n.name + (n.alias ? ' / ' + n.alias : '') + ' (' + n.unit_abbr + ')'
+  )
 
   api('getAllNutrients', undefined).then(nutrients => {
-    const options = nutrients
-      .sort((a, b) => (a.name > b.name ? 1 : -1))
-      .map(n => {
-        const option = document.createElement('option')
-        option.value = n.id
-        option.textContent = n.name + (n.alias ? ' / ' + n.alias : '') + ' (' + n.unit_abbr + ')'
-        return option
-      })
-
-    select.append(...options)
+    select.setOptions(
+      nutrients.sort((a, b) => (a.name > b.name ? 1 : -1))
+    )
+    onReadyCb()
   })
 
-  return select
+  let onReadyCb = () => {}
+
+  return Object.assign(select, {
+    onReady(cb: () => void) {
+      onReadyCb = cb
+    }
+  })
 }

@@ -1,19 +1,17 @@
+import { Select } from '../components/Select'
+
+// TODO Find better name.
 export function OrderBySelect() {
-  const select = document.createElement('select')
+  const select = Select<{ text: string, value: 'weight' | 'energy' }>(
+    'Per',
+    o => o.value,
+    o => o.text
+  )
 
-  const order = [
-    { text: 'Per 100 grams', value: 'weight' },
-    { text: 'Per 100 calories', value: 'energy' }
-  ]
-
-  const options = order.map(o => {
-    const option = document.createElement('option')
-    option.value = o.value
-    option.textContent = o.text
-    return option
-  })
-
-  select.append(...options)
+  select.setOptions([
+    { text: '100 grams', value: 'weight' },
+    { text: '100 calories', value: 'energy' }
+  ])
 
   return select
 }
