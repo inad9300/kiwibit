@@ -3,7 +3,7 @@ import { FoodFinderPage } from './food-finder/FoodFinderPage'
 import { MealPlanPage } from './meal-plan/MealPlanPage'
 import { SettingsPage } from './settings/SettingsPage'
 import { NotFoundPage } from './not-found/NotFoundPage'
-import { IconName } from '@fortawesome/fontawesome-common-types'
+import type { IconName } from './components/Icon'
 import { getUrlParams } from './utils/getUrlParams'
 
 export enum Page {

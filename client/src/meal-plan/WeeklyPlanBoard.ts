@@ -1,7 +1,6 @@
 import { app } from '../main'
 import { weekDays, currentWeekDay } from './cal'
-import { Icon } from '../components/Icon'
-import { IconName } from '@fortawesome/fontawesome-common-types'
+import { Icon, IconName } from '../components/Icon'
 import { Vbox } from '../components/Box'
 import { Button } from '../components/Button'
 import { AddFoodModal } from './AddFoodModal'
@@ -11,9 +10,9 @@ export function WeeklyPlanBoard() {
   planControls.style.padding = '32px 0'
   planControls.style.textAlign = 'center'
 
-  const priorWeekBtn = planControlBtn('arrow-left', true)
+  const priorWeekBtn = planControlBtn('arrow-left' as any, true)
   const showCalendarBtn = planControlBtn('calendar-week', false)
-  const nextWeekBtn = planControlBtn('arrow-right', false)
+  const nextWeekBtn = planControlBtn('arrow-right' as any, false)
   planControls.append(priorWeekBtn, showCalendarBtn, nextWeekBtn)
 
   const planDeck = document.createElement('div')
@@ -59,7 +58,7 @@ function planControlBtn(iconName: IconName, isFirst: boolean) {
   btn.style.backgroundColor = 'white'
   btn.style.fontSize = '16px'
   btn.style.color = '#333'
-  btn.append(Icon(iconName))
+  btn.append(Icon(iconName as any))
 
   if (!isFirst) {
     btn.style.marginLeft = '8px'
@@ -75,8 +74,8 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
   title.style.color = '#333'
   title.textContent = cardTitle
 
-  const addFoodIcon = addItemBtn('carrot', 'Add food', () => app.prepend(AddFoodModal()))
-  const addRecipeIcon = addItemBtn('utensils', 'Add recipe', () => void 0)
+  const addFoodIcon = addItemBtn('carrot' as any, 'Add food', () => app.prepend(AddFoodModal()))
+  const addRecipeIcon = addItemBtn('utensils' as any, 'Add recipe', () => void 0)
   // const addSmoothieIcon = addItemBtn('blender', 'Add smoothie', () => void 0)
   // const addSaladIcon = addItemBtn('seedling', 'Add salad', () => void 0)
 
@@ -141,7 +140,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
 
 function addItemBtn(iconName: IconName, title: string, onClick: () => void) {
   const root = Icon(iconName)
-  root.title = title
+  // root.title = title
   root.style.padding = '8px'
   root.style.cursor = 'pointer'
   root.style.borderRadius = '3px'

@@ -133,6 +133,7 @@ function MenuItem(page: typeof pages['top-foods']) {
   name.textContent = page.title
 
   const icon = Icon(page.icon)
+  icon.style.width = 'auto'
   icon.style.color = page.iconColor
   icon.style.fontSize = '22px'
   icon.style.marginBottom = '4px'

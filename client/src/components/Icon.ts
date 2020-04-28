@@ -1,11 +1,10 @@
-import '@fortawesome/fontawesome-free/css/solid.css'
-import '@fortawesome/fontawesome-free/css/fontawesome.css'
+import { library, icon, findIconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { faSeedling, faPlus, faBinoculars, faCalendarWeek, faUserCog, faQuestion } from '@fortawesome/free-solid-svg-icons'
 
-import { IconName } from '@fortawesome/fontawesome-common-types'
+library.add(faSeedling, faPlus, faBinoculars, faCalendarWeek, faUserCog, faQuestion)
+
+export type IconName = 'seedling' | 'plus' | 'binoculars' | 'calendar-week' | 'user-cog' | 'question'
 
 export function Icon(name: IconName) {
-  const root = document.createElement('i')
-  root.className = 'fas fa-' + name
-
-  return root
+  return icon(findIconDefinition({ prefix: 'fas', iconName: name })).node[0] as SVGSVGElement
 }
