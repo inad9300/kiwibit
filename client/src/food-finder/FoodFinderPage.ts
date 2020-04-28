@@ -8,7 +8,7 @@ import { Hbox } from '../components/Box'
 export function FoodFinderPage() {
   const usdaCategorySelect = UsdaCategorySelect()
   usdaCategorySelect.onchange = () => {
-    foodFinderInput.setUsdaCategoryId(parseInt(usdaCategorySelect.value, 10))
+    foodFinderInput.setUsdaCategoryId(usdaCategorySelect.getSelected()!.id)
   }
 
   const foodDetails = FoodDetails()

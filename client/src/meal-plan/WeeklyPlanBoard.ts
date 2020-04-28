@@ -138,7 +138,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
   return root
 }
 
-function addItemBtn(iconName: IconName, title: string, onClick: () => void) {
+function addItemBtn(iconName: IconName, _title: string, onClick: () => void) {
   const root = Icon(iconName)
   // root.title = title
   root.style.padding = '8px'
