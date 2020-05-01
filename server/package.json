@@ -2,10 +2,8 @@
   "private": true,
   "scripts": {
     "postinstall": "ts-node ./src/schema.gen.ts",
-    "prestart": "export TZ=UTC",
-    "start": "nodemon --watch src/ --ext ts --exec 'clear && node --inspect=9229 --require=ts-node/register src/main.ts --debug'",
-    "pretest": "export TZ=UTC",
-    "test": "c8 ts-node ../shared/runner.ts"
+    "start": "export TZ=UTC && export NODE_ENV=development && nodemon --watch src/ --ext ts --exec 'clear && node --inspect=9229 --require=ts-node/register src/main.ts'",
+    "test": "export TZ=UTC && c8 ts-node ../shared/runner.ts"
   },
   "dependencies": {
     "pg": "8.0.3"

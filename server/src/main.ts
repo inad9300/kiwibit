@@ -9,7 +9,7 @@ process.on('unhandledRejection', err => log.error('Unhandled rejection.', err))
 
 http
   .createServer(serve)
-  .listen(4000, () => log.info(`Server up and running.`))
+  .listen(process.env.PORT || 4000, () => log.info(`Server up and running.`))
   .on('error', err => log.error('Server failed to start.', err))
 
 function serve(req: http.IncomingMessage, res: http.ServerResponse) {
@@ -18,7 +18,9 @@ function serve(req: http.IncomingMessage, res: http.ServerResponse) {
     reply(res, new Error('Unexpected request error. ' + err.message))
   })
 
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+  if (process.env.NODE_ENV === 'development') {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
@@ -32,7 +34,7 @@ function serve(req: http.IncomingMessage, res: http.ServerResponse) {
   log.debug('HTTP request.', req.url)
 
   try {
-    const fnName = req.url!.substr(5) as keyof Api // Skip "/api/".
+    const fnName = req.url!.substr('/api/'.length) as keyof Api
     const fn = (api[fnName] as unknown) as ApiFn<ApiPayload, ApiPayload>
     if (!fn) {
       reply(res, new Error(`Unknown API function: "${fnName}".`))
