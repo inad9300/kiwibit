@@ -1,7 +1,7 @@
 import { pool } from '../pool'
 
 export async function getIntakeMetadataForAllNutrients(data: { age: number; gender: 'M' | 'F' }) {
-  const res = await pool.query(`
+  const res = await pool.query<any>(`
     select *
     from (
       select n.id nutrient_id, (

@@ -1,7 +1,7 @@
 import { pool } from '../pool'
 
 export async function findFoodDetails(data: { id: number }) {
-  const res = await pool.query(`
+  const res = await pool.query<any>(`
     select
       f.name,
       n.id nutrient_id,

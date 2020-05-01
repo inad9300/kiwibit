@@ -6,7 +6,7 @@ import { pool } from '../pool'
  * Highest foods for every nutrient.
  */
 export async function getTopFoodsForAllNutrients() {
-  const res = await pool.query(`
+  const res = await pool.query<any>(`
     select ndf.NutrDesc, t1.Nutr_Val, ndf.Units, t1.Long_Desc, t1.FdGrp_Cd, t1.FdGrp_Desc
     from (
       select t0.Nutr_No, t0.Nutr_Val, t0.Long_Desc, t0.FdGrp_Cd, t0.FdGrp_Desc,

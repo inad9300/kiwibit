@@ -4,7 +4,7 @@ export async function findFoodsByNameAndUsdaCategory(data: {
   foodName: string
   usdaCategoryId: number
 }) {
-  const res = await pool.query(`
+  const res = await pool.query<any>(`
     select f.id, f.name
     from foods f
     where lower(f.name) like '%' || lower('${data.foodName.replace(/ /g, '%')}') || '%'
