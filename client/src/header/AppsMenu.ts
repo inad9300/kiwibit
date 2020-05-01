@@ -110,7 +110,7 @@ export function AppsMenu(trigger: HTMLElement) {
 }
 
 function MenuItem(page: typeof pages['top-foods']) {
-  const link = Link('/?page=' + page.slug)
+  const link = Link('?page=' + page.slug)
   link.style.textDecoration = 'none'
   link.style.display = 'flex'
   link.style.flexDirection = 'column'
