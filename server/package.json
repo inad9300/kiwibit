@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "--postinstall": "npm run generators",
-    "start": "export TZ=UTC && export NODE_ENV=development && nodemon --watch src/ --ext ts --exec 'clear && node --inspect=9229 --require=ts-node/register src/main.ts'",
+    "start": "export TZ=UTC && export NODE_ENV=development && nodemon --watch src/ --ext ts --exec 'node --inspect=9229 --require=ts-node/register src/main.ts'",
     "test": "export TZ=UTC && c8 ts-node ../shared/runner.ts",
     "generators": "ts-node ./src/schema.gen.ts"
   },
