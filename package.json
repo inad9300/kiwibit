@@ -3,7 +3,10 @@
   "name": "kiwibit",
   "version": "0.0.1",
   "scripts": {
-    "postinstall": "cd client && npm i && npm run build",
-    "start": "cd server && npm i && npm start"
+    "postinstall": "cd client && npm i --dev && npm run build",
+    "start": "cd server && npm i --dev && npm start"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   }
 }
