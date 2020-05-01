@@ -1,6 +1,4 @@
 import type { Api } from '../../../server/src/Api'
-// FIXME https://github.com/parcel-bundler/parcel/issues/2978
-// import { config } from '../../shared/config'
 
 const headers = { 'Content-Type': 'application/json; charset=utf-8' }
 
