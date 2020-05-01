@@ -3,8 +3,8 @@
   "name": "kiwibit",
   "version": "0.0.1",
   "scripts": {
-    "postinstall": "cd client && npm i --dev && npm run build",
-    "start": "cd server && npm i --dev && npm start"
+    "postinstall": "cd client && npm i --only=dev && npm i --only=prod && npm run build",
+    "start": "cd server && npm i --only=dev && npm i --only=prod && npm start"
   },
   "engines": {
     "node": ">=12.0.0"
