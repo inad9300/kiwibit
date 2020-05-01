@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "kiwibit",
+  "version": "0.0.1",
+  "scripts": {
+    "postinstall": "cd client && npm i && npm run build",
+    "start": "cd server && npm i && npm start"
+  }
+}
