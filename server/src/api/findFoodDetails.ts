@@ -1,7 +1,8 @@
 import { pool } from '../pool'
+import { QueryResultRow } from 'pg'
 
 export async function findFoodDetails(data: { id: number }) {
-  const res = await pool.query<any>(`
+  const res = await pool.query<QueryResultRow>(`
     select
       f.name,
       n.id nutrient_id,
