@@ -74,7 +74,7 @@ function Bar(f: FoodNutrient, max: number) {
   barSpace.append(bar)
 
   const root = Hbox([title, barSpace], { tag: 'a' })
-  ;(root as HTMLAnchorElement).href = `/?page=${Page.FoodFinder}&food-id=${f.id}`
+  ;(root as HTMLAnchorElement).href = `?page=${Page.FoodFinder}&food-id=${f.id}`
   root.style.textDecoration = 'none'
   root.style.outline = '0'
   root.style.padding = `2px ${barPadding}px`
