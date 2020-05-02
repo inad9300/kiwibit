@@ -55,7 +55,8 @@ client
       columnsByTable[col.table_name].push(col)
     })
 
-    const isOptional = (col: ColumnMetadata) => col.is_nullable === 'YES' || !!col.column_default
+    const isOptional = (col: ColumnMetadata) => col.is_nullable === 'YES'
+      || (!!col.column_default && !/^nextval\(.+\)$/.test(col.column_default))
 
     const schema = Object.keys(columnsByTable)
       .map(

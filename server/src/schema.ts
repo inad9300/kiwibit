@@ -1,40 +1,40 @@
 import { Table } from './Table'
 
 export type data_sources = {
-  id: number | null
+  id: number
   url: string
   title: string
   short_title: string | null
 }
 
 export const data_sources: Table<data_sources> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   url: { type: String, optional: false },
   title: { type: String, optional: false },
   short_title: { type: String, optional: true }
 }
 
 export type files = {
-  id: number | null
+  id: number
   name: string
   type: string
   data: Uint8Array
 }
 
 export const files: Table<files> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false },
   type: { type: String, optional: false },
   data: { type: Uint8Array, optional: false }
 }
 
 export type food_label_definitions = {
-  id: number | null
+  id: number
   name: string
 }
 
 export const food_label_definitions: Table<food_label_definitions> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false }
 }
 
@@ -73,7 +73,7 @@ export const food_unit_ratios: Table<food_unit_ratios> = {
 }
 
 export type foods = {
-  id: number | null
+  id: number
   source_id: number
   external_id: string
   is_public: boolean | null
@@ -84,7 +84,7 @@ export type foods = {
 }
 
 export const foods: Table<foods> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   source_id: { type: Number, optional: false },
   external_id: { type: String, optional: false },
   is_public: { type: Boolean, optional: true },
@@ -95,39 +95,39 @@ export const foods: Table<foods> = {
 }
 
 export type meal_types = {
-  id: number | null
+  id: number
   name: string
 }
 
 export const meal_types: Table<meal_types> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false }
 }
 
 export type nf_dd_categories = {
-  id: number | null
+  id: number
   name: string
   servings: number
 }
 
 export const nf_dd_categories: Table<nf_dd_categories> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false },
   servings: { type: Number, optional: false }
 }
 
 export type nutrient_categories = {
-  id: number | null
+  id: number
   name: string
 }
 
 export const nutrient_categories: Table<nutrient_categories> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false }
 }
 
 export type nutrients = {
-  id: number | null
+  id: number
   name: string
   abbr: string | null
   alias: string | null
@@ -140,7 +140,7 @@ export type nutrients = {
 }
 
 export const nutrients: Table<nutrients> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false },
   abbr: { type: String, optional: true },
   alias: { type: String, optional: true },
@@ -153,7 +153,7 @@ export const nutrients: Table<nutrients> = {
 }
 
 export type recipe_ingredients = {
-  id: number | null
+  id: number
   recipe_id: number
   ingredient_food_id: number | null
   ingredient_recipe_id: number | null
@@ -161,7 +161,7 @@ export type recipe_ingredients = {
 }
 
 export const recipe_ingredients: Table<recipe_ingredients> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   recipe_id: { type: Number, optional: false },
   ingredient_food_id: { type: Number, optional: true },
   ingredient_recipe_id: { type: Number, optional: true },
@@ -169,7 +169,7 @@ export const recipe_ingredients: Table<recipe_ingredients> = {
 }
 
 export type recipes = {
-  id: number | null
+  id: number
   source_id: number
   external_id: string
   is_public: boolean | null
@@ -181,7 +181,7 @@ export type recipes = {
 }
 
 export const recipes: Table<recipes> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   source_id: { type: Number, optional: false },
   external_id: { type: String, optional: false },
   is_public: { type: Boolean, optional: true },
@@ -237,19 +237,19 @@ export const tolerable_intakes: Table<tolerable_intakes> = {
 }
 
 export type units = {
-  id: number | null
+  id: number
   abbr: string
   name: string
 }
 
 export const units: Table<units> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   abbr: { type: String, optional: false },
   name: { type: String, optional: false }
 }
 
 export type usda_categories = {
-  id: number | null
+  id: number
   name: string
   is_visible_default: boolean
   color: string
@@ -257,7 +257,7 @@ export type usda_categories = {
 }
 
 export const usda_categories: Table<usda_categories> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false },
   is_visible_default: { type: Boolean, optional: false },
   color: { type: String, optional: false },
@@ -297,12 +297,12 @@ export const user_daily_recipes: Table<user_daily_recipes> = {
 }
 
 export type user_types = {
-  id: number | null
+  id: number
   name: string
 }
 
 export const user_types: Table<user_types> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false }
 }
 
@@ -331,7 +331,7 @@ export const user_visible_usda_categories: Table<user_visible_usda_categories> =
 }
 
 export type users = {
-  id: number | null
+  id: number
   name: string
   email: string
   password: string
@@ -348,7 +348,7 @@ export type users = {
 }
 
 export const users: Table<users> = {
-  id: { type: Number, optional: true },
+  id: { type: Number, optional: false },
   name: { type: String, optional: false },
   email: { type: String, optional: false },
   password: { type: String, optional: false },
