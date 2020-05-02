@@ -5,7 +5,7 @@
     "start": "export TZ=UTC && export NODE_ENV=development && nodemon --watch src/ --ext ts --exec 'clear && node --inspect=9229 --require=ts-node/register src/main.ts'",
     "build": "",
     "run": "export TZ=UTC && export NODE_ENV=production && nodemon --ext ts --exec 'node --require=ts-node/register src/main.ts'",
-    "generators": "ts-node ./src/schema.gen.ts"
+    "generators": "ts-node ./src/schema.gen.ts && ts-node ./src/static-data.gen.ts"
   },
   "dependencies": {
     "pg": "8.0.3"
