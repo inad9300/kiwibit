@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import { writeFileSync } from 'fs'
+import { resolve } from 'path'
 import { Client } from 'pg'
 import { pgConfig } from './pgConfig'
 
@@ -83,8 +83,8 @@ export const ${table}: Table<${table}> = {
       )
       .join('\n')
 
-    fs.writeFileSync(
-      path.resolve(__dirname, 'schema.ts'),
+    writeFileSync(
+      resolve(__dirname, 'schema.ts'),
       `import { Table } from './Table'\n` + schema + '\n'
     )
   })
