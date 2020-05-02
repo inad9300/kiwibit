@@ -1,4 +1,5 @@
-const path = require('path')
+const { resolve } = require('path')
+const { DefinePlugin } = require('webpack')
 
 module.exports = {
   entry: './src/main.ts',
@@ -7,15 +8,20 @@ module.exports = {
       {
         test: /\.ts$/,
         use: 'ts-loader',
-        include: path.resolve(__dirname, 'src')
+        include: resolve(__dirname, 'src')
       }
     ]
   },
+  plugins: [
+    new DefinePlugin({
+      DEBUG: process.env.NODE_ENV === 'development'
+    })
+  ],
   resolve: {
     extensions: ['.ts', '.js']
   },
   output: {
     filename: 'main.js',
-    path: path.resolve(__dirname, 'bin')
+    path: resolve(__dirname, 'bin')
   }
 }

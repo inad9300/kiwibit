@@ -2,8 +2,8 @@
   "private": true,
   "scripts": {
     "test": "tsc --noEmit && c8 ts-node ../shared/runner.ts",
-    "start": "clear && webpack --mode development --devtool inline-source-map --watch --verbose",
-    "build": "webpack --mode production"
+    "start": "clear && export NODE_ENV=development && webpack --mode development --devtool inline-source-map --watch --verbose",
+    "build": "export NODE_ENV=production && webpack --mode production"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "1.2.28",
