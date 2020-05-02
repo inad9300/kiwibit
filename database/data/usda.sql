@@ -3,6 +3,7 @@ select
   fdgrp_cd,
   fdgrp_desc,
   fdgrp_desc not in (
+    'American Indian/Alaska Native Foods',
     'Beef Products',
     'Dairy and Egg Products',
     'Finfish and Shellfish Products',
