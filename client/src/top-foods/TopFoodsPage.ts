@@ -65,7 +65,6 @@ export function TopFoodsPage() {
 
   async function reloadChart(offset = 0) {
     if (offset > 0) {
-      console.debug(lastTopFoodsCriteria)
       const topFoods = await api('getTopFoodsForNutrient', {
         ...lastTopFoodsCriteria,
         offset
@@ -87,7 +86,6 @@ export function TopFoodsPage() {
       categories: !categoryId || categoryId === -1 ? [] : [categoryId],
       offset
     }
-    console.debug(lastTopFoodsCriteria)
 
     const [intakeMetadata, topFoods] = await Promise.all([
       api('getIntakeMetadataForNutrient', {
