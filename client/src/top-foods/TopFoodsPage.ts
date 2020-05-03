@@ -1,8 +1,8 @@
 import { NutrientSelect } from './NutrientSelect'
-import { OrderBySelect } from './OrderBySelect'
-import { CategoriesSelect } from './CategoriesSelect'
+import { PerSelect } from './PerSelect'
+import { CategorySelect } from './CategorySelect'
 import { TopFoodsChart } from './TopFoodsChart'
-import { api } from '../utils/api'
+import { api, ApiInput } from '../utils/api'
 import { Hbox, Vbox } from '../components/Box'
 import { Button } from '../components/Button'
 import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
@@ -13,11 +13,11 @@ export function TopFoodsPage() {
   nutrientSelect.onchange = () => reloadChart()
   nutrientSelect.onReady(reloadChart)
 
-  const categoriesSelect = CategoriesSelect()
-  categoriesSelect.onchange = () => reloadChart()
+  const categorySelect = CategorySelect()
+  categorySelect.onchange = () => reloadChart()
 
-  const orderBySelect = OrderBySelect()
-  orderBySelect.onchange = () => reloadChart()
+  const perSelect = PerSelect()
+  perSelect.onchange = () => reloadChart()
 
   const zoomTitle = document.createElement('div')
   zoomTitle.textContent = 'Zoom'
@@ -32,11 +32,9 @@ export function TopFoodsPage() {
     zoomSlider.max = '0'
   zoomSlider.oninput = () => chart.style.width = zoomSlider.value + 'px'
 
-  // TODO window.addEventListener('resize', evt => console.debug(evt))
-
   const zoomControl = Vbox([zoomTitle, zoomSlider])
 
-  const controlsRow = Hbox([nutrientSelect, categoriesSelect, orderBySelect, zoomControl], { gap: '8px' })
+  const controlsRow = Hbox([nutrientSelect, categorySelect, perSelect, zoomControl], { gap: '8px' })
   controlsRow.style.margin = '12px 16px'
 
   const chart = TopFoodsChart()
@@ -58,7 +56,7 @@ export function TopFoodsPage() {
   const root = Vbox([controlsRow, chart, moreResultsBtn])
 
   let topFoodsOffset = 0
-  let lastTopFoodsCriteria: any = {} // FIXME Type
+  let lastTopFoodsCriteria: ApiInput<'getTopFoodsForNutrient'>
   const topFoodsAcc: FoodNutrient[] = []
 
   let lastIntakeMetadata: NutrientIntakeMetadata
@@ -78,11 +76,11 @@ export function TopFoodsPage() {
     topFoodsOffset = 0
 
     const nutrientId = nutrientSelect.getSelected()!.id!
-    const categoryId = categoriesSelect.getSelected()?.id
+    const categoryId = categorySelect.getSelected()?.id
 
     lastTopFoodsCriteria = {
       nutrientId,
-      orderBy: orderBySelect.getSelected()!.value,
+      orderBy: perSelect.getSelected()!.value,
       categories: !categoryId || categoryId === -1 ? [] : [categoryId],
       offset
     }

@@ -21,7 +21,7 @@ export function App() {
   const root = document.createElement('div')
   root.className = 'kiwibit'
   root.style.height = '100%'
-  root.style.display = 'flex' // TODO Replace with Hbox()
+  root.style.display = 'flex'
   root.style.flexDirection = 'column'
   root.style.position = 'relative'
   root.style.fontFamily = 'sans-serif'

@@ -5,8 +5,6 @@ interface BoxOptions {
   wrap?: 'wrap' | 'reverse'
 }
 
-// TODO Remove options and children... Leave as simple flex wrapper.
-
 function box(
   direction: 'row' | 'column',
   marginProp: 'marginLeft' | 'marginTop',

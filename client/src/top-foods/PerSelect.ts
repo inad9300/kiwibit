@@ -1,7 +1,6 @@
 import { Select } from '../components/Select'
 
-// TODO Find better name.
-export function OrderBySelect() {
+export function PerSelect() {
   const select = Select<{ text: string, value: 'weight' | 'energy' }>(
     'Per',
     o => o.value,

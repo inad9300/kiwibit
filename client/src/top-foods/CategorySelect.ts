@@ -2,7 +2,7 @@ import { api } from '../utils/api'
 import { Select } from '../components/Select'
 import type { UsdaCategory } from '../../../server/src/api/getAllUsdaCategories'
 
-export function CategoriesSelect() {
+export function CategorySelect() {
   const select = Select<UsdaCategory>(
     'Category',
     n => n.id!,

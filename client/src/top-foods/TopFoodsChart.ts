@@ -9,8 +9,6 @@ import { Abbr } from '../components/Abbr'
 const barPadding = 17
 const barTitleRightMargin = 8
 
-// FIXME If amount is 0, don't draw 100% bars.
-
 export function TopFoodsChart() {
   const root = document.createElement('div')
   root.style.marginBottom = '12px'
@@ -192,7 +190,7 @@ function Legend(intakeMetadata: NutrientIntakeMetadata, topFoods: FoodNutrient[]
   root.style.overflowY = 'auto'
   root.style.bottom =
     root.style.right = '12px'
-  root.style.padding = '8px' // FIXME Bottom padding not working on Firefox.
+  root.style.padding = '8px'
   root.style.fontSize = '13px'
   root.style.border = '1px solid lightgrey'
   root.style.background = '#fff'

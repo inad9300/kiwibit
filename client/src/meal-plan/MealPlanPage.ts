@@ -13,7 +13,6 @@ export function MealPlanPage() {
 
 function TabbedSection() {
   const tabInfo = [
-    // TODO Counters.
     { name: 'Nutritional Overview', side: 'left' as 'left', content: NutritionalOverview },
     { name: 'Daily Dozen', side: 'left' as 'left', content: DailyDozen },
     { name: 'Shopping List', side: 'right' as 'right', content: ShoppingList }
