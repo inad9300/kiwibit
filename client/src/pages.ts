@@ -1,3 +1,4 @@
+import { WelcomePage } from './welcome/WelcomePage'
 import { TopFoodsPage } from './top-foods/TopFoodsPage'
 import { FoodFinderPage } from './food-finder/FoodFinderPage'
 import { MealPlanPage } from './meal-plan/MealPlanPage'
@@ -7,6 +8,7 @@ import type { IconName } from './components/Icon'
 import { getUrlParams } from './utils/getUrlParams'
 
 export enum Page {
+  Welcome = 'welcome',
   TopFoods = 'top-foods',
   FoodFinder = 'food-finder',
   MealPlan = 'meal-plan',
@@ -19,7 +21,7 @@ export function getCurrentPage(): PageMap[Page.NotFound] {
 
   return pages.hasOwnProperty(pageSlug!)
     ? pages[pageSlug as keyof typeof pages]
-    : pages['not-found']
+    : pages['welcome']
 }
 
 type PageMap = {
@@ -33,6 +35,13 @@ type PageMap = {
 }
 
 export const pages: PageMap = {
+  [Page.Welcome]: {
+    slug: Page.Welcome,
+    title: 'Welcome',
+    icon: 'hand-spock',
+    iconColor: 'rgb(148, 151, 189)',
+    component: WelcomePage
+  },
   [Page.TopFoods]: {
     slug: Page.TopFoods,
     title: 'Top Foods',

@@ -5,6 +5,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { faQuestion } from '@fortawesome/free-solid-svg-icons/faQuestion'
 import { faSeedling } from '@fortawesome/free-solid-svg-icons/faSeedling'
 import { faUserCog } from '@fortawesome/free-solid-svg-icons/faUserCog'
+import { faHandSpock } from '@fortawesome/free-solid-svg-icons/faHandSpock'
 
 library.add(
   faBinoculars,
@@ -13,6 +14,7 @@ library.add(
   faQuestion,
   faSeedling,
   faUserCog,
+  faHandSpock
 )
 
 export type IconName =
@@ -21,7 +23,8 @@ export type IconName =
   'plus' |
   'question' |
   'seedling' |
-  'user-cog'
+  'user-cog' |
+  'hand-spock'
 
 export function Icon(name: IconName) {
   return icon(findIconDefinition({ prefix: 'fas', iconName: name })).node[0] as SVGSVGElement
