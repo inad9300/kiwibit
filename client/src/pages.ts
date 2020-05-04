@@ -18,10 +18,13 @@ export enum Page {
 
 export function getCurrentPage(): PageMap[Page.NotFound] {
   const pageSlug = getUrlParams().get('page')
+  if (!pageSlug) {
+    return pages['welcome']
+  }
 
-  return pages.hasOwnProperty(pageSlug!)
+  return pages.hasOwnProperty(pageSlug)
     ? pages[pageSlug as keyof typeof pages]
-    : pages['welcome']
+    : pages['not-found']
 }
 
 type PageMap = {
