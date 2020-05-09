@@ -7,22 +7,25 @@ import { Hbox } from '../components/Box'
 
 export function FoodFinderPage() {
   const usdaCategorySelect = UsdaCategorySelect()
-  usdaCategorySelect.onchange = () => {
+  usdaCategorySelect.onchange = () => { // FIXME `onchange` does not exist (pss... don't tell TypeScript).
     foodFinderInput.setUsdaCategoryId(usdaCategorySelect.getSelected()!.id)
   }
 
   const foodDetails = FoodDetails()
 
   function loadFoodDetails(foodId: number) {
-    Promise.all([
-      api('getIntakeMetadataForAllNutrients', { age: 25, gender: 'M' }),
-      api('findFoodDetails', { id: foodId })
-    ]).then(([intakeMetadata, foodDetailsData]) => {
-      foodDetails.setData(intakeMetadata, foodDetailsData)
-    })
+    Promise
+      .all([
+        api('getIntakeMetadataForAllNutrients', { age: 25, gender: 'M' }),
+        api('findFoodDetails', { id: foodId })
+      ])
+      .then(([intakeMetadata, foodDetailsData]) => {
+        foodDetails.setData(intakeMetadata, foodDetailsData)
+      })
   }
 
-  const foodFinderInput = FoodFinderInput(loadFoodDetails)
+  const foodFinderInput = FoodFinderInput()
+  foodFinderInput.onSelect(loadFoodDetails)
 
   const controlsRow = Hbox([usdaCategorySelect, foodFinderInput], { gap: '8px' })
 
