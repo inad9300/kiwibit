@@ -8,16 +8,16 @@
     "generators": "ts-node ./src/schema.gen.ts && ts-node ./src/static-data.gen.ts"
   },
   "dependencies": {
-    "pg": "8.0.3"
+    "pg": "8.1.0"
   },
   "devDependencies": {
-    "@types/node": "13.13.4",
+    "@types/node": "13.13.5",
     "@types/node-fetch": "2.5.7",
     "@types/pg": "7.14.3",
-    "c8": "7.1.1",
+    "c8": "7.1.2",
     "node-fetch": "2.6.0",
     "nodemon": "2.0.3",
-    "ts-node": "8.9.1",
+    "ts-node": "8.10.1",
     "typescript": "3.8.3"
   },
   "engines": {
