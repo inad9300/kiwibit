@@ -1,4 +1,4 @@
-import type { Api } from '../../../server/src/Api'
+import type { Api } from '../../../server/src/api-types'
 
 export type ApiInput<Fn extends keyof Api> = Parameters<Api[Fn]>[0]
 
