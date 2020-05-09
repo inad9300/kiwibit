@@ -4,10 +4,11 @@ import { Link } from '../components/Link'
 
 export function FoodDetailsTable() {
   const heading = document.createElement('h1')
+  heading.style.fontSize = '20px'
 
-  const googleImagesLink = document.createElement('a')
-  googleImagesLink.target = '_blank'
-  googleImagesLink.textContent = 'Find in Google Images'
+  const ddgLink = document.createElement('a')
+  ddgLink.target = '_blank'
+  ddgLink.textContent = 'Find images in DuckDuckGo'
 
   const table = document.createElement('table')
   table.style.borderCollapse = 'collapse'
@@ -20,7 +21,10 @@ export function FoodDetailsTable() {
   const ths = headers.map(h => {
     const th = document.createElement('th')
     th.textContent = h
-    th.style.padding = '4px 6px'
+    th.style.padding = '6px'
+    th.style.fontSize = '14px'
+    th.style.color = '#222'
+    th.style.textAlign = h === 'Nutrient' ? 'left' : 'right'
     return th
   })
 
@@ -31,15 +35,17 @@ export function FoodDetailsTable() {
   thead.append(tr)
 
   const tbody = document.createElement('tbody')
+  tbody.style.fontSize = '15px'
   table.append(thead, tbody)
 
   const root = document.createElement('div')
-  root.append(heading, googleImagesLink, table)
+  root.append(heading, ddgLink, table)
 
   return Object.assign(root, {
     setData(intakeMetadata: any[], foodDetails: any) {
       heading.textContent = foodDetails.name + ` (100 g)`
-      googleImagesLink.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)
+      ddgLink.href = 'https://duckduckgo.com/?iax=images&ia=images&q=' + encodeURIComponent(foodDetails.name)
+      // googleImagesLink.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)
 
       const knownCategories: string[] = []
 
@@ -58,6 +64,10 @@ export function FoodDetailsTable() {
           categoryTd.style.padding = '6px'
           categoryTd.style.fontWeight = 'bold'
           categoryTd.style.textAlign = 'center'
+          categoryTd.style.textTransform = 'uppercase'
+          categoryTd.style.fontSize = '13px'
+          categoryTd.style.color = '#222'
+          categoryTd.style.textShadow = '0 1px 0 rgba(255, 255, 255, 0.75)'
           categoryTd.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
 
           tr.append(categoryTd)

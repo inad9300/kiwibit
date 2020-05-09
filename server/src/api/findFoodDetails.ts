@@ -11,7 +11,7 @@ type FoodDetails = {
   nutrient_category_name: schema.nutrient_categories['name']
 }
 
-export async function findFoodDetails(data: { id: number }) {
+export async function findFoodDetails(data: { id: number, showAll: boolean }) {
   const res = await pool.query<FoodDetails>(`
     select
       f.name,
@@ -27,7 +27,7 @@ export async function findFoodDetails(data: { id: number }) {
     left join nutrient_categories nc on (nc.id = n.category_id)
     left join units u on (u.id = n.unit_id)
     where f.id = ${data.id}
-    and n.is_visible_default = true
+    ${data.showAll ? '' : 'and n.is_visible_default = true'}
     order by (case
       when nc.name = 'Minerals' then 1
       when nc.name = 'Vitamins' then 2
