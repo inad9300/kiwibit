@@ -25,25 +25,25 @@ export function Header() {
   root.style.borderBottom = '1px solid rgba(0, 0, 0, 0.15)'
   root.style.boxShadow = '0 1px 5px rgba(0, 0, 0, 0.1)'
 
-  const buyMeAAoffeeImg = document.createElement('img')
-  buyMeAAoffeeImg.src = 'https://cdn.buymeacoffee.com/buttons/default-orange.png'
-  buyMeAAoffeeImg.alt = 'Buy me a coffee'
-  buyMeAAoffeeImg.width = 145
-  buyMeAAoffeeImg.height = 34
-  buyMeAAoffeeImg.style.borderRadius = '3px'
-  buyMeAAoffeeImg.style.border = '1px solid rgba(0, 0, 0, 0.5)'
-  buyMeAAoffeeImg.style.backgroundColor = '#ff813f'
-  buyMeAAoffeeImg.style.color = '#fff'
+  const buyMeACoffeeImg = document.createElement('img')
+  buyMeACoffeeImg.src = 'https://cdn.buymeacoffee.com/buttons/default-orange.png'
+  buyMeACoffeeImg.alt = 'Buy me a coffee'
+  buyMeACoffeeImg.width = 145
+  buyMeACoffeeImg.height = 34
+  buyMeACoffeeImg.style.borderRadius = '3px'
+  buyMeACoffeeImg.style.border = '1px solid rgba(0, 0, 0, 0.5)'
+  buyMeACoffeeImg.style.backgroundColor = '#ff813f'
+  buyMeACoffeeImg.style.color = '#fff'
 
-  const buyMeAAoffeeLink = Link('https://www.buymeacoffee.com/wu6S9Ob0k')
-  buyMeAAoffeeLink.target = '_blank'
-  buyMeAAoffeeLink.style.margin = '7px 7px 0 0'
-  buyMeAAoffeeLink.append(buyMeAAoffeeImg)
+  const buyMeACoffeeLink = Link('https://www.buymeacoffee.com/wu6S9Ob0k')
+  buyMeACoffeeLink.target = '_blank'
+  buyMeACoffeeLink.style.margin = '7px 7px 0 0'
+  buyMeACoffeeLink.append(buyMeACoffeeImg)
 
   const spacer = document.createElement('div')
   spacer.style.flex = '1'
 
-  root.append(Logo(), triangle, pageIcon, pageTitle, spacer, buyMeAAoffeeLink)
+  root.append(Logo(), triangle, pageIcon, pageTitle, spacer, buyMeACoffeeLink)
 
   return root
 }
