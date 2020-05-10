@@ -1,17 +1,16 @@
 import { UsdaCategorySelect } from './UsdaCategorySelect'
 import { FoodFinderInput } from './FoodFinderInput'
-import { FoodDetails } from './FoodDetails'
+import { FoodDetailsTable } from './FoodDetailsTable'
 import { api } from '../utils/api'
 import { getUrlParams } from '../utils/getUrlParams'
 import { Hbox } from '../components/Box'
 
 export function FoodFinderPage() {
   const usdaCategorySelect = UsdaCategorySelect()
-  usdaCategorySelect.onchange = () => { // FIXME `onchange` does not exist (pss... don't tell TypeScript).
+  usdaCategorySelect.onchange = () =>
     foodFinderInput.setUsdaCategoryId(usdaCategorySelect.getSelected()!.id)
-  }
 
-  const foodDetails = FoodDetails()
+  const foodDetailsTable = FoodDetailsTable()
 
   function loadFoodDetails(foodId: number) {
     Promise
@@ -20,7 +19,7 @@ export function FoodFinderPage() {
         api('findFoodDetails', { id: foodId })
       ])
       .then(([intakeMetadata, foodDetailsData]) => {
-        foodDetails.setData(intakeMetadata, foodDetailsData)
+        foodDetailsTable.setData(intakeMetadata, foodDetailsData)
       })
   }
 
@@ -31,7 +30,7 @@ export function FoodFinderPage() {
 
   const root = document.createElement('div')
   root.style.margin = '12px 16px'
-  root.append(controlsRow, foodDetails)
+  root.append(controlsRow, foodDetailsTable)
 
   const foodIdStr = getUrlParams().get('food-id')
   if (foodIdStr) {

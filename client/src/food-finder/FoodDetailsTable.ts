@@ -1,6 +1,8 @@
 import { pct } from '../utils/pct'
+import { Page } from '../pages'
+import { Link } from '../components/Link'
 
-export function FoodDetails() {
+export function FoodDetailsTable() {
   const heading = document.createElement('h1')
 
   const googleImagesLink = document.createElement('a')
@@ -64,8 +66,13 @@ export function FoodDetails() {
           continue
         }
 
-        const nameTd = document.createElement('td')
-        nameTd.textContent = n.name + (n.alias ? ' / ' + n.alias : '')
+        const nutrientLink = Link(`?page=${Page.TopFoods}&nutrient-id=${n.id}`)
+        nutrientLink.textContent = n.name + (n.alias ? ' / ' + n.alias : '')
+        nutrientLink.style.color = 'black'
+        nutrientLink.style.textDecoration = 'none'
+
+        const nutrientTd = document.createElement('td')
+        nutrientTd.append(nutrientLink)
 
         const amountTd = document.createElement('td')
         amountTd.textContent = n.amount + ' ' + n.unit_abbr
@@ -95,7 +102,7 @@ export function FoodDetails() {
           ulPctTd.style.color = 'red'
         }
 
-        const tds = [nameTd, amountTd, rdiTd, rdiPctTd, ulTd, ulPctTd]
+        const tds = [nutrientTd, amountTd, rdiTd, rdiPctTd, ulTd, ulPctTd]
         tds.forEach(td => (td.style.padding = '6px'))
 
         tr.append(...tds)

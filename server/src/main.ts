@@ -2,7 +2,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'http'
 import { readFile } from 'fs'
 import './Error'
 import { log } from './log'
-import { Api, ApiFn, ApiPayload } from './Api'
+import { Api, ApiFn, ApiPayload } from './api-types'
 import * as api from './api'
 import { URL } from 'url'
 

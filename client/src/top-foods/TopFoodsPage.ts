@@ -3,21 +3,32 @@ import { PerSelect } from './PerSelect'
 import { CategorySelect } from './CategorySelect'
 import { TopFoodsChart } from './TopFoodsChart'
 import { api, ApiInput } from '../utils/api'
+import { getUrlParams } from '../utils/getUrlParams'
 import { Hbox, Vbox } from '../components/Box'
 import { Button } from '../components/Button'
 import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
 import type { NutrientIntakeMetadata } from '../../../server/src/api/getIntakeMetadataForNutrient'
 
 export function TopFoodsPage() {
+  const urlNutrientId = getUrlParams().get('nutrient-id')
+
   const nutrientSelect = NutrientSelect()
-  nutrientSelect.onchange = () => reloadChart()
-  nutrientSelect.onReady(reloadChart)
+  nutrientSelect.onchange = () => reloadChart(nutrientSelect.getSelected()!.id)
+  nutrientSelect.onReady(() => {
+    if (!urlNutrientId) {
+      reloadChart(nutrientSelect.getSelected()!.id)
+    } else {
+      const nutrientId = parseInt(urlNutrientId, 10)
+      nutrientSelect.setSelected(nutrientId)
+      reloadChart(nutrientId)
+    }
+  })
 
   const categorySelect = CategorySelect()
-  categorySelect.onchange = () => reloadChart()
+  categorySelect.onchange = () => reloadChart(nutrientSelect.getSelected()!.id)
 
   const perSelect = PerSelect()
-  perSelect.onchange = () => reloadChart()
+  perSelect.onchange = () => reloadChart(nutrientSelect.getSelected()!.id)
 
   const zoomTitle = document.createElement('div')
   zoomTitle.textContent = 'Zoom'
@@ -50,7 +61,7 @@ export function TopFoodsPage() {
   moreResultsBtn.style.backgroundColor = '#fff'
   moreResultsBtn.onclick = () => {
     topFoodsOffset += 100
-    reloadChart(topFoodsOffset)
+    reloadChart(nutrientSelect.getSelected()!.id, topFoodsOffset)
   }
 
   const root = Vbox([controlsRow, chart, moreResultsBtn])
@@ -61,7 +72,7 @@ export function TopFoodsPage() {
 
   let lastIntakeMetadata: NutrientIntakeMetadata
 
-  async function reloadChart(offset = 0) {
+  async function reloadChart(nutrientId: number, offset = 0) {
     if (offset > 0) {
       const topFoods = await api('getTopFoodsForNutrient', {
         ...lastTopFoodsCriteria,
@@ -75,7 +86,6 @@ export function TopFoodsPage() {
     chart.style.width = ''
     topFoodsOffset = 0
 
-    const nutrientId = nutrientSelect.getSelected()!.id!
     const categoryId = categorySelect.getSelected()?.id
 
     lastTopFoodsCriteria = {

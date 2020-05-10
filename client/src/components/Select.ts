@@ -36,6 +36,9 @@ export function Select<O>(
     },
     getSelected(): O | undefined {
       return options.find(o => getId(o) + '' === select.value)
+    },
+    setSelected(id: string | number) {
+      select.value = id + ''
     }
   })
 }
