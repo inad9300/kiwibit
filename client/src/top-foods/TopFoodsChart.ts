@@ -185,11 +185,11 @@ function Legend(intakeMetadata: NutrientIntakeMetadata, topFoods: FoodNutrient[]
   const root = Vbox([...metadataLegendItems, ...categoryLegendItems], { gap: '4px' })
   root.style.position = 'fixed'
   root.style.zIndex = '1'
+  root.style.bottom =
+    root.style.right = '12px'
   root.style.width =
     root.style.maxHeight = '230px'
   root.style.overflowY = 'auto'
-  root.style.bottom =
-    root.style.right = '12px'
   root.style.padding = '8px'
   root.style.fontSize = '13px'
   root.style.border = '1px solid lightgrey'
