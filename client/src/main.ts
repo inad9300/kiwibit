@@ -11,8 +11,12 @@ if (DEBUG) {
   document.createElement = function () {
     const elem = createElement.apply(document, arguments as any)
 
-    const callee = new Error().stack!.split('\n')[1].split('@')[0]
-    elem.dataset.component = callee
+    elem.dataset.stack = new Error().stack!
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => /^at Object.[a-zA-Z0-9_]+/.test(l))
+      .map(l => l.slice(10, l.indexOf(' ', 10)))
+      .join(' ← ')
 
     return elem
   }

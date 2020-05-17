@@ -1,7 +1,10 @@
-export function Link(url: string) {
-    const root = document.createElement('a')
-    root.style.outline = '0'
-    root.href = url
+import { Html } from './Html'
 
-    return root
-  }
+export function Link(url: string) {
+  return Html('a').with(it => {
+    it.href = url
+    it.style.outline = '0'
+    it.style.color = '#000'
+    it.style.textDecoration = 'none'
+  })
+}

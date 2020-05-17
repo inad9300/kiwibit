@@ -1,3 +1,4 @@
+import { Html } from './Html'
 import { Vbox } from './Box'
 
 export function Select<O>(
@@ -5,40 +6,46 @@ export function Select<O>(
   getId: (opt: O) => string | number,
   getDisplayText: (opt: O) => string
 ) {
-  const title = document.createElement('div')
-  title.textContent = titleText
-  title.style.fontSize = '13px'
-  title.style.fontWeight = 'bold'
-  title.style.color = '#555'
-  title.style.margin = '0 0 1px 4px'
+  const title = Html('div').with(it => {
+    it.textContent = titleText
+    it.style.fontSize = '13px'
+    it.style.fontWeight = 'bold'
+    it.style.color = '#555'
+    it.style.margin = '0 0 1px 4px'
+  })
 
-  const select = document.createElement('select')
-  select.style.padding = '4px 5px'
-  select.style.border = '1px solid rgba(0, 0, 0, 0.15)'
-  select.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
-  select.style.backgroundColor = '#fff'
-  select.style.outline = '0'
-  select.style.cursor = 'pointer'
-
-  const root = Vbox([title, select])
+  const select = Html('select').with(it => {
+    it.style.padding = '4px 5px'
+    it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
+    it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
+    it.style.backgroundColor = '#fff'
+    it.style.outline = '0'
+    it.style.cursor = 'pointer'
+  })
 
   let options: O[] = []
 
-  return Object.assign(root, {
-    setOptions(opts: O[]) {
-      options = opts
-      options.forEach(o => {
-        const option = document.createElement('option')
-        option.value = getId(o) + ''
-        option.textContent = getDisplayText(o)
-        select.options.add(option)
-      })
-    },
-    getSelected(): O | undefined {
-      return options.find(o => getId(o) + '' === select.value)
-    },
-    setSelected(id: string | number) {
-      select.value = id + ''
+  return Vbox().with(it => {
+    it.append(title, select)
+
+    return {
+      setOptions(opts: O[]) {
+        options = opts
+        options.forEach(o => {
+          select.options.add(
+            Html('option').with(it => {
+              it.value = getId(o) + ''
+              it.textContent = getDisplayText(o)
+            })
+          )
+        })
+      },
+      getSelected(): O | undefined {
+        return options.find(o => getId(o) + '' === select.value)
+      },
+      setSelected(id: string | number) {
+        select.value = id + ''
+      }
     }
   })
 }

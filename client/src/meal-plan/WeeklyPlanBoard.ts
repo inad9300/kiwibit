@@ -2,7 +2,7 @@ import { app } from '../main'
 import { weekDays, currentWeekDay } from './cal'
 import { Icon, IconName } from '../components/Icon'
 import { Vbox } from '../components/Box'
-import { Button } from '../components/Button'
+import { BaseButton } from '../components/BaseButton'
 import { AddFoodModal } from './AddFoodModal'
 
 export function WeeklyPlanBoard() {
@@ -51,7 +51,7 @@ export function WeeklyPlanBoard() {
 function planControlBtn(iconName: IconName, isFirst: boolean) {
   const size = '32px'
 
-  const btn = Button()
+  const btn = BaseButton()
   btn.style.width = size
   btn.style.height = size
   btn.style.borderRadius = '50%'
@@ -92,7 +92,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
   addPopover.style.top = '5px'
   addPopover.append(addFoodIcon, addRecipeIcon)
 
-  const addBtn = Button()
+  const addBtn = BaseButton()
   addBtn.style.display = 'none'
   const addBtnSize = 60
   addBtn.style.width = addBtn.style.height = addBtnSize + 'px'
@@ -126,7 +126,9 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
     body.style.border = '2px solid darkred'
   }
 
-  const root = Vbox([title, body], { tag: 'article' })
+  const root = Vbox('article').with(it => {
+    it.append(title, body)
+  })
   root.style.display = 'inline-flex'
   root.style.height = '500px'
   root.style.width = '360px'

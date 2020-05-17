@@ -1,16 +1,18 @@
-export function List(children?: (string | HTMLElement)[]) {
-  const root = document.createElement('ul')
-  root.style.listStyle = 'none'
-  root.style.margin = '0'
-  root.style.padding = '0'
+import { Html } from './Html'
 
-  if (children) {
-    root.append(...children.map(c => {
-      const li = document.createElement('li')
-      li.append(c)
-      return li
-    }))
-  }
+export function List() {
+  return Html('ul').with(it => {
+    it.style.listStyle = 'none'
+    it.style.margin = '0'
+    it.style.padding = '0'
 
-  return root
+    return {
+      setChildren(children: (string | HTMLElement)[]) {
+        it.innerHTML = ''
+        it.append(
+          ...children.map(c => Html('li').with(it => it.append(c)))
+        )
+      }
+    }
+  })
 }

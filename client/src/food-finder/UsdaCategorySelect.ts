@@ -3,11 +3,7 @@ import { Select } from '../components/Select'
 import type { UsdaCategory } from '../../../server/src/api/getAllUsdaCategories'
 
 export function UsdaCategorySelect() {
-  const select = Select<UsdaCategory>(
-    'Category',
-    n => n.id!,
-    n => n.name
-  )
+  const select = Select<UsdaCategory>('Category', n => n.id!, n => n.name)
 
   api('getAllUsdaCategories', undefined).then(categories => {
     categories.unshift({

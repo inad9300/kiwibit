@@ -1,3 +1,5 @@
+import { Html } from '../components/Html'
+
 export function SettingsPage() {
-  return document.createElement('div')
+  return Html('div')
 }

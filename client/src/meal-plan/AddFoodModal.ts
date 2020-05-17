@@ -1,5 +1,5 @@
 import { Hbox, Vbox } from '../components/Box'
-import { Button } from '../components/Button'
+import { BaseButton } from '../components/BaseButton'
 import { List } from '../components/List'
 
 export function AddFoodModal() {
@@ -50,13 +50,13 @@ export function AddFoodModal() {
   sidebar.style.borderRadius = `3px 0 0 3px`
   sidebar.append(mostUsedListTitle, mostUsedList, yourCookbookListTitle, yourCookbookList)
 
-  const findBtn = Button()
+  const findBtn = BaseButton()
   findBtn.textContent = 'Find'
 
-  const importBtn = Button()
+  const importBtn = BaseButton()
   importBtn.textContent = 'Import'
 
-  const newBtn = Button()
+  const newBtn = BaseButton()
   newBtn.textContent = 'New'
 
   const btns = [findBtn, importBtn, newBtn]
@@ -72,7 +72,7 @@ export function AddFoodModal() {
     else btn.style.borderRadius = '0'
   })
 
-  const cancelBtn = Button()
+  const cancelBtn = BaseButton()
   cancelBtn.textContent = 'Cancel'
   cancelBtn.style.padding = '4px 8px'
   cancelBtn.style.borderRadius = '3px'
@@ -93,10 +93,14 @@ export function AddFoodModal() {
   main.style.padding = '8px 12px'
   main.textContent = 'Main'
 
-  const rightPart = Vbox([nav, main])
+  const rightPart = Vbox().with(it => {
+    it.append(nav, main)
+  })
   rightPart.style.flex = '1'
 
-  const root = Hbox([sidebar, rightPart], { tag: 'article' })
+  const root = Hbox('article').with(it => {
+    it.append(sidebar, rightPart)
+  })
   root.style.width = '1024px'
   root.style.maxWidth = '90%'
   root.style.position = 'absolute'

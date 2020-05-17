@@ -1,37 +1,36 @@
-interface BoxOptions {
-  tag?: keyof HTMLElementTagNameMap
-  gap?: string
-  justify?: 'space-evenly' | 'space-between'
-  wrap?: 'wrap' | 'reverse'
-}
+import { Html } from './Html'
 
-function box(
-  direction: 'row' | 'column',
-  marginProp: 'marginLeft' | 'marginTop',
-  children: HTMLElement[],
-  options: BoxOptions = {}
-) {
-  const root = document.createElement(options.tag || 'div')
-  root.style.display = 'flex'
-  root.style.flexDirection = direction
-  root.append(...children)
+export function Hbox<T extends keyof HTMLElementTagNameMap>(tag: T = 'div' as T) {
+  return (Html(tag) as HTMLElement).with(it => {
+    it.style.display = 'flex'
+    it.style.flexDirection = 'row'
 
-  if (options.justify !== undefined) {
-    root.style.justifyContent = options.justify
-  }
-
-  if (options.wrap !== undefined) {
-    root.style.flexWrap = options.wrap
-  }
-
-  if (options.gap !== undefined) {
-    for (let i = 1; i < children.length; ++i) {
-      children[i].style[marginProp] = options.gap
+    return {
+      setChildren: getSetChildren(it, 'marginLeft')
     }
-  }
-
-  return root
+  })
 }
 
-export const Hbox = box.bind(null, 'row', 'marginLeft')
-export const Vbox = box.bind(null, 'column', 'marginTop')
+export function Vbox<T extends keyof HTMLElementTagNameMap>(tag: T = 'div' as T) {
+  return (Html(tag) as HTMLElement).with(it => {
+    it.style.display = 'flex'
+    it.style.flexDirection = 'column'
+
+    return {
+      setChildren: getSetChildren(it, 'marginTop')
+    }
+  })
+}
+
+function getSetChildren(parent: HTMLElement, marginProp: 'marginLeft' | 'marginTop') {
+  return (children: HTMLElement[], gap?: string) => {
+    if (gap) {
+      for (let i = 1; i < children.length; ++i) {
+        children[i].style[marginProp] = gap
+      }
+    }
+
+    parent.innerHTML = ''
+    parent.append(...children)
+  }
+}

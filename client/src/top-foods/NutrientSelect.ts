@@ -8,19 +8,12 @@ export function NutrientSelect() {
     n => n.id!,
     n => n.name + (n.alias ? ' / ' + n.alias : '') + ' (' + n.unit_abbr + ')'
   )
+  .with(() => ({ onReady: () => {} }))
 
   api('getAllNutrients', undefined).then(nutrients => {
-    select.setOptions(
-      nutrients.sort((a, b) => (a.name > b.name ? 1 : -1))
-    )
-    onReadyCb()
+    select.setOptions(nutrients.sort((a, b) => (a.name > b.name ? 1 : -1)))
+    select.onReady()
   })
 
-  let onReadyCb = () => {}
-
-  return Object.assign(select, {
-    onReady(cb: () => void) {
-      onReadyCb = cb
-    }
-  })
+  return select
 }

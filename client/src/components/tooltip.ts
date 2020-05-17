@@ -1,34 +1,44 @@
-export const tooltip = document.createElement('div')
-tooltip.style.pointerEvents = 'none'
-tooltip.style.fontSize = '13px'
-tooltip.style.padding = '6px'
-tooltip.style.display = 'none'
-tooltip.style.width = 'max-content'
-tooltip.style.maxWidth = '300px'
-tooltip.style.position = 'fixed'
-tooltip.style.zIndex = '100'
-tooltip.style.color = '#fff'
-tooltip.style.borderRadius = '3px'
-tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+import { Html } from './Html'
 
 const { documentElement } = document
 const { min } = Math
 
-export function attachTooltip(content: string | HTMLElement, ref: HTMLElement) {
-  ref.addEventListener('mouseenter', evt => {
-    tooltip.innerHTML = ''
-    tooltip.append(content)
-    tooltip.style.display = 'block'
-    reposition(evt)
+export function Tooltip() {
+  return Html('div').with(it => {
+    it.hidden = true
+    it.style.pointerEvents = 'none'
+    it.style.fontSize = '13px'
+    it.style.padding = '6px'
+    it.style.width = 'max-content'
+    it.style.maxWidth = '300px'
+    it.style.position = 'fixed'
+    it.style.zIndex = '100'
+    it.style.color = '#fff'
+    it.style.borderRadius = '3px'
+    it.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+
+    function reposition(evt: MouseEvent) {
+      const maxTop = documentElement.clientHeight - it.offsetHeight
+      const maxLeft = documentElement.clientWidth - it.offsetWidth
+
+      it.style.top = min(maxTop, evt.clientY + 10) + 'px'
+      it.style.left = min(maxLeft, evt.clientX + 10) + 'px'
+    }
+
+    // TODO Remove old listeners!
+    // let priorRef: HTMLElement | undefined
+
+    return {
+      update(content: string | HTMLElement, ref: HTMLElement) {
+        ref.addEventListener('mouseenter', evt => {
+          it.innerHTML = ''
+          it.append(content)
+          it.hidden = false
+          reposition(evt)
+        })
+        ref.addEventListener('mousemove', reposition)
+        ref.addEventListener('mouseleave', () => it.hidden = true)
+      }
+    }
   })
-  ref.addEventListener('mousemove', reposition)
-  ref.addEventListener('mouseleave', () => tooltip.style.display = 'none')
-
-  function reposition(evt: MouseEvent) {
-    const maxTop = documentElement.clientHeight - tooltip.offsetHeight
-    const maxLeft = documentElement.clientWidth - tooltip.offsetWidth
-
-    tooltip.style.top = min(maxTop, evt.clientY + 10) + 'px'
-    tooltip.style.left = min(maxLeft, evt.clientX + 10) + 'px'
-  }
 }

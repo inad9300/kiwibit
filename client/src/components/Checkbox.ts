@@ -1,6 +1,7 @@
-export function Checkbox() {
-  const root = document.createElement('input')
-  root.type = 'checkbox'
+import { Html } from './Html'
 
-  return root
+export function Checkbox() {
+  return Html('input').with(it => {
+    it.type = 'checkbox'
+  })
 }
