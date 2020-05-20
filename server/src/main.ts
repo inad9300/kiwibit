@@ -1,5 +1,6 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import { readFile } from 'fs'
+import { resolve } from 'path'
 import './Error'
 import { log } from './log'
 import { Api, ApiFn, ApiPayload } from './api-types'
@@ -8,6 +9,8 @@ import { URL } from 'url'
 
 process.on('uncaughtException', err => log.error('Uncaught exception.', err))
 process.on('unhandledRejection', err => log.error('Unhandled rejection.', err))
+
+const serverRoot = resolve(__dirname, '../..')
 
 createServer(serve)
   .listen(process.env.PORT || 4000, () => log.info(`Server up and running.`))
@@ -35,8 +38,11 @@ function serve(req: IncomingMessage, res: ServerResponse) {
   log.debug('HTTP request.', req.method, req.url)
 
   if (req.method === 'GET') {
-    const { pathname } = new URL('http://localhost' + req.url!)
-    return readFile(__dirname + '/../..' + pathname, (err, data) => {
+    let { pathname } = new URL('http://localhost' + req.url!)
+    if (pathname === '/') {
+      pathname = '/index.html'
+    }
+    return readFile(serverRoot + pathname, (err, data) => {
       if (err) {
         reply(res, new Error('File not found.'))
       } else {
