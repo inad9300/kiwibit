@@ -13,9 +13,11 @@ if (DEBUG) {
 
     elem.dataset.stack = new Error().stack!
       .split('\n')
+      .slice(1)
       .map(l => l.trim())
-      .filter(l => /^at Object.[a-zA-Z0-9_]+/.test(l))
-      .map(l => l.slice(10, l.indexOf(' ', 10)))
+      .filter(l => !/[. ]Html /.test(l))
+      .map(l => l.match(/^at (?:Object\.)?([A-Z][a-zA-Z0-9_]+) \(/)?.[1])
+      .filter(l => l)
       .join(' ← ')
 
     return elem
