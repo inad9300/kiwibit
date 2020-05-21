@@ -60,18 +60,19 @@ export function TopFoodsPage() {
 
   const chart = TopFoodsChart()
 
+  const topFoodsLimit = 100
+  let topFoodsOffset = 0
+
   const moreResultsBtn = RegularButton('More results').with(it => {
     it.hidden = true
     it.style.width = 'auto'
     it.style.margin = `0 ${barPadding}px 12px ${barPadding}px`
     it.onclick = () => {
-      topFoodsOffset += 100
+      topFoodsOffset += topFoodsLimit
       reloadChart(nutrientSelect.getSelected()!.id, topFoodsOffset)
     }
   })
 
-  const topFoodsLimit = 100
-  let topFoodsOffset = 0
   let lastTopFoodsCriteria: ApiInput<'getTopFoodsForNutrient'>
   let lastIntakeMetadata: NutrientIntakeMetadata
   const topFoodsAcc: FoodNutrient[] = []
