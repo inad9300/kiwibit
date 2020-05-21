@@ -11,7 +11,7 @@ if (DEBUG) {
   document.createElement = function () {
     const elem = createElement.apply(document, arguments as any)
 
-    elem.dataset.stack = new Error().stack!
+    const stack = new Error().stack!
       .split('\n')
       .slice(1)
       .map(l => l.trim())
@@ -19,6 +19,10 @@ if (DEBUG) {
       .map(l => l.match(/^at (?:Object\.)?([A-Z][a-zA-Z0-9_]+) \(/)?.[1])
       .filter(l => l)
       .join(' ← ')
+
+    if (stack) {
+      elem.dataset.stack = stack
+    }
 
     return elem
   }
