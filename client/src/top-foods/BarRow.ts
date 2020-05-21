@@ -10,7 +10,7 @@ import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrien
 export const barPadding = 17
 export const barTitleRightMargin = 8
 
-export function Bar(f: FoodNutrient, max: number) {
+export function BarRow(f: FoodNutrient, max: number) {
   const title = Html('div').with(it => {
     it.textContent = f.name
     it.style.whiteSpace = 'nowrap'

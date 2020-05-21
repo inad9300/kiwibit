@@ -7,6 +7,7 @@ import { getUrlParams } from '../utils/getUrlParams'
 import { Html } from '../components/Html'
 import { Hbox, Vbox } from '../components/Box'
 import { RegularButton } from '../components/RegularButton'
+import { barPadding } from './BarRow'
 import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
 import type { NutrientIntakeMetadata } from '../../../server/src/api/getIntakeMetadataForNutrient'
 
@@ -62,7 +63,7 @@ export function TopFoodsPage() {
   const moreResultsBtn = RegularButton('More results').with(it => {
     it.hidden = true
     it.style.width = 'auto'
-    it.style.margin = '0 12px 12px 12px'
+    it.style.margin = `0 ${barPadding}px 12px ${barPadding}px`
     it.onclick = () => {
       topFoodsOffset += 100
       reloadChart(nutrientSelect.getSelected()!.id, topFoodsOffset)

@@ -1,8 +1,5 @@
 import { Html } from './Html'
 
-const { documentElement } = document
-const { min } = Math
-
 export function Tooltip() {
   return Html('div').with(it => {
     it.hidden = true
@@ -16,6 +13,9 @@ export function Tooltip() {
     it.style.color = '#fff'
     it.style.borderRadius = '3px'
     it.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+
+    const { documentElement } = document
+    const { min } = Math
 
     function reposition(evt: MouseEvent) {
       const maxTop = documentElement.clientHeight - it.offsetHeight

@@ -3,10 +3,11 @@ import { Abbr } from '../components/Abbr'
 import { Span } from '../components/Span'
 import { Vbox, Hbox } from '../components/Box'
 import { CategoryCircle } from './CategoryCircle'
+import { barPadding } from './BarRow'
 import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
 import type { NutrientIntakeMetadata } from '../../../server/src/api/getIntakeMetadataForNutrient'
 
-export function Legend(intakeMetadata: NutrientIntakeMetadata, topFoods: FoodNutrient[]) {
+export function Legend(parentChart: HTMLElement, intakeMetadata: NutrientIntakeMetadata, topFoods: FoodNutrient[]) {
   const { rdi, ul } = intakeMetadata
   const { unit_abbr } = topFoods[0]
   const metadataLegendItems: HTMLElement[] = []
@@ -72,13 +73,32 @@ export function Legend(intakeMetadata: NutrientIntakeMetadata, topFoods: FoodNut
     it.setChildren([...metadataLegendItems, ...categoryLegendItems], '4px')
     it.style.position = 'fixed'
     it.style.zIndex = '1'
-    it.style.bottom = it.style.right = '12px'
+    it.style.top = '0'
+    it.style.right = barPadding + 'px'
     it.style.width = it.style.maxHeight = '230px'
     it.style.overflowY = 'auto'
     it.style.padding = '8px'
     it.style.fontSize = '13px'
+    // TODO Create Card() component.
     it.style.border = '1px solid lightgrey'
     it.style.background = '#fff'
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
+
+    // TODO? Remove previous event listeners.
+
+    setTimeout(() => {
+      const legendHeight = it.offsetHeight
+      const { documentElement } = document
+
+      function reposition() {
+        const chartBottom = parentChart.getBoundingClientRect().bottom
+        const chartBottomOffset = Math.max(0, documentElement.offsetHeight - (chartBottom + 12))
+        it.style.top = documentElement.offsetHeight - legendHeight - chartBottomOffset - 12 + 'px'
+      }
+
+      reposition()
+      window.addEventListener('resize', reposition)
+      window.addEventListener('scroll', reposition)
+    })
   })
 }
