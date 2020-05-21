@@ -73,9 +73,9 @@ export function TopFoodsPage() {
     }
   })
 
+  const topFoodsAcc: FoodNutrient[] = []
   let lastTopFoodsCriteria: ApiInput<'getTopFoodsForNutrient'>
   let lastIntakeMetadata: NutrientIntakeMetadata
-  const topFoodsAcc: FoodNutrient[] = []
 
   async function reloadChart(nutrientId: number, offset = 0) {
     if (offset > 0) {
