@@ -80,7 +80,7 @@ export function TopFoodsPage() {
   async function reloadChart(nutrientId: number, offset = 0) {
     if (offset > 0) {
       const topFoods = await api('getTopFoodsForNutrient', { ...lastTopFoodsCriteria, offset })
-      if (topFoods.length < topFoodsLimit) {
+      if (topFoods.length < topFoodsLimit || topFoods.slice(-1)[0].amount === 0) {
         moreResultsBtn.hidden = true
       }
       topFoodsAcc.push(...topFoods)
@@ -110,7 +110,7 @@ export function TopFoodsPage() {
     topFoodsAcc.length = 0
     topFoodsAcc.push(...topFoods)
     chart.update(intakeMetadata, topFoods)
-    if (topFoods.length === topFoodsLimit) {
+    if (topFoods.length === topFoodsLimit && topFoods.slice(-1)[0].amount !== 0) {
       moreResultsBtn.hidden = false
     }
 
