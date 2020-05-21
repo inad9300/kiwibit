@@ -69,15 +69,10 @@ export function TopFoodsPage() {
     }
   })
 
-  const root = Vbox().with(it => {
-    it.append(controlsRow, chart, moreResultsBtn)
-  })
-
   let topFoodsOffset = 0
   let lastTopFoodsCriteria: ApiInput<'getTopFoodsForNutrient'>
-  const topFoodsAcc: FoodNutrient[] = []
-
   let lastIntakeMetadata: NutrientIntakeMetadata
+  const topFoodsAcc: FoodNutrient[] = []
 
   async function reloadChart(nutrientId: number, offset = 0) {
     if (offset > 0) {
@@ -114,5 +109,7 @@ export function TopFoodsPage() {
     zoomSlider.max = (chart.clientWidth * 10) + ''
   }
 
-  return root
+  return Vbox().with(it => {
+    it.append(controlsRow, chart, moreResultsBtn)
+  })
 }
