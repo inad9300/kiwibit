@@ -20,6 +20,7 @@ export async function getTopFoodsForNutrient(data: {
   orderBy: 'weight' | 'energy'
   categories: number[]
   offset: number
+  limit: number
 }) {
   const orderBy =
     data.orderBy === 'weight' || data.nutrientId === energyId
@@ -54,7 +55,7 @@ export async function getTopFoodsForNutrient(data: {
     ${categoriesFilter}
     order by ${orderBy} desc
     offset ${data.offset}
-    limit 100
+    limit ${data.limit}
   `)
 
   return res.rows

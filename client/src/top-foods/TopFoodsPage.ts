@@ -70,6 +70,7 @@ export function TopFoodsPage() {
     }
   })
 
+  const topFoodsLimit = 100
   let topFoodsOffset = 0
   let lastTopFoodsCriteria: ApiInput<'getTopFoodsForNutrient'>
   let lastIntakeMetadata: NutrientIntakeMetadata
@@ -78,6 +79,9 @@ export function TopFoodsPage() {
   async function reloadChart(nutrientId: number, offset = 0) {
     if (offset > 0) {
       const topFoods = await api('getTopFoodsForNutrient', { ...lastTopFoodsCriteria, offset })
+      if (topFoods.length < topFoodsLimit) {
+        moreResultsBtn.hidden = true
+      }
       topFoodsAcc.push(...topFoods)
       chart.update(lastIntakeMetadata, topFoodsAcc)
       return
@@ -89,6 +93,7 @@ export function TopFoodsPage() {
     const categoryId = categorySelect.getSelected()?.id
 
     lastTopFoodsCriteria = {
+      limit: topFoodsLimit,
       nutrientId,
       orderBy: perSelect.getSelected()!.value,
       categories: !categoryId || categoryId === -1 ? [] : [categoryId],
@@ -104,7 +109,9 @@ export function TopFoodsPage() {
     topFoodsAcc.length = 0
     topFoodsAcc.push(...topFoods)
     chart.update(intakeMetadata, topFoods)
-    moreResultsBtn.hidden = false
+    if (topFoods.length === topFoodsLimit) {
+      moreResultsBtn.hidden = false
+    }
 
     zoomSlider.step = zoomSlider.min = zoomSlider.value = chart.clientWidth + ''
     zoomSlider.max = (chart.clientWidth * 10) + ''
