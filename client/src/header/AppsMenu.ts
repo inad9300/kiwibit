@@ -36,7 +36,7 @@ export function AppsMenu(trigger: HTMLElement) {
   })
 
   document.body.addEventListener('click', evt => {
-    if (root.hidden && !root.contains(evt.target as Node) && !trigger.contains(evt.target as Node)) {
+    if (!root.hidden && !root.contains(evt.target as Node) && !trigger.contains(evt.target as Node)) {
       close()
     }
   })
@@ -50,7 +50,7 @@ export function AppsMenu(trigger: HTMLElement) {
   const frames = 8
   const opacityMax = 1
   const opacityMin = 0
-  const yPosMax = 54
+  const yPosMax = 53
   const yPosMin = 36
   const opacityInc = (opacityMax - opacityMin) / frames
   const yPosInc = (yPosMax - yPosMin) / frames
