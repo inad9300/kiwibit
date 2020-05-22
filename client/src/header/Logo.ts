@@ -1,29 +1,24 @@
 import { AppsMenu } from './AppsMenu'
 import { Html } from '../components/Html'
 import { BaseButton } from '../components/BaseButton'
+import { Hbox } from '../components/Box'
 
 const height = '47px'
 
-export const logoTriangle = Html('div').with(it => {
-  it.style.borderTop = height + ' solid transparent'
-  it.style.borderRight = '20px solid transparent'
-})
-
 export function Logo() {
-  const root = BaseButton().with(it => {
+  const logoSquare = BaseButton().with(it => {
     it.textContent = 'meals'
     it.style.height = height
-    it.style.position = 'relative'
     it.style.margin = '0'
-    it.style.padding = '10px 16px 10px 16px'
+    it.style.padding = '10px 16px 10px 14px'
     it.style.fontFamily = 'Pacifico, sans-serif'
-    it.style.fontSize = '24px'
+    it.style.fontSize = '28px'
     it.style.lineHeight = '0'
     it.style.textShadow = '0 -1px 0 rgba(255, 255, 255, 0.75)'
 
     it.onclick = () => menu.toggle()
-    it.onmouseenter = it.onfocus = () => setActive()
-    it.onblur = () => setInactive()
+    it.onmouseenter = it.onfocus = setActive
+    it.onblur = setInactive
     it.onmouseout = () => {
       if (menu.hidden) {
         setInactive()
@@ -31,23 +26,29 @@ export function Logo() {
     }
   })
 
+  const logoTriangle = Html('div').with(it => {
+    it.style.borderTop = height + ' solid transparent'
+    it.style.borderRight = '20px solid transparent'
+  })
+
   setInactive()
 
   function setActive() {
-    root.style.color = '#333'
-    root.style.backgroundColor = logoTriangle.style.borderTopColor = 'rgba(0, 0, 0, 0.09)'
+    logoSquare.style.color = '#333'
+    logoSquare.style.backgroundColor = logoTriangle.style.borderTopColor = '#eee'
   }
 
   function setInactive() {
-    root.style.color = '#b12a42'
-    root.style.backgroundColor = logoTriangle.style.borderTopColor = 'rgba(0, 0, 0, 0.04)'
+    logoSquare.style.color = '#b12a42'
+    logoSquare.style.backgroundColor = logoTriangle.style.borderTopColor = '#eee'
   }
 
-  const menu = AppsMenu(root).with(it => {
+  const menu = AppsMenu(logoSquare).with(it => {
     it.onClose = setInactive
   })
 
-  root.append(menu)
-
-  return root
+  return Hbox().with(it => {
+    it.style.position = 'relative'
+    it.append(logoSquare, logoTriangle, menu)
+  })
 }

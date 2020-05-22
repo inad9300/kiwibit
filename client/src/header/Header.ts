@@ -3,7 +3,7 @@ import { Html } from '../components/Html'
 import { Icon } from '../components/Icon'
 import { Link } from '../components/Link'
 import { Spacer } from '../components/Spacer'
-import { Logo, logoTriangle } from './Logo'
+import { Logo } from './Logo'
 
 export function Header() {
   const page = getCurrentPage()
@@ -42,6 +42,6 @@ export function Header() {
     it.style.borderBottom = '1px solid rgba(0, 0, 0, 0.15)'
     it.style.boxShadow = '0 1px 5px rgba(0, 0, 0, 0.1)'
 
-    it.append(Logo(), logoTriangle, pageIcon, pageTitle, Spacer(), buyMeACoffeeLink)
+    it.append(Logo(), pageIcon, pageTitle, Spacer(), buyMeACoffeeLink)
   })
 }
