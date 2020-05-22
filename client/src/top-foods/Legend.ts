@@ -1,7 +1,8 @@
 import { Html } from '../components/Html'
 import { Abbr } from '../components/Abbr'
 import { Span } from '../components/Span'
-import { Vbox, Hbox } from '../components/Box'
+import { Hbox } from '../components/Box'
+import { Card } from '../components/Card'
 import { CategoryCircle } from './CategoryCircle'
 import { barPadding } from './BarRow'
 import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
@@ -69,7 +70,7 @@ export function Legend(parentChart: HTMLElement, intakeMetadata: NutrientIntakeM
       })
     })
 
-  return Vbox().with(it => {
+  return Card().with(it => {
     it.setChildren([...metadataLegendItems, ...categoryLegendItems], '4px')
     it.style.position = 'fixed'
     it.style.zIndex = '1'
@@ -77,12 +78,7 @@ export function Legend(parentChart: HTMLElement, intakeMetadata: NutrientIntakeM
     it.style.right = barPadding + 'px'
     it.style.width = it.style.maxHeight = '230px'
     it.style.overflowY = 'auto'
-    it.style.padding = '8px'
     it.style.fontSize = '13px'
-    // TODO Create Card() component.
-    it.style.border = '1px solid lightgrey'
-    it.style.background = '#fff'
-    it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
 
     // TODO? Remove previous event listeners.
 
