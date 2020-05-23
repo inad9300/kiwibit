@@ -1,5 +1,6 @@
 import { Html } from './Html'
 import { Vbox } from './Box'
+import { Icon } from './Icon'
 
 export function Select<O>(
   titleText: string,
@@ -15,7 +16,10 @@ export function Select<O>(
   })
 
   const select = Html('select').with(it => {
-    it.style.padding = '4px 5px'
+    it.style.height = '26px'
+    it.style.webkitAppearance = 'none'
+    it.style.borderRadius = '0'
+    it.style.padding = '0 5px'
     it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
     it.style.backgroundColor = '#fff'
@@ -26,7 +30,18 @@ export function Select<O>(
   let options: O[] = []
 
   return Vbox().with(it => {
-    it.append(title, select)
+    it.style.position = 'relative'
+    it.append(
+      title,
+      select,
+      Icon('chevron-down').with(it => {
+        it.style.fontSize = '12px'
+        it.style.color = '#666'
+        it.style.position = 'absolute'
+        it.style.bottom = '6px'
+        it.style.right = '5px'
+      })
+    )
 
     return {
       setOptions(opts: O[]) {
