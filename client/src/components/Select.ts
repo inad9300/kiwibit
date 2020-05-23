@@ -41,6 +41,7 @@ export function Select<O>(
         it.style.position = 'absolute'
         it.style.bottom = '6px'
         it.style.right = '5px'
+        it.style.pointerEvents = 'none'
       })
     )
 
