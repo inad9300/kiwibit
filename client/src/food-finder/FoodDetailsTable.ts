@@ -120,14 +120,14 @@ export function FoodDetailsTable() {
 
           const iconCell = Html('td').with(it => {
             const im = intakeMetadata.find(im => im.nutrient_id === n.id)
-            if (im?.ul || im?.rdi) {
+            if (im?.ul != null || im?.rdi != null) {
               let icon: SVGElement
-              if (im.ul && n.amount >= im.ul) {
+              if (im.ul != null && n.amount >= im.ul) {
                 icon = Icon('times').with(it => {
                   it.style.color = '#cc1515'
                   it.style.marginLeft = '1px'
                 })
-              } else if (im.rdi && (im.ul || pct(n.amount, im.rdi) <= 100)) {
+              } else if (im.rdi != null && (im.ul != null || pct(n.amount, im.rdi) <= 100)) {
                 icon = Icon('check').with(it => {
                   it.style.color = 'green'
                   it.style.opacity = Math.min(1, pct(n.amount, im.rdi!) / 100) + ''
