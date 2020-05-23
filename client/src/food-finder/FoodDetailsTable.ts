@@ -15,12 +15,13 @@ export function FoodDetailsTable() {
   const title = Html('h1').with(it => {
     it.style.color = '#000'
     it.style.fontWeight = 'normal'
-    it.style.fontSize = '16px'
+    it.style.fontSize = '15px'
     it.style.margin = '0'
   })
 
   const ddgLink = Link('').with(it => {
     it.target = '_blank'
+    it.style.lineHeight = '0'
 
     it.onmouseenter = () => img.style.filter = ''
     it.onmouseleave = () => img.style.filter = 'grayscale(100%)'
@@ -36,12 +37,18 @@ export function FoodDetailsTable() {
   })
 
   const heading = Hbox().with(it => {
-    it.style.margin = '0 5px'
-    it.append(title, Spacer(), ddgLink)
+    it.style.margin = '0 3px 3px 3px'
+    it.setChildren([
+      title,
+      Spacer(),
+      Vbox().with(it => {
+        it.append(Spacer(), ddgLink)
+      })
+    ], '3px')
   })
 
   const tbody = Html('tbody').with(it => {
-    it.style.fontSize = '15px'
+    it.style.fontSize = '14px'
   })
 
   const table = Html('table').with(it => {
@@ -50,16 +57,18 @@ export function FoodDetailsTable() {
     it.style.borderCollapse = 'collapse'
     it.style.border = '1px solid #ccc'
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
-    it.style.marginBottom = '16px'
+    it.style.marginBottom = '-1px'
   })
 
   return Html('div').with(it => {
-    it.style.width = '345px'
+    it.style.width = '325px'
     it.append(heading, table)
 
     return {
       setData(intakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>, foodDetails: ApiOutput<'findFoodDetails'>) {
         title.textContent = foodDetails.name + ` (100 g)`
+        tooltip.update(Span(foodDetails.name + ` (100 g)`), title)
+
         ddgLink.href = 'https://duckduckgo.com/?iax=images&ia=images&q=' + encodeURIComponent(foodDetails.name)
         // googleImagesLink.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)
 

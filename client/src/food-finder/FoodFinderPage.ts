@@ -12,7 +12,9 @@ export function FoodFinderPage() {
     it.onchange = () => foodFinderInput.setUsdaCategoryId(it.getSelected()!.id)
   })
 
-  const foodDetailsTable = FoodDetailsTable()
+  const foodDetailsTable = FoodDetailsTable().with(it => {
+    it.hidden = true
+  })
 
   let lastFoodId: number
   let lastShowAll: boolean
@@ -26,13 +28,16 @@ export function FoodFinderPage() {
       .then(([intakeMetadata, foodDetailsData]) => {
         lastFoodId = foodId
         lastShowAll = showAll
-        showAllNutrientsBtn.textContent = showAll ? 'Show less nutrients' : 'Show more nutrients'
+        showMoreNutrientsBtn.textContent = showAll ? 'Show less nutrients' : 'Show more nutrients'
         foodDetailsTable.setData(intakeMetadata, foodDetailsData)
+        foodDetailsTable.hidden = showMoreNutrientsBtn.hidden = false
       })
   }
 
-  const showAllNutrientsBtn = RegularButton('Show more nutrients').with(it => {
-    it.style.width = 'auto'
+  const showMoreNutrientsBtn = RegularButton('Show more nutrients').with(it => {
+    it.hidden = true
+    it.style.width = '325px'
+    it.style.borderColor = '#ccc'
     it.onclick = () => loadFoodDetails(lastFoodId, !lastShowAll)
   })
 
@@ -52,7 +57,7 @@ export function FoodFinderPage() {
   }
 
   return Html('div').with(it => {
-    it.style.margin = '12px 16px'
-    it.append(controlsRow, foodDetailsTable, showAllNutrientsBtn)
+    it.style.margin = '12px 16px 16px 16px'
+    it.append(controlsRow, foodDetailsTable, showMoreNutrientsBtn)
   })
 }

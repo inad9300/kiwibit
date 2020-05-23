@@ -8,7 +8,8 @@ export function FoodFinderInput() {
   const input = Html('input').with(it => {
     it.placeholder = `e.g. "lentils cooked" (at least 3 characters)`
     it.oninput = () => list.update(it.value, usdaCategoryId)
-    it.style.fontSize = '13px'
+    it.style.height = '26px'
+    it.style.fontSize = '12px'
     it.style.padding = '4px 5px'
     it.style.width = '275px'
     it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
@@ -53,6 +54,7 @@ function TypeaheadList() {
   const root = Html('div').with(it => {
     it.hidden = true
     it.style.position = 'absolute'
+    it.style.zIndex = '1'
     it.style.top = '47px'
     it.style.padding = '4px 0'
     it.style.border = '1px solid rgba(0, 0, 0, 0.15)'

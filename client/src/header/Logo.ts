@@ -15,6 +15,7 @@ export function Logo() {
     it.style.fontSize = '28px'
     it.style.lineHeight = '0'
     it.style.textShadow = '0 -1px 0 rgba(255, 255, 255, 0.75)'
+    it.style.backgroundColor = '#eee'
 
     it.onclick = () => menu.toggle()
     it.onmouseenter = it.onfocus = setActive
@@ -27,7 +28,7 @@ export function Logo() {
   })
 
   const logoTriangle = Html('div').with(it => {
-    it.style.borderTop = height + ' solid transparent'
+    it.style.borderTop = height + ' solid #eee'
     it.style.borderRight = '20px solid transparent'
   })
 
@@ -35,12 +36,10 @@ export function Logo() {
 
   function setActive() {
     logoSquare.style.color = '#333'
-    logoSquare.style.backgroundColor = logoTriangle.style.borderTopColor = '#eee'
   }
 
   function setInactive() {
     logoSquare.style.color = '#b12a42'
-    logoSquare.style.backgroundColor = logoTriangle.style.borderTopColor = '#eee'
   }
 
   const menu = AppsMenu(logoSquare).with(it => {
