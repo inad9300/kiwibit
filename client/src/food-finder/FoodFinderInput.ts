@@ -12,6 +12,8 @@ export function FoodFinderInput() {
     it.style.padding = '4px 5px'
     it.style.width = '275px'
     it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
+    it.style.borderLeft = '0'
+    it.style.outline = 'none'
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.065) inset'
     it.style.backgroundColor = '#fff'
   })

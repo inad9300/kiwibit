@@ -41,7 +41,8 @@ export function FoodFinderPage() {
   })
 
   const controlsRow = Hbox().with(it => {
-    it.setChildren([usdaCategorySelect, foodFinderInput], '8px')
+    it.append(usdaCategorySelect, foodFinderInput)
+    it.style.marginBottom = '10px'
   })
 
   const foodIdStr = getUrlParams().get('food-id')
