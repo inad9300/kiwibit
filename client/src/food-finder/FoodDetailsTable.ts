@@ -127,7 +127,7 @@ export function FoodDetailsTable() {
                   it.style.color = '#cc1515'
                   it.style.marginLeft = '1px'
                 })
-              } else if (im.rdi && im.ul) {
+              } else if (im.rdi && (im.ul || pct(n.amount, im.rdi) <= 100)) {
                 icon = Icon('check').with(it => {
                   it.style.color = 'green'
                   it.style.opacity = Math.min(1, pct(n.amount, im.rdi!) / 100) + ''
