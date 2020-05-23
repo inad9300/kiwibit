@@ -124,6 +124,7 @@ export function FoodDetailsTable() {
               if (im.ul && n.amount >= im.ul) {
                 icon = Icon('times').with(it => {
                   it.style.color = '#cc1515'
+                  it.style.marginLeft = '1px'
                 })
               } else if (im.rdi && im.ul) {
                 icon = Icon('check').with(it => {
