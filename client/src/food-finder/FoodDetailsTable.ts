@@ -61,7 +61,7 @@ export function FoodDetailsTable() {
   })
 
   return Html('div').with(it => {
-    it.style.width = '325px'
+    it.style.width = '335px'
     it.append(heading, table)
 
     return {
@@ -115,6 +115,7 @@ export function FoodDetailsTable() {
           const amountCell = Html('td').with(it => {
             it.textContent = n.amount + ' ' + n.unit_abbr
             it.style.textAlign = 'right'
+            it.style.whiteSpace = 'nowrap'
           })
 
           const iconCell = Html('td').with(it => {

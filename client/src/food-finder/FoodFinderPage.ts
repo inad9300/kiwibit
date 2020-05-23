@@ -36,7 +36,7 @@ export function FoodFinderPage() {
 
   const showMoreNutrientsBtn = RegularButton('Show more nutrients').with(it => {
     it.hidden = true
-    it.style.width = '325px'
+    it.style.width = '335px'
     it.style.borderColor = '#ccc'
     it.onclick = () => loadFoodDetails(lastFoodId, !lastShowAll)
   })
