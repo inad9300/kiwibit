@@ -2,35 +2,42 @@ import { pct } from '../utils/pct'
 import { Page } from '../pages'
 import { Html } from '../components/Html'
 import { Link } from '../components/Link'
+import { Image } from '../components/Image'
+import { Icon } from '../components/Icon'
+import { ApiOutput } from '../utils/api'
+import { tooltip } from '../App'
+import { Span } from '../components/Span'
+import { Vbox, Hbox } from '../components/Box'
+import { Italics } from '../components/Italics'
+import { Spacer } from '../components/Spacer'
 
 export function FoodDetailsTable() {
-  const heading = Html('h1').with(it => {
-    it.style.fontSize = '20px'
+  const title = Html('h1').with(it => {
+    it.style.color = '#000'
+    it.style.fontWeight = 'normal'
+    it.style.fontSize = '16px'
+    it.style.margin = '0'
   })
 
   const ddgLink = Link('').with(it => {
     it.target = '_blank'
-    it.textContent = 'Find images in DuckDuckGo'
-  })
 
-  const headers = ['Nutrient', 'Amount', 'RDI', '% of RDI', 'UL', '% of UL']
+    it.onmouseenter = () => img.style.filter = ''
+    it.onmouseleave = () => img.style.filter = 'grayscale(100%)'
 
-  const ths = headers.map(h =>
-    Html('th').with(it => {
-      it.textContent = h
-      it.style.padding = '6px'
-      it.style.fontSize = '14px'
-      it.style.color = '#222'
-      it.style.textAlign = h === 'Nutrient' ? 'left' : 'right'
+    const img = Image('https://duckduckgo.com/assets/common/dax-logo.svg').with(it => {
+      it.width = it.height = 18
+      it.style.filter = 'grayscale(100%)'
     })
-  )
 
-  const tr = Html('tr').with(it => {
-    it.append(...ths)
+    tooltip.update(Span('Find images in DuckDuckGo'), it)
+
+    it.append(img)
   })
 
-  const thead = Html('thead').with(it => {
-    it.append(tr)
+  const heading = Hbox().with(it => {
+    it.style.margin = '0 5px'
+    it.append(title, Spacer(), ddgLink)
   })
 
   const tbody = Html('tbody').with(it => {
@@ -38,24 +45,25 @@ export function FoodDetailsTable() {
   })
 
   const table = Html('table').with(it => {
-    it.append(thead, tbody)
+    it.append(tbody)
+    it.style.width = '100%'
     it.style.borderCollapse = 'collapse'
-    it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
+    it.style.border = '1px solid #ccc'
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
     it.style.marginBottom = '16px'
   })
 
   return Html('div').with(it => {
-    it.append(heading, ddgLink, table)
+    it.style.width = '345px'
+    it.append(heading, table)
 
     return {
-      setData(intakeMetadata: any[], foodDetails: any) {
-        heading.textContent = foodDetails.name + ` (100 g)`
+      setData(intakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>, foodDetails: ApiOutput<'findFoodDetails'>) {
+        title.textContent = foodDetails.name + ` (100 g)`
         ddgLink.href = 'https://duckduckgo.com/?iax=images&ia=images&q=' + encodeURIComponent(foodDetails.name)
         // googleImagesLink.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)
 
         const knownCategories: string[] = []
-
         const trs: HTMLTableRowElement[] = []
 
         for (let i = 0; i < foodDetails.nutrients.length; ++i) {
@@ -67,15 +75,16 @@ export function FoodDetailsTable() {
 
             const categoryTd = Html('td').with(it => {
               it.textContent = n.category_name
-              it.colSpan = headers.length
+              it.colSpan = 3
               it.style.padding = '6px'
               it.style.fontWeight = 'bold'
               it.style.textAlign = 'center'
               it.style.textTransform = 'uppercase'
               it.style.fontSize = '13px'
-              it.style.color = '#222'
+              it.style.color = '#333'
+              it.style.borderTop = it.style.borderBottom = '1px solid #ccc'
               it.style.textShadow = '0 1px 0 rgba(255, 255, 255, 0.75)'
-              it.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
+              it.style.backgroundColor = '#eee'
             })
 
             tr.append(categoryTd)
@@ -84,53 +93,63 @@ export function FoodDetailsTable() {
             continue
           }
 
-          const nutrientLink = Link(`?page=${Page.TopFoods}&nutrient-id=${n.id}`).with(it => {
-            it.textContent = n.name + (n.alias ? ' / ' + n.alias : '')
-            it.style.color = 'black'
-            it.style.textDecoration = 'none'
+          const nutrientCell = Html('td').with(it => {
+            it.append(
+              Link(`?page=${Page.TopFoods}&nutrient-id=${n.id}`).with(it => {
+                it.textContent = n.name + (n.alias ? ' / ' + n.alias : '')
+                it.style.color = 'black'
+                it.style.textDecoration = 'none'
+              })
+            )
           })
 
-          const nutrientTd = Html('td').with(it => {
-            it.append(nutrientLink)
-          })
-
-          const amountTd = Html('td').with(it => {
-            it.textContent = n.amount + ' ' + n.unit_abbr
+          const amountCell = Html('td').with(it => {
+            it.textContent = n.amount + ' ' + n.unit_abbr
             it.style.textAlign = 'right'
           })
 
-          const im = intakeMetadata.find(im => im.nutrient_id === n.id)
+          const iconCell = Html('td').with(it => {
+            const im = intakeMetadata.find(im => im.nutrient_id === n.id)
+            if (im?.ul || im?.rdi) {
+              let icon: SVGElement
+              if (im.ul && n.amount >= im.ul) {
+                icon = Icon('times').with(it => {
+                  it.style.color = '#cc1515'
+                })
+              } else if (im.rdi && im.ul) {
+                icon = Icon('check').with(it => {
+                  it.style.color = 'green'
+                  it.style.opacity = Math.min(1, pct(n.amount, im.rdi!) / 100) + ''
+                })
+              } else {
+                icon = Icon('circle').with(it => {
+                  it.style.fontSize = '9px'
+                  it.style.marginLeft = '2px'
+                  it.style.color = '#cad1f0'
+                })
+              }
 
-          const rdiTd = Html('td').with(it => {
-            it.textContent = im?.rdi ? im.rdi + ' ' + n.unit_abbr : ''
-            it.style.textAlign = 'right'
-          })
+              const imTooltip = Vbox().with(it => {
+                it.setChildren([
+                  im.rdi
+                    ? Span(`${pct(n.amount, im.rdi).toFixed(2)} % of the RDI (${im.rdi} ${n.unit_abbr})`)
+                    : Italics('No RDI information'),
+                  im.ul
+                    ? Span(`${pct(n.amount, im.ul).toFixed(2)} % of the UL (${im.ul} ${n.unit_abbr})`)
+                    : Italics('No UL information')
+                ], '4px')
+              })
 
-          const rdiPctTd = Html('td').with(it => {
-            it.textContent = im?.rdi ? pct(n.amount, im.rdi).toFixed(2) + ' %' : ''
-            it.style.textAlign = 'right'
-            if (im?.rdi && pct(n.amount, im.rdi) > 100) {
-              it.style.color = 'green'
+              tooltip.update(imTooltip, it)
+
+              it.append(icon)
             }
           })
 
-          const ulTd = Html('td').with(it => {
-            it.textContent = im?.ul ? im.ul + ' ' + n.unit_abbr : ''
-            it.style.textAlign = 'right'
-          })
+          const cells = [nutrientCell, amountCell, iconCell]
+          cells.forEach(td => (td.style.padding = '6px'))
 
-          const ulPctTd = Html('td').with(it => {
-            it.textContent = im?.ul ? pct(n.amount, im.ul).toFixed(2) + ' %' : ''
-            it.style.textAlign = 'right'
-            if (im?.ul && pct(n.amount, im.ul) > 100) {
-              it.style.color = 'red'
-            }
-          })
-
-          const tds = [nutrientTd, amountTd, rdiTd, rdiPctTd, ulTd, ulPctTd]
-          tds.forEach(td => (td.style.padding = '6px'))
-
-          tr.append(...tds)
+          tr.append(...cells)
           trs.push(tr)
         }
 
