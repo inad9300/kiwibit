@@ -1,8 +1,10 @@
 import type { Api } from '../../../server/src/api-types'
 
+type ThenArg<T> = T extends PromiseLike<infer U> ? U : never
+
 export type ApiInput<Fn extends keyof Api> = Parameters<Api[Fn]>[0]
 
-export type ApiOutput<Fn extends keyof Api> = ReturnType<Api[Fn]>
+export type ApiOutput<Fn extends keyof Api> = ThenArg<ReturnType<Api[Fn]>>
 
 export function api<Fn extends keyof Api>(fn: Fn, payload: ApiInput<Fn>) {
   const aborter = new AbortController()
@@ -14,7 +16,7 @@ export function api<Fn extends keyof Api>(fn: Fn, payload: ApiInput<Fn>) {
     signal: aborter.signal
   })
   .then(res => res.text())
-  .then(body => (body ? JSON.parse(body) : undefined)) as ApiOutput<Fn>
+  .then(body => (body ? JSON.parse(body) : undefined)) as ReturnType<Api[Fn]>
 
   return Object.assign(promise, {
     abort: aborter.abort.bind(aborter)
