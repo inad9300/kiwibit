@@ -3,8 +3,7 @@ import { FoodFinderInput } from './FoodFinderInput'
 import { FoodDetailsTable } from './FoodDetailsTable'
 import { api } from '../utils/api'
 import { getUrlParams } from '../utils/getUrlParams'
-import { Hbox } from '../components/Box'
-import { Html } from '../components/Html'
+import { Hbox, Vbox } from '../components/Box'
 import { RegularButton } from '../components/RegularButton'
 
 export function FoodFinderPage() {
@@ -48,6 +47,7 @@ export function FoodFinderPage() {
   const controlsRow = Hbox().with(it => {
     it.append(usdaCategorySelect, foodFinderInput)
     it.style.marginBottom = '10px'
+    it.style.minHeight = 'min-content'
   })
 
   const foodIdStr = getUrlParams().get('food-id')
@@ -56,8 +56,8 @@ export function FoodFinderPage() {
     loadFoodDetails(foodId, false)
   }
 
-  return Html('div').with(it => {
-    it.style.margin = '12px 16px 16px 16px'
+  return Vbox().with(it => {
+    it.style.padding = '12px 16px 16px 16px'
     it.append(controlsRow, foodDetailsTable, showMoreNutrientsBtn)
   })
 }

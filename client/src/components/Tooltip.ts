@@ -6,7 +6,7 @@ export function Tooltip() {
     it.style.pointerEvents = 'none'
     it.style.fontSize = '13px'
     it.style.padding = '6px'
-    it.style.width = 'max-content'
+    it.style.minWidth = 'max-content'
     it.style.maxWidth = '300px'
     it.style.position = 'fixed'
     it.style.zIndex = '100'
@@ -30,6 +30,10 @@ export function Tooltip() {
 
     return {
       update(content: string | HTMLElement, ref: HTMLElement) {
+        if (content instanceof HTMLElement) {
+          content.style.maxWidth = '300px'
+        }
+
         ref.addEventListener('mouseenter', evt => {
           it.innerHTML = ''
           it.append(content)

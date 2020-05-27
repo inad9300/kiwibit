@@ -74,7 +74,12 @@ export function Legend(
     })
 
   return Card().with(it => {
-    it.setChildren([...metadataLegendItems, ...categoryLegendItems], '4px')
+    const children = [...metadataLegendItems, ...categoryLegendItems]
+    for (const c of children) {
+      c.style.minHeight = 'min-content'
+    }
+
+    it.setChildren(children, '4px')
     it.style.position = 'fixed'
     it.style.zIndex = '1'
     it.style.top = '0'

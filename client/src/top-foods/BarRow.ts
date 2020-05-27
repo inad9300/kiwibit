@@ -7,7 +7,7 @@ import { Hbox } from '../components/Box'
 import { BarTooltipContent } from './BarTooltipContent'
 import type { ApiOutput } from '../utils/api'
 
-export const barPadding = 17
+export const barPadding = 12
 export const barTitleRightMargin = 8
 
 export function BarRow(f: ApiOutput<'getTopFoodsForNutrient'>[0], max: number) {

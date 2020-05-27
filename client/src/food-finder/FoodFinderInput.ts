@@ -9,6 +9,7 @@ export function FoodFinderInput() {
     it.placeholder = `e.g. "lentils cooked" (at least 3 characters)`
     it.oninput = () => list.update(it.value, usdaCategoryId)
     it.style.height = '26px'
+    it.style.minHeight = '26px'
     it.style.fontSize = '12px'
     it.style.padding = '4px 5px'
     it.style.width = '275px'

@@ -53,6 +53,7 @@ export function TopFoodsPage() {
 
   const controlsRow = Hbox().with(it => {
     it.setChildren([nutrientSelect, categorySelect, perSelect, zoomControl], '8px')
+    it.style.minHeight = 'min-content'
     it.style.margin = '12px 16px'
   })
 
@@ -64,7 +65,7 @@ export function TopFoodsPage() {
   const moreResultsBtn = RegularButton('More results').with(it => {
     it.hidden = true
     it.style.width = 'auto'
-    it.style.margin = `0 ${barPadding}px 12px ${barPadding}px`
+    it.style.margin = `0 ${barPadding}px`
     it.onclick = () => {
       topFoodsOffset += topFoodsLimit
       reloadChart(nutrientSelect.getSelected()!.id, topFoodsOffset)
@@ -118,5 +119,6 @@ export function TopFoodsPage() {
 
   return Vbox().with(it => {
     it.append(controlsRow, chart, moreResultsBtn)
+    it.style.paddingBottom = '12px'
   })
 }

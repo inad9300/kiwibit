@@ -19,8 +19,9 @@ export function App() {
   })
 
   const page = getCurrentPage()
-  const pageComponent = page.component()
-  pageComponent.style.flex = '1'
+  const pageComponent = page.component().with(it => {
+    it.style.flex = '1'
+  })
 
   document.title = page.title
 
@@ -47,7 +48,7 @@ export function App() {
     it.style.display = 'flex'
     it.style.flexDirection = 'column'
     it.style.position = 'relative'
-    it.style.fontFamily = 'sans-serif'
+    it.style.fontFamily = 'system-ui, sans-serif'
     it.append(appStyle, Header(), pageComponent, tooltip)
   })
 }

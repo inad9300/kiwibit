@@ -11,7 +11,7 @@ export function Logo() {
     it.style.height = height
     it.style.margin = '0'
     it.style.padding = '10px 16px 10px 14px'
-    it.style.fontFamily = 'Pacifico, sans-serif'
+    it.style.fontFamily = 'Pacifico, system-ui, sans-serif'
     it.style.fontSize = '28px'
     it.style.lineHeight = '0'
     it.style.textShadow = '0 -1px 0 rgba(255, 255, 255, 0.75)'

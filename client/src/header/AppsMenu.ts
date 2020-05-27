@@ -14,7 +14,7 @@ export function AppsMenu(trigger: HTMLElement) {
     it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
     it.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'
     it.style.fontSize = '13px'
-    it.style.fontFamily = 'sans-serif'
+    it.style.fontFamily = 'system-ui, sans-serif'
     it.style.lineHeight = 'initial'
     it.style.backgroundColor = 'white'
     it.style.position = 'absolute'
