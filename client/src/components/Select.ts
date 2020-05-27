@@ -19,7 +19,7 @@ export function Select<O>(
     it.style.height = '26px'
     it.style.webkitAppearance = 'none'
     it.style.borderRadius = '0'
-    it.style.padding = '0 10px 0 5px'
+    it.style.padding = '0 18px 0 5px'
     it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
     it.style.fontSize = '12px'
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
