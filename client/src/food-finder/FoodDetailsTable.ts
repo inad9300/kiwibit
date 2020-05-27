@@ -4,12 +4,12 @@ import { Html } from '../components/Html'
 import { Link } from '../components/Link'
 import { Image } from '../components/Image'
 import { Icon } from '../components/Icon'
-import { ApiOutput } from '../utils/api'
 import { tooltip } from '../App'
 import { Span } from '../components/Span'
 import { Vbox, Hbox } from '../components/Box'
 import { Italics } from '../components/Italics'
 import { Spacer } from '../components/Spacer'
+import type { ApiOutput } from '../utils/api'
 
 export function FoodDetailsTable() {
   const title = Html('h1').with(it => {

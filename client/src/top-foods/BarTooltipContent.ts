@@ -1,9 +1,9 @@
 import { Html } from '../components/Html'
 import { Vbox, Hbox } from '../components/Box'
 import { CategoryCircle } from './CategoryCircle'
-import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
+import type { ApiOutput } from '../utils/api'
 
-export function BarTooltipContent(f: FoodNutrient) {
+export function BarTooltipContent(f: ApiOutput<'getTopFoodsForNutrient'>[0]) {
   const nameRow = Html('div').with(it => {
     it.textContent = f.name
   })

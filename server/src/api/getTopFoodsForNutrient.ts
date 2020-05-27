@@ -6,7 +6,7 @@ pool
   .query(`select id from nutrients where name = 'Energy'`)
   .then(res => (energyId = res.rows[0].id))
 
-export type FoodNutrient = {
+type FoodNutrient = {
   id: number
   name: string
   amount: number

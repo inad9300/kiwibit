@@ -1,6 +1,6 @@
 import { pool } from '../pool'
 
-export type UsdaCategory = {
+type UsdaCategory = {
   id: number
   name: string
   color: string

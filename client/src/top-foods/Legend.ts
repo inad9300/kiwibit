@@ -5,10 +5,13 @@ import { Hbox } from '../components/Box'
 import { Card } from '../components/Card'
 import { CategoryCircle } from './CategoryCircle'
 import { barPadding } from './BarRow'
-import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
-import type { NutrientIntakeMetadata } from '../../../server/src/api/getIntakeMetadataForNutrient'
+import type { ApiOutput } from '../utils/api'
 
-export function Legend(parentChart: HTMLElement, intakeMetadata: NutrientIntakeMetadata, topFoods: FoodNutrient[]) {
+export function Legend(
+  parentChart: HTMLElement,
+  intakeMetadata: ApiOutput<'getIntakeMetadataForNutrient'>,
+  topFoods: ApiOutput<'getTopFoodsForNutrient'>
+) {
   const { rdi, ul } = intakeMetadata
   const { unit_abbr } = topFoods[0]
   const metadataLegendItems: HTMLElement[] = []

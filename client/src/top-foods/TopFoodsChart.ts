@@ -1,11 +1,10 @@
-import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
-import type { NutrientIntakeMetadata } from '../../../server/src/api/getIntakeMetadataForNutrient'
 import { pct } from '../utils/pct'
 import { Html } from '../components/Html'
 import { Vbox } from '../components/Box'
 import { Legend } from './Legend'
 import { BarRow, barPadding, barTitleRightMargin } from './BarRow'
 import { MetadataLine } from './MetadataLine'
+import type { ApiOutput } from '../utils/api'
 
 export function TopFoodsChart() {
   return Html('div').with(it => {
@@ -13,7 +12,10 @@ export function TopFoodsChart() {
     it.style.position = 'relative'
 
     return {
-      update(intakeMetadata: NutrientIntakeMetadata, topFoods: FoodNutrient[]) {
+      update(
+        intakeMetadata: ApiOutput<'getIntakeMetadataForNutrient'>,
+        topFoods: ApiOutput<'getTopFoodsForNutrient'>
+      ) {
         const max = Math.max(
           intakeMetadata.rdi ?? 0,
           intakeMetadata.ul ?? 0,

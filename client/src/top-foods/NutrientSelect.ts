@@ -1,9 +1,8 @@
-import { api } from '../utils/api'
+import { api, ApiOutput } from '../utils/api'
 import { Select } from '../components/Select'
-import type { NutrientWithUnit } from '../../../server/src/api/getAllNutrients'
 
 export function NutrientSelect() {
-  const select = Select<NutrientWithUnit>(
+  const select = Select<ApiOutput<'getAllNutrients'>[0]>(
     'Nutrient',
     n => n.id!,
     n => n.name + (n.alias ? ' / ' + n.alias : '') + ' (' + n.unit_abbr + ')'

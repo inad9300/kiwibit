@@ -2,14 +2,12 @@ import { NutrientSelect } from './NutrientSelect'
 import { PerSelect } from './PerSelect'
 import { CategorySelect } from './CategorySelect'
 import { TopFoodsChart } from './TopFoodsChart'
-import { api, ApiInput } from '../utils/api'
+import { api, ApiInput, ApiOutput } from '../utils/api'
 import { getUrlParams } from '../utils/getUrlParams'
 import { Html } from '../components/Html'
 import { Hbox, Vbox } from '../components/Box'
 import { RegularButton } from '../components/RegularButton'
 import { barPadding } from './BarRow'
-import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
-import type { NutrientIntakeMetadata } from '../../../server/src/api/getIntakeMetadataForNutrient'
 
 export function TopFoodsPage() {
   const nutrientSelect = NutrientSelect().with(it => {
@@ -73,9 +71,9 @@ export function TopFoodsPage() {
     }
   })
 
-  const topFoodsAcc: FoodNutrient[] = []
+  const topFoodsAcc: ApiOutput<'getTopFoodsForNutrient'> = []
   let lastTopFoodsCriteria: ApiInput<'getTopFoodsForNutrient'>
-  let lastIntakeMetadata: NutrientIntakeMetadata
+  let lastIntakeMetadata: ApiOutput<'getIntakeMetadataForNutrient'>
 
   async function reloadChart(nutrientId: number, offset = 0) {
     if (offset > 0) {

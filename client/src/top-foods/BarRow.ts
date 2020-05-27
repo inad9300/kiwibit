@@ -5,12 +5,12 @@ import { Spacer } from '../components/Spacer'
 import { Html } from '../components/Html'
 import { Hbox } from '../components/Box'
 import { BarTooltipContent } from './BarTooltipContent'
-import type { FoodNutrient } from '../../../server/src/api/getTopFoodsForNutrient'
+import type { ApiOutput } from '../utils/api'
 
 export const barPadding = 17
 export const barTitleRightMargin = 8
 
-export function BarRow(f: FoodNutrient, max: number) {
+export function BarRow(f: ApiOutput<'getTopFoodsForNutrient'>[0], max: number) {
   const title = Html('div').with(it => {
     it.textContent = f.name
     it.style.whiteSpace = 'nowrap'

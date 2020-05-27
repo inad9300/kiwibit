@@ -1,7 +1,7 @@
 import { pool } from '../pool'
 import { nutrients, units } from '../schema'
 
-export type NutrientWithUnit = {
+type NutrientWithUnit = {
   id: nutrients['id']
   name: nutrients['name']
   alias: nutrients['alias']

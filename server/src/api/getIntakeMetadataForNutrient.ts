@@ -1,10 +1,5 @@
 import { pool } from '../pool'
 
-export type NutrientIntakeMetadata = {
-  ul?: number
-  rdi?: number
-}
-
 export async function getIntakeMetadataForNutrient(data: {
   nutrientId: number
   age: number
