@@ -1,11 +1,9 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import { readFile } from 'fs'
 import { resolve } from 'path'
-import './Error'
-import { log } from './log'
-import { Api, ApiFn, ApiPayload } from './api-types'
-import * as api from './api'
 import { URL } from 'url'
+import { log } from './log'
+import * as api from './api'
 
 process.on('uncaughtException', err => log.error('Uncaught exception.', err))
 process.on('unhandledRejection', err => log.error('Unhandled rejection.', err))
@@ -29,8 +27,7 @@ function serve(req: IncomingMessage, res: ServerResponse) {
   }
 
   if (req.method === 'OPTIONS') {
-    res.writeHead(200)
-    return res.end()
+    return res.writeHead(200).end()
   } else if (req.method !== 'GET' && req.method !== 'POST') {
     return reply(res, new Error('Only GET and POST requests allowed.'))
   }
@@ -46,15 +43,14 @@ function serve(req: IncomingMessage, res: ServerResponse) {
       if (err) {
         reply(res, new Error('File not found.'))
       } else {
-        res.writeHead(200)
-        res.end(data)
+        res.writeHead(200).end(data)
       }
     })
   }
 
   try {
-    const fnName = req.url!.substr('/api/'.length) as keyof Api
-    const fn = (api[fnName] as unknown) as ApiFn<ApiPayload, ApiPayload>
+    const fnName = req.url!.substr('/api/'.length) as keyof typeof api
+    const fn = api[fnName] as ((payload: any) => Promise<any>) | undefined
     if (!fn) {
       reply(res, new Error(`Unknown API function: "${fnName}".`))
     } else {
@@ -68,7 +64,7 @@ function serve(req: IncomingMessage, res: ServerResponse) {
   }
 }
 
-function getPayload(req: IncomingMessage): Promise<ApiPayload> {
+function getPayload(req: IncomingMessage): Promise<any> {
   return new Promise((resolve, reject) => {
     const body: Buffer[] = []
     req
@@ -78,11 +74,9 @@ function getPayload(req: IncomingMessage): Promise<ApiPayload> {
   })
 }
 
-function reply(res: ServerResponse, payload: ApiPayload | Error) {
+function reply(res: ServerResponse, payload: any | Error) {
   log.debug('HTTP response.', payload)
-  res.writeHead(
-    payload instanceof Error ? 500 : 200,
-    { 'Content-Type': 'application/json; charset=utf-8' }
-  )
-  res.end(JSON.stringify(payload))
+  res
+    .writeHead(payload instanceof Error ? 500 : 200, { 'Content-Type': 'application/json; charset=utf-8' })
+    .end(JSON.stringify(payload instanceof Error ? { error: payload.message } : payload))
 }

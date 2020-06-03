@@ -1,4 +1,6 @@
-import type { Api } from '../../../server/src/api-types'
+import type * as apiIndex from '../../../server/src/api'
+
+type Api = typeof apiIndex
 
 type ThenArg<T> = T extends PromiseLike<infer U> ? U : never
 

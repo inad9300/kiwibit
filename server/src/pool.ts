@@ -1,8 +1,11 @@
 import { Pool } from 'pg'
-import { pgConfig } from './pgConfig'
 import { log } from './log'
 
-export const pool = new Pool({ ...pgConfig, max: 16 }).on('error', (err, client) => {
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgres://postgres:hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E@localhost:5000/postgres',
+  max: 16
+})
+.on('error', (err, client) => {
   log.error('Unexpected error on idle client.', err, client)
   process.exit(-1)
 })

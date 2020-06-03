@@ -1,9 +1,6 @@
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { Client } from 'pg'
-import { pgConfig } from './pgConfig'
-
-const ucFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
+import { pool } from './pool'
 
 const pgToJsType = {
   bool: 'boolean',
@@ -31,21 +28,16 @@ interface ColumnMetadata {
   udt_name: keyof typeof pgToJsType
 }
 
-const client = new Client(pgConfig)
-
-client
-  .connect()
-  .then(() =>
-    client.query(`
-      select table_name, column_name, udt_name, is_nullable, column_default
-        -- character_maximum_length, is_identity, numeric_precision,
-        -- numeric_precision_radix, numeric_scale, datetime_precision,
-        -- interval_type, interval_precision
-      from information_schema.columns
-      where table_schema = 'public'
-      order by table_name, ordinal_position
-    `)
-  )
+pool
+  .query<ColumnMetadata>(`
+    select table_name, column_name, udt_name, is_nullable, column_default
+      -- character_maximum_length, is_identity, numeric_precision,
+      -- numeric_precision_radix, numeric_scale, datetime_precision,
+      -- interval_type, interval_precision
+    from information_schema.columns
+    where table_schema = 'public'
+    order by table_name, ordinal_position
+  `)
   .then(res => {
     const columnsByTable: { [table: string]: ColumnMetadata[] } = {}
     res.rows.forEach(col => {
@@ -58,35 +50,20 @@ client
     const isOptional = (col: ColumnMetadata) => col.is_nullable === 'YES'
       || (!!col.column_default && !/^nextval\(.+\)$/.test(col.column_default))
 
-    const schema = Object.keys(columnsByTable)
+    const schema = Object
+      .keys(columnsByTable)
       .map(
         table =>
-          `
-export type ${table} = {
+`export type ${table} = {
   ${columnsByTable[table]
-    .map(
-      col => `${col.column_name}: ${pgToJsType[col.udt_name]}${isOptional(col) ? ' | null' : ''}`
-    )
-    .join('\n  ')}
+     .map(col => `${col.column_name}: ${pgToJsType[col.udt_name]}${isOptional(col) ? ' | null' : ''}`)
+     .join('\n  ')}
 }
-
-export const ${table}: Table<${table}> = {
-  ${columnsByTable[table]
-    .map(
-      col =>
-        `${col.column_name}: { type: ${ucFirst(pgToJsType[col.udt_name])}, optional: ${
-          isOptional(col) ? 'true' : 'false'
-        } }`
-    )
-    .join(',\n  ')}
-}`
+`
       )
       .join('\n')
 
-    writeFileSync(
-      resolve(__dirname, 'schema.ts'),
-      `import { Table } from './Table'\n` + schema + '\n'
-    )
+    writeFileSync(resolve(__dirname, 'schema.ts'), schema)
   })
   .catch(err => console.error('Failed to query schema metadata.', err))
   .finally(() => process.exit(0))
