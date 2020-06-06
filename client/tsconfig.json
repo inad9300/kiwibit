@@ -1,8 +1,6 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["./src"],
   "compilerOptions": {
-    "outDir": "./bin",
     "target": "es5",
     "lib": ["dom", "es6"],
     "skipLibCheck": true

@@ -1,8 +1,6 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["./src"],
   "compilerOptions": {
-    "outDir": "bin",
     "target": "es5",
     "lib": ["es7", "esnext"]
   }
