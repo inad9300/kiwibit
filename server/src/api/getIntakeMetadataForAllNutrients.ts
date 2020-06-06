@@ -15,18 +15,18 @@ export async function getIntakeMetadataForAllNutrients(data: { age: number; gend
           select rdi.value
           from reference_intakes rdi
           where rdi.nutrient_id = n.id
-          and rdi.age_min <= ${data.age}
-          and rdi.age_max >= ${data.age}
-          and rdi.gender = '${data.gender}'
+          and rdi.age_min <= $1
+          and rdi.age_max >= $1
+          and rdi.gender = $2
           and rdi.for_pregnancy = 'N'
           and rdi.for_lactation = 'N'
         ) rdi, (
           select ul.value
           from tolerable_intakes ul
           where ul.nutrient_id = n.id
-          and ul.age_min <= ${data.age}
-          and ul.age_max >= ${data.age}
-          and ul.gender = '${data.gender}'
+          and ul.age_min <= $1
+          and ul.age_max >= $1
+          and ul.gender = $2
           and ul.for_pregnancy = 'N'
           and ul.for_lactation = 'N'
         ) ul
@@ -34,7 +34,10 @@ export async function getIntakeMetadataForAllNutrients(data: { age: number; gend
     ) x
     where x.rdi is not null
     or x.ul is not null
-  `)
+  `, [
+    data.age,
+    data.gender
+  ])
 
   return res.rows
 }

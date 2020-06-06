@@ -35,28 +35,29 @@ export async function getTopFoodsForNutrient(data: {
         )
       )`
 
-  const categoriesFilter = data.categories.length === 0
-    ? ''
-    : `and uc.id in (${data.categories.join(',')})`
-
   const res = await pool.query<FoodNutrient>(`
     select f.id, f.name, ${orderBy} amount, uc.color, uc.name usda_category_name, (
         select u.abbr
         from nutrients n
         left join units u on (u.id = n.unit_id)
-        where n.id = ${data.nutrientId}
+        where n.id = $1
       ) unit_abbr
     from foods f
     join food_nutrients fn on (fn.food_id = f.id)
     left join usda_categories uc on (uc.id = f.usda_category_id)
-    where fn.nutrient_id = ${data.nutrientId}
+    where fn.nutrient_id = $1
     and uc.is_visible_default = true
     and ${orderBy} is not null
-    ${categoriesFilter}
+    and ($2::int[] is null or uc.id = any($2))
     order by ${orderBy} desc
-    offset ${data.offset}
-    limit ${data.limit}
-  `)
+    offset $3
+    limit $4
+  `, [
+    data.nutrientId,
+    data.categories.length === 0 ? null : data.categories,
+    data.offset,
+    data.limit
+  ])
 
   return res.rows
 }
@@ -68,6 +69,13 @@ test({
   'returns an array': async () => {
     const ironId = 25
     const res = await getTopFoodsForNutrient({ nutrientId: ironId, orderBy: 'weight', offset: 0, limit: 11, categories: [] })
+    ok(Array.isArray(res))
+    ok(res.length > 10)
+  },
+  'returns an array, with categories': async () => {
+    const ironId = 25
+    const spicesAndHerbsId = 2
+    const res = await getTopFoodsForNutrient({ nutrientId: ironId, orderBy: 'weight', offset: 0, limit: 11, categories: [spicesAndHerbsId] })
     ok(Array.isArray(res))
     ok(res.length > 10)
   }

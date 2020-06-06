@@ -26,7 +26,7 @@ export async function findFoodDetails(data: { id: number, showAll: boolean }) {
     join nutrients n on (n.id = fn.nutrient_id)
     left join nutrient_categories nc on (nc.id = n.category_id)
     left join units u on (u.id = n.unit_id)
-    where f.id = ${data.id}
+    where f.id = $1
     ${data.showAll ? '' : 'and n.is_visible_default = true'}
     order by (case
       when nc.name = 'Minerals' then 1
@@ -36,7 +36,7 @@ export async function findFoodDetails(data: { id: number, showAll: boolean }) {
       when nc.name = 'Carbohydrates' then 5
       when nc.name = 'Other' then 6
     end), n.name
-  `)
+  `, [data.id])
 
   return {
     name: res.rows[0].name,

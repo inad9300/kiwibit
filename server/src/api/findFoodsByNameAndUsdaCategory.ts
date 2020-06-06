@@ -13,13 +13,14 @@ export async function findFoodsByNameAndUsdaCategory(data: {
   const res = await pool.query<Food>(`
     select f.id, f.name
     from foods f
-    where lower(f.name) like '%' || lower('${data.foodName.replace(/ /g, '%')}') || '%'
-    and f.usda_category_id = ${
-      data.usdaCategoryId === -1 ? 'f.usda_category_id' : data.usdaCategoryId
-    }
+    where lower(f.name) like '%' || lower($1) || '%'
+    and f.usda_category_id = coalesce($2, f.usda_category_id)
     order by f.name
     limit 100
-  `)
+  `, [
+    data.foodName.replace(/ /g, '%'),
+    data.usdaCategoryId === -1 ? null : data.usdaCategoryId
+  ])
   return res.rows
 }
 
