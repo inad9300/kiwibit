@@ -7,5 +7,4 @@ export const pool = new Pool({
 })
 .on('error', (err, client) => {
   log.error('Unexpected error on idle client.', err, client)
-  process.exit(-1)
 })

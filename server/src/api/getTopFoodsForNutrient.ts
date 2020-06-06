@@ -60,3 +60,15 @@ export async function getTopFoodsForNutrient(data: {
 
   return res.rows
 }
+
+import { test } from '../../../shared/test'
+import { ok } from 'assert'
+
+test({
+  'returns an array': async () => {
+    const ironId = 25
+    const res = await getTopFoodsForNutrient({ nutrientId: ironId, orderBy: 'weight', offset: 0, limit: 11, categories: [] })
+    ok(Array.isArray(res))
+    ok(res.length > 10)
+  }
+})

@@ -14,3 +14,14 @@ export async function getAllUsdaCategories() {
   `)
   return res.rows
 }
+
+import { test } from '../../../shared/test'
+import { ok } from 'assert'
+
+test({
+  'returns an array': async () => {
+    const res = await getAllUsdaCategories()
+    ok(Array.isArray(res))
+    ok(res.length > 10)
+  }
+})

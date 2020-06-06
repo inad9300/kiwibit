@@ -50,3 +50,14 @@ export async function findFoodDetails(data: { id: number, showAll: boolean }) {
     }))
   }
 }
+
+import { test } from '../../../shared/test'
+import { ok } from 'assert'
+
+test({
+  'returns an object': async () => {
+    const res = await findFoodDetails({ id: 1, showAll: false })
+    ok(typeof res === 'object')
+    ok(Object.keys(res).length > 1)
+  }
+})

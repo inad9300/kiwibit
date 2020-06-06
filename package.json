@@ -2,9 +2,12 @@
   "private": true,
   "scripts": {
     "postinstall": "npm run install-server && npm run install-client",
-    "install-server": "cd server && npm i --only=dev && npm i --only=prod && npm run build",
-    "install-client": "cd client && npm i --only=dev && npm i --only=prod && npm run build",
-    "start": "cd server && npm run run"
+    "install-server": "cd server && npm ci && npm run build",
+    "install-client": "cd client && npm ci && npm run build",
+    "start": "node server/bin/main.js"
+  },
+  "devDependencies": {
+    "@types/webpack": "4.41.17"
   },
   "engines": {
     "node": ">=14.0.0"

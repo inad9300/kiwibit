@@ -4,7 +4,7 @@ const now = () => new Date().toISOString()
 
 export const log = {
   debug: (msg: Object, ...moreInfo: Logable[]) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (DEBUG) {
       console.debug(now(), '[DEBUG]', msg, ...moreInfo)
     }
   },

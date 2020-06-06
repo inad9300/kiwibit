@@ -38,3 +38,14 @@ export async function getIntakeMetadataForAllNutrients(data: { age: number; gend
 
   return res.rows
 }
+
+import { test } from '../../../shared/test'
+import { ok } from 'assert'
+
+test({
+  'returns an array': async () => {
+    const res = await getIntakeMetadataForAllNutrients({ age: 26, gender: 'M' })
+    ok(Array.isArray(res))
+    ok(res.length > 10)
+  }
+})

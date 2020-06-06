@@ -19,3 +19,14 @@ export async function getAllNutrients() {
   `)
   return res.rows
 }
+
+import { test } from '../../../shared/test'
+import { ok } from 'assert'
+
+test({
+  'returns an array': async () => {
+    const res = await getAllNutrients()
+    ok(Array.isArray(res))
+    ok(res.length > 10)
+  }
+})

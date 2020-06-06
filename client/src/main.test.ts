@@ -7,7 +7,7 @@ export default {
     const page = await browser.newPage()
 
     await page.goto('https://example.com/')
-    // await page.screenshot({path: 'example.png'})
+    // await page.screenshot({ path: 'example.png' })
 
     const abc = await page.title()
     ok(abc === 'Example Domain')

@@ -1,9 +1,9 @@
 {
   "private": true,
   "scripts": {
-    "test": "tsc --noEmit && c8 ts-node ../shared/runner.ts",
-    "start": "clear && export NODE_ENV=development && webpack --mode development --devtool inline-source-map --watch --verbose",
-    "build": "export NODE_ENV=production && webpack --mode production"
+    "start": "webpack --mode development --devtool inline-source-map --watch --verbose",
+    "build": "webpack --mode production",
+    "test": "c8 ts-node --files ../shared/test-runner.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "1.2.28",
@@ -15,7 +15,7 @@
     "puppeteer": "3.3.0",
     "ts-loader": "7.0.5",
     "ts-node": "8.10.2",
-    "typescript": "3.9.3",
+    "typescript": "3.9.5",
     "webpack": "4.43.0",
     "webpack-cli": "3.3.11"
   }
