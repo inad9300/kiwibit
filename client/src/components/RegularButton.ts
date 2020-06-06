@@ -8,7 +8,7 @@ export function RegularButton(text: string) {
     it.style.minHeight = '26px'
     it.style.padding = '0 5px'
     it.style.fontSize = '12px'
-    it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
+    it.style.border = '1px solid lightgrey'
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
     it.style.backgroundColor = '#fff'
 
