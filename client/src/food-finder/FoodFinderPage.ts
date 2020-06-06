@@ -41,7 +41,7 @@ export function FoodFinderPage() {
   })
 
   const foodFinderInput = FoodFinderInput().with(it => {
-    it.onSelect = foodId => loadFoodDetails(foodId, false)
+    it.onSelect = food => loadFoodDetails(food.id, false)
   })
 
   const controlsRow = Hbox().with(it => {

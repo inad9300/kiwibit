@@ -8,6 +8,7 @@ import { Html } from '../components/Html'
 import { Hbox, Vbox } from '../components/Box'
 import { RegularButton } from '../components/RegularButton'
 import { barPadding } from './BarRow'
+import { ControlTitle } from '../components/ControlTitle'
 
 export function TopFoodsPage() {
   const nutrientSelect = NutrientSelect().with(it => {
@@ -33,12 +34,8 @@ export function TopFoodsPage() {
     it.onchange = () => reloadChart(nutrientSelect.getSelected()!.id)
   })
 
-  const zoomTitle = Html('div').with(it => {
-    it.textContent = 'Zoom'
-    it.style.fontSize = '13px'
-    it.style.fontWeight = 'bold'
-    it.style.color = '#555'
-    it.style.margin = '0 0 5px 4px'
+  const zoomTitle = ControlTitle('Zoom').with(it => {
+    it.style.marginBottom = '5px'
   })
 
   const zoomSlider = Html('input').with(it => {

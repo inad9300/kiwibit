@@ -1,20 +1,13 @@
 import { Html } from './Html'
 import { Vbox } from './Box'
 import { Icon } from './Icon'
+import { ControlTitle } from './ControlTitle'
 
 export function Select<O>(
   titleText: string,
   getId: (opt: O) => string | number,
   getDisplayText: (opt: O) => string
 ) {
-  const title = Html('div').with(it => {
-    it.textContent = titleText
-    it.style.fontSize = '13px'
-    it.style.fontWeight = 'bold'
-    it.style.color = '#555'
-    it.style.margin = '0 0 1px 4px'
-  })
-
   const select = Html('select').with(it => {
     it.style.height = '26px'
     it.style.minHeight = '26px'
@@ -22,7 +15,7 @@ export function Select<O>(
     it.style.borderRadius = '0'
     it.style.margin = '0'
     it.style.padding = '0 18px 0 5px'
-    it.style.border = '1px solid rgba(0, 0, 0, 0.15)'
+    it.style.border = '1px solid lightgrey'
     it.style.fontSize = '12px'
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
     it.style.backgroundColor = '#fff'
@@ -35,7 +28,7 @@ export function Select<O>(
   return Vbox().with(it => {
     it.style.position = 'relative'
     it.append(
-      title,
+      ControlTitle(titleText),
       select,
       Icon('chevron-down').with(it => {
         it.style.fontSize = '12px'
