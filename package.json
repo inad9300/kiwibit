@@ -1,9 +1,9 @@
 {
   "private": true,
   "scripts": {
-    "heroku-postbuild": "npm run install-server && npm run install-client",
-    "install-server": "cd server && npm i --only=prod && npm i --only=dev && npm run build",
-    "install-client": "cd client && npm i --only=prod && npm i --only=dev && npm run build",
+    "heroku-postbuild": "npm run build-server && npm run build-client",
+    "build-server": "cd server && npm i --only=prod && npm i --only=dev && npm run build",
+    "build-client": "cd client && npm i --only=prod && npm i --only=dev && npm run build",
     "start": "node server/bin/main.js"
   },
   "devDependencies": {
