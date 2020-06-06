@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "postinstall": "heroku config:set NPM_CONFIG_PRODUCTION=false && npm run install-server && npm run install-client",
+    "postinstall": "NPM_CONFIG_PRODUCTION=false && npm run install-server && npm run install-client",
     "install-server": "cd server && npm ci && npm run build",
     "install-client": "cd client && npm ci && npm run build",
     "start": "node server/bin/main.js"
