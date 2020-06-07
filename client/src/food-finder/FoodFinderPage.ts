@@ -33,7 +33,7 @@ export function FoodFinderPage() {
     lastFoodId = foodId
     lastShowAll = showAll
     showMoreNutrientsBtn.textContent = showAll ? 'Show less nutrients' : 'Show more nutrients'
-    foodDetailsTable.setData(intakeMetadata, foodDetailsData)
+    foodDetailsTable.setData(intakeMetadata, foodDetailsData, 100)
     foodDetailsTable.hidden = showMoreNutrientsBtn.hidden = false
   }
 

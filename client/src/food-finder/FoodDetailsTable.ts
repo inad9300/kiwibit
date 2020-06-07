@@ -8,6 +8,7 @@ import { Span } from '../components/Span'
 import { Vbox, Hbox } from '../components/Box'
 import { Italics } from '../components/Italics'
 import { Spacer } from '../components/Spacer'
+import { TextField } from '../components/TextField'
 import type { ApiOutput } from '../utils/api'
 
 export function FoodDetailsTable() {
@@ -15,7 +16,28 @@ export function FoodDetailsTable() {
     it.style.color = '#000'
     it.style.fontWeight = 'normal'
     it.style.fontSize = '15px'
-    it.style.margin = '0'
+    it.style.margin = '0 3px 0 0'
+  })
+
+  let lastIntakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>
+  let lastFoodDetails: ApiOutput<'findFoodDetails'>
+
+  const amountInput = TextField().with(it => {
+    it.style.height = it.style.minHeight = '17px'
+    it.style.width = 'calc(3ch + 6px)'
+    it.style.padding = '0'
+    it.style.marginTop = '2px'
+    it.style.textAlign = 'center'
+    it.oninput = () => {
+      it.style.width = `calc(${(it.value + '').length}ch + 6px)`
+      const value = parseFloat(it.value)
+      if (isNaN(value) || value < 0) {
+        it.style.borderColor = 'rgba(150, 0, 0, 0.5)'
+      } else {
+        it.style.borderColor = 'lightgrey'
+        root.setData(lastIntakeMetadata, lastFoodDetails, value)
+      }
+    }
   })
 
   const ddgLink = Link('').with(it => {
@@ -38,7 +60,10 @@ export function FoodDetailsTable() {
   const heading = Hbox().with(it => {
     it.style.margin = '0 3px 3px 3px'
     it.setChildren([
-      title,
+      Hbox().with(it => {
+        it.style.fontSize = '15px'
+        it.append(title, '(', amountInput, ' g)')
+      }),
       Spacer(),
       Vbox().with(it => {
         it.append(Spacer(), ddgLink)
@@ -59,14 +84,30 @@ export function FoodDetailsTable() {
     it.style.marginBottom = '-1px'
   })
 
-  return Html('div').with(it => {
+  const root = Html('div').with(it => {
     it.style.width = '335px'
     it.append(heading, table)
 
     return {
-      setData(intakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>, foodDetails: ApiOutput<'findFoodDetails'>) {
-        title.textContent = foodDetails.name + ` (100 g)`
-        tooltip.attach(Span(foodDetails.name + ` (100 g)`), title)
+      setData(
+        intakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>,
+        foodDetails: ApiOutput<'findFoodDetails'>,
+        foodAmount: number
+      ) {
+        lastIntakeMetadata = intakeMetadata
+        lastFoodDetails = foodDetails
+
+        foodDetails = {
+          ...foodDetails,
+          nutrients: foodDetails.nutrients.map(nutrient => ({
+            ...nutrient,
+            amount: parseFloat((foodAmount * nutrient.amount / 100).toFixed(3))
+          }))
+        }
+
+        title.textContent = foodDetails.name
+        amountInput.value = foodAmount + ''
+        tooltip.attach(Span(foodDetails.name), title)
 
         ddgLink.href = 'https://duckduckgo.com/?iax=images&ia=images&q=' + encodeURIComponent(foodDetails.name)
         // googleImagesLink.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)
@@ -76,12 +117,14 @@ export function FoodDetailsTable() {
 
         for (let i = 0; i < foodDetails.nutrients.length; ++i) {
           const n = foodDetails.nutrients[i]
-          const tr = Html('tr')
+          const tr = Html('tr').with(it => {
+            it.style.textShadow = '0 1px 0 rgba(255, 255, 255, 0.75)'
+          })
 
           if (!knownCategories.includes(n.category_name)) {
             knownCategories.push(n.category_name)
 
-            const categoryTd = Html('td').with(it => {
+            const categoryCell = Html('td').with(it => {
               it.textContent = n.category_name
               it.colSpan = 3
               it.style.padding = '6px'
@@ -91,11 +134,10 @@ export function FoodDetailsTable() {
               it.style.fontSize = '13px'
               it.style.color = '#333'
               it.style.borderTop = it.style.borderBottom = '1px solid #ccc'
-              it.style.textShadow = '0 1px 0 rgba(255, 255, 255, 0.75)'
               it.style.backgroundColor = '#eee'
             })
 
-            tr.append(categoryTd)
+            tr.append(categoryCell)
             trs.push(tr)
             i--
             continue
@@ -153,4 +195,6 @@ export function FoodDetailsTable() {
       }
     }
   })
+
+  return root
 }
