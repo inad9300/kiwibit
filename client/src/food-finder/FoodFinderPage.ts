@@ -1,10 +1,16 @@
+import { Page } from '../pages'
+import { api } from '../utils/api'
 import { UsdaCategorySelect } from './UsdaCategorySelect'
 import { FoodFinderInput } from './FoodFinderInput'
 import { FoodDetailsTable } from './FoodDetailsTable'
-import { api } from '../utils/api'
 import { getUrlParams } from '../utils/getUrlParams'
 import { Hbox, Vbox } from '../components/Box'
 import { RegularButton } from '../components/RegularButton'
+
+function urlFoodId() {
+  const foodIdStr = getUrlParams().get('food-id')
+  return foodIdStr ? parseInt(foodIdStr, 10) : null
+}
 
 export function FoodFinderPage() {
   const usdaCategorySelect = UsdaCategorySelect().with(it => {
@@ -18,19 +24,17 @@ export function FoodFinderPage() {
   let lastFoodId: number
   let lastShowAll: boolean
 
-  function loadFoodDetails(foodId: number, showAll: boolean) {
-    Promise
-      .all([
-        api('getIntakeMetadataForAllNutrients', { age: 25, gender: 'M' }),
-        api('findFoodDetails', { id: foodId, showAll })
-      ])
-      .then(([intakeMetadata, foodDetailsData]) => {
-        lastFoodId = foodId
-        lastShowAll = showAll
-        showMoreNutrientsBtn.textContent = showAll ? 'Show less nutrients' : 'Show more nutrients'
-        foodDetailsTable.setData(intakeMetadata, foodDetailsData)
-        foodDetailsTable.hidden = showMoreNutrientsBtn.hidden = false
-      })
+  async function loadFoodDetails(foodId: number, showAll: boolean) {
+    const [intakeMetadata, foodDetailsData] = await Promise.all([
+      api('getIntakeMetadataForAllNutrients', { age: 25, gender: 'M' }),
+      api('findFoodDetails', { id: foodId, showAll })
+    ])
+
+    lastFoodId = foodId
+    lastShowAll = showAll
+    showMoreNutrientsBtn.textContent = showAll ? 'Show less nutrients' : 'Show more nutrients'
+    foodDetailsTable.setData(intakeMetadata, foodDetailsData)
+    foodDetailsTable.hidden = showMoreNutrientsBtn.hidden = false
   }
 
   const showMoreNutrientsBtn = RegularButton('Show more nutrients').with(it => {
@@ -41,7 +45,12 @@ export function FoodFinderPage() {
   })
 
   const foodFinderInput = FoodFinderInput().with(it => {
-    it.onSelect = food => loadFoodDetails(food.id, false)
+    it.onSelect = async food => {
+      await loadFoodDetails(food.id, false)
+      if (urlFoodId() !== food.id) {
+        history.pushState(null, '', `/?page=${Page.FoodFinder}&food-id=${food.id}`)
+      }
+    }
   })
 
   const controlsRow = Hbox().with(it => {
@@ -50,11 +59,17 @@ export function FoodFinderPage() {
     it.style.minHeight = 'min-content'
   })
 
-  const foodIdStr = getUrlParams().get('food-id')
-  if (foodIdStr) {
-    const foodId = parseInt(foodIdStr, 10)
-    loadFoodDetails(foodId, false)
+  function loadFoodDetailsFromUrl() {
+    const foodId = urlFoodId()
+    if (foodId) {
+      loadFoodDetails(foodId, false)
+    } else {
+      foodDetailsTable.hidden = showMoreNutrientsBtn.hidden = true
+    }
   }
+
+  loadFoodDetailsFromUrl()
+  window.addEventListener('popstate', () => loadFoodDetailsFromUrl())
 
   return Vbox().with(it => {
     it.style.padding = '12px 16px 16px 16px'
