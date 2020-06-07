@@ -65,7 +65,7 @@ export function Typeahead<R>(
 
           const nextIdx = idx === -1 || idx === items.length - 1 ? 0 : idx + 1
           items[nextIdx].select()
-          items[nextIdx].scrollIntoView()
+          items[nextIdx].scrollIntoView({ block: 'nearest' })
         }
       },
       selectPrior() {
@@ -77,7 +77,7 @@ export function Typeahead<R>(
 
           const priorIdx = idx === -1 || idx === 0 ? items.length - 1 : idx - 1
           items[priorIdx].select()
-          // TODO (only if needed) items[priorIdx].scrollIntoView()
+          items[priorIdx].scrollIntoView({ block: 'nearest' })
         }
       },
       confirmSelection() {
