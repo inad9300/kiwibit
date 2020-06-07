@@ -3,7 +3,6 @@ import { Page } from '../pages'
 import { Html } from '../components/Html'
 import { Link } from '../components/Link'
 import { Image } from '../components/Image'
-import { Icon } from '../components/Icon'
 import { tooltip } from '../main'
 import { Span } from '../components/Span'
 import { Vbox, Hbox } from '../components/Box'
@@ -116,48 +115,33 @@ export function FoodDetailsTable() {
             it.textContent = n.amount + ' ' + n.unit_abbr
             it.style.textAlign = 'right'
             it.style.whiteSpace = 'nowrap'
+            it.style.borderRight = '1px solid #ccc'
           })
 
-          const iconCell = Html('td').with(it => {
-            const im = intakeMetadata.find(im => im.nutrient_id === n.id)
-            if (im?.ul != null || im?.rdi != null) {
-              let icon: SVGElement
-              if (im.ul != null && n.amount >= im.ul) {
-                icon = Icon('times').with(it => {
-                  it.style.color = '#cc1515'
-                  it.style.marginLeft = '1px'
-                })
-              } else if (im.rdi != null && (im.ul != null || pct(n.amount, im.rdi) <= 100)) {
-                icon = Icon('check').with(it => {
-                  it.style.color = 'green'
-                  it.style.opacity = Math.min(1, pct(n.amount, im.rdi!) / 100) + ''
-                })
-              } else {
-                icon = Icon('circle').with(it => {
-                  it.style.fontSize = '9px'
-                  it.style.marginLeft = '2px'
-                  it.style.color = '#cad1f0'
-                })
-              }
+          const im = intakeMetadata.find(im => im.nutrient_id === n.id)
 
-              const imTooltip = Vbox().with(it => {
-                it.setChildren([
-                  im.rdi
-                    ? Span(`${pct(n.amount, im.rdi).toFixed(2)} % of the RDI (${im.rdi} ${n.unit_abbr})`)
-                    : Italics('No RDI information'),
-                  im.ul
-                    ? Span(`${pct(n.amount, im.ul).toFixed(2)} % of the UL (${im.ul} ${n.unit_abbr})`)
-                    : Italics('No UL information')
-                ], '4px')
-              })
-
-              tooltip.attach(imTooltip, it)
-
-              it.append(icon)
+          if (im?.ul != null || im?.rdi != null) {
+            if (im.ul != null && n.amount >= im.ul) {
+              tr.style.backgroundImage = `linear-gradient(90deg, rgba(150, 0, 0, 0.15) 100%, transparent 0)`
+            } else if (im.rdi != null && (im.ul != null || pct(n.amount, im.rdi) <= 100)) {
+              tr.style.backgroundImage = `linear-gradient(90deg, rgba(0, 150, 0, 0.15) ${pct(n.amount, im.rdi)}%, transparent 0)`
             }
+          }
+
+          const imTooltip = Vbox().with(it => {
+            it.setChildren([
+              im?.rdi
+                ? Span(`${pct(n.amount, im.rdi).toFixed(2)} % of the RDI (${im.rdi} ${n.unit_abbr})`)
+                : Italics('No RDI information'),
+              im?.ul
+                ? Span(`${pct(n.amount, im.ul).toFixed(2)} % of the UL (${im.ul} ${n.unit_abbr})`)
+                : Italics('No UL information')
+            ], '4px')
           })
 
-          const cells = [nutrientCell, amountCell, iconCell]
+          tooltip.attach(imTooltip, tr)
+
+          const cells = [nutrientCell, amountCell]
           cells.forEach(td => (td.style.padding = '6px'))
 
           tr.append(...cells)
