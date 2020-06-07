@@ -1,4 +1,4 @@
-import { WelcomePage } from './welcome/WelcomePage'
+import { HomePage } from './home/HomePage'
 import { TopFoodsPage } from './top-foods/TopFoodsPage'
 import { FoodFinderPage } from './food-finder/FoodFinderPage'
 import { MealPlanPage } from './meal-plan/MealPlanPage'
@@ -8,7 +8,7 @@ import type { IconName } from './components/Icon'
 import { getUrlParams } from './utils/getUrlParams'
 
 export enum Page {
-  Welcome = 'welcome',
+  Home = 'home',
   TopFoods = 'top-foods',
   FoodFinder = 'food-finder',
   MealPlan = 'meal-plan',
@@ -19,7 +19,8 @@ export enum Page {
 export function getCurrentPage(): PageMap[Page.NotFound] {
   const pageSlug = getUrlParams().get('page')
   if (!pageSlug) {
-    return pages['welcome']
+    history.replaceState(null, '', '/?page=home')
+    return pages['home']
   }
 
   return pages.hasOwnProperty(pageSlug)
@@ -38,12 +39,12 @@ type PageMap = {
 }
 
 export const pages: PageMap = {
-  [Page.Welcome]: {
-    slug: Page.Welcome,
-    title: 'Welcome',
-    icon: 'hand-spock',
+  [Page.Home]: {
+    slug: Page.Home,
+    title: 'Home',
+    icon: 'home',
     iconColor: 'rgb(148, 151, 189)',
-    component: WelcomePage
+    component: HomePage
   },
   [Page.TopFoods]: {
     slug: Page.TopFoods,

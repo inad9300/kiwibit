@@ -5,7 +5,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { faQuestion } from '@fortawesome/free-solid-svg-icons/faQuestion'
 import { faSeedling } from '@fortawesome/free-solid-svg-icons/faSeedling'
 import { faUserCog } from '@fortawesome/free-solid-svg-icons/faUserCog'
-import { faHandSpock } from '@fortawesome/free-solid-svg-icons/faHandSpock'
+import { faHome } from '@fortawesome/free-solid-svg-icons/faHome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck'
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes'
 import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle'
@@ -18,7 +18,7 @@ library.add(
   faQuestion,
   faSeedling,
   faUserCog,
-  faHandSpock,
+  faHome,
   faCheck,
   faTimes,
   faCircle,
@@ -32,7 +32,7 @@ export type IconName =
   'question' |
   'seedling' |
   'user-cog' |
-  'hand-spock' |
+  'home' |
   'check' |
   'times' |
   'circle' |

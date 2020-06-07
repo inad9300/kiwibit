@@ -2,7 +2,11 @@ import { pages } from '../pages'
 import { List } from '../components/List'
 import { MenuItem, menuItemWidth } from './MenuItem'
 
-const findablePages = [pages['top-foods'], pages['food-finder']]
+const findablePages = [
+  pages['home'],
+  pages['top-foods'],
+  pages['food-finder']
+]
 
 export function AppsMenu(trigger: HTMLElement) {
   const root = List().with(it => {
@@ -10,7 +14,7 @@ export function AppsMenu(trigger: HTMLElement) {
     it.setChildren(findablePages.map(p => MenuItem(p)))
     it.style.opacity = '0'
     it.style.padding = '12px'
-    it.style.width = (menuItemWidth * 2 + 26) + 'px'
+    it.style.width = (menuItemWidth * 3 + 26) + 'px'
     it.style.border = '1px solid lightgrey'
     it.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'
     it.style.fontSize = '13px'
