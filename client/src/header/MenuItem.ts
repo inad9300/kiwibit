@@ -17,8 +17,9 @@ export function MenuItem(page: typeof pages['top-foods']) {
     it.textContent = page.title
   })
 
-  const link = Link('?page=' + page.slug).with(it => {
+  return Link('?page=' + page.slug).with(it => {
     it.append(icon, name)
+    it.style.float = 'left'
     it.style.textDecoration = 'none'
     it.style.display = 'flex'
     it.style.flexDirection = 'column'
@@ -36,10 +37,5 @@ export function MenuItem(page: typeof pages['top-foods']) {
       it.style.backgroundColor = 'transparent'
       it.style.borderColor = 'transparent'
     }
-  })
-
-  return Html('li').with(it => {
-    it.append(link)
-    it.style.float = 'left'
   })
 }
