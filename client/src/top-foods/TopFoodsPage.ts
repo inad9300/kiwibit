@@ -16,6 +16,13 @@ function urlNutrientId() {
   return nutrientIdStr ? parseInt(nutrientIdStr, 10) : null
 }
 
+function roundAmount(foods: ApiOutput<'getTopFoodsForNutrient'>) {
+  return foods.map(f => {
+    f.amount = parseFloat(f.amount.toFixed(3))
+    return f
+  })
+}
+
 export function TopFoodsPage() {
   window.addEventListener('popstate', () => {
     const nutrientId = urlNutrientId()
@@ -87,7 +94,7 @@ export function TopFoodsPage() {
     }
 
     if (offset > 0) {
-      const topFoods = await api('getTopFoodsForNutrient', { ...lastTopFoodsCriteria, offset })
+      const topFoods = await api('getTopFoodsForNutrient', { ...lastTopFoodsCriteria, offset }).then(roundAmount)
       if (topFoods.length < topFoodsLimit || topFoods.slice(-1)[0].amount === 0) {
         moreResultsBtn.hidden = true
       }
@@ -111,7 +118,7 @@ export function TopFoodsPage() {
 
     const [intakeMetadata, topFoods] = await Promise.all([
       api('getIntakeMetadataForNutrient', { nutrientId, age: 25, gender: 'M' }),
-      api('getTopFoodsForNutrient', lastTopFoodsCriteria)
+      api('getTopFoodsForNutrient', lastTopFoodsCriteria).then(roundAmount)
     ])
 
     lastIntakeMetadata = intakeMetadata
