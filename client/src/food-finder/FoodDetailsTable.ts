@@ -4,7 +4,7 @@ import { Html } from '../components/Html'
 import { Link } from '../components/Link'
 import { Image } from '../components/Image'
 import { Icon } from '../components/Icon'
-import { tooltip } from '../App'
+import { tooltip } from '../main'
 import { Span } from '../components/Span'
 import { Vbox, Hbox } from '../components/Box'
 import { Italics } from '../components/Italics'
@@ -31,7 +31,7 @@ export function FoodDetailsTable() {
       it.style.filter = 'grayscale(100%)'
     })
 
-    tooltip.update(Span('Find images in DuckDuckGo'), it)
+    tooltip.attach(Span('Find images in DuckDuckGo'), it)
 
     it.append(img)
   })
@@ -67,7 +67,7 @@ export function FoodDetailsTable() {
     return {
       setData(intakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>, foodDetails: ApiOutput<'findFoodDetails'>) {
         title.textContent = foodDetails.name + ` (100 g)`
-        tooltip.update(Span(foodDetails.name + ` (100 g)`), title)
+        tooltip.attach(Span(foodDetails.name + ` (100 g)`), title)
 
         ddgLink.href = 'https://duckduckgo.com/?iax=images&ia=images&q=' + encodeURIComponent(foodDetails.name)
         // googleImagesLink.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)
@@ -151,7 +151,7 @@ export function FoodDetailsTable() {
                 ], '4px')
               })
 
-              tooltip.update(imTooltip, it)
+              tooltip.attach(imTooltip, it)
 
               it.append(icon)
             }

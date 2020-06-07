@@ -25,11 +25,8 @@ export function Tooltip() {
       it.style.left = min(maxLeft, evt.clientX + 10) + 'px'
     }
 
-    // TODO Remove old listeners!
-    // let priorRef: HTMLElement | undefined
-
     return {
-      update(content: string | HTMLElement, ref: HTMLElement) {
+      attach(content: string | HTMLElement, ref: HTMLElement) {
         if (content instanceof HTMLElement) {
           content.style.maxWidth = '300px'
         }

@@ -1,36 +1,56 @@
 import './polyfills'
-import { App } from './App'
 import { log } from './utils/log'
+import { getCurrentPage } from './pages'
+import { Style } from './components/Style'
+import { Header } from './header/Header'
+import { Tooltip } from './components/Tooltip'
 
 window.addEventListener('error', evt => log.error('Uncaught exception.', evt))
 window.addEventListener('unhandledRejection', evt => log.error('Unhandled rejection.', evt))
 
-if (DEBUG) {
-  const { createElement } = document
+const page = getCurrentPage()
 
-  document.createElement = function () {
-    const elem = createElement.apply(document, arguments as any)
+const globalCss = Style(`
+  * {
+    box-sizing: border-box;
+  }
 
-    const stack = new Error().stack!
-      .split('\n')
-      .slice(1)
-      .map(l => l.trim())
-      .filter(l => !/[. ]Html /.test(l))
-      .map(l => l.match(/^at (?:Object\.)?([A-Z][a-zA-Z0-9_]+) \(/)?.[1])
-      .filter(l => l)
-      .join(' ← ')
+  ::-moz-focus-inner {
+    border: 0;
+  }
+`)
 
-    if (stack) {
-      elem.dataset.stack = stack
-    }
+export const tooltip = Tooltip()
 
-    return elem
+document.title = page.title
+document.documentElement.style.height = '100%'
+document.body.with(it => {
+  it.style.height = '100%'
+  it.style.display = 'flex'
+  it.style.flexDirection = 'column'
+  it.style.margin = '0'
+  it.style.fontFamily = 'system-ui, sans-serif'
+  it.append(
+    globalCss,
+    Header(),
+    page.component().with(it => { it.style.flex = '1' }),
+    tooltip
+  )
+})
+
+let i = 1
+const titleSuffix = ' meals'
+
+function slidingTitle() {
+  document.title = page.title + ' |' + titleSuffix.slice(-i)
+
+  if (++i <= titleSuffix.length) {
+    requestAnimationFrame(slidingTitle)
   }
 }
 
-document.documentElement.style.height = '100%'
-document.body.style.height = '100%'
-document.body.style.margin = '0'
+setTimeout(() => {
+  document.title += ' |'
 
-export const app = App()
-document.body.append(app)
+  setTimeout(() => requestAnimationFrame(slidingTitle), 128)
+}, 1_024)

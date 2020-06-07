@@ -1,4 +1,3 @@
-import { app } from '../main'
 import { weekDays, currentWeekDay } from './cal'
 import { Icon, IconName } from '../components/Icon'
 import { Vbox } from '../components/Box'
@@ -74,7 +73,7 @@ function planCard(cardTitle: string, isActive: boolean, isFirst: boolean, isLast
   title.style.color = '#333'
   title.textContent = cardTitle
 
-  const addFoodIcon = addItemBtn('carrot' as any, 'Add food', () => app.prepend(AddFoodModal()))
+  const addFoodIcon = addItemBtn('carrot' as any, 'Add food', () => document.body.prepend(AddFoodModal()))
   const addRecipeIcon = addItemBtn('utensils' as any, 'Add recipe', () => void 0)
   // const addSmoothieIcon = addItemBtn('blender', 'Add smoothie', () => void 0)
   // const addSaladIcon = addItemBtn('seedling', 'Add salad', () => void 0)

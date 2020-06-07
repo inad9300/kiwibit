@@ -1,6 +1,6 @@
 import { Page } from '../pages'
 import { pct } from '../utils/pct'
-import { tooltip } from '../App'
+import { tooltip } from '../main'
 import { Spacer } from '../components/Spacer'
 import { Html } from '../components/Html'
 import { Hbox } from '../components/Box'
@@ -40,7 +40,7 @@ export function BarRow(f: ApiOutput<'getTopFoodsForNutrient'>[0], max: number) {
     it.style.padding = `2px ${barPadding}px`
     it.onmouseenter = () => it.style.backgroundColor = '#d2e3f2'
     it.onmouseleave = () => it.style.backgroundColor = 'transparent'
-    tooltip.update(BarTooltipContent(f), it)
+    tooltip.attach(BarTooltipContent(f), it)
 
     return {
       getTitleWidth() {
