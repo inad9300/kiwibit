@@ -19,7 +19,7 @@ export enum Page {
 export function getCurrentPage(): PageMap[Page.NotFound] {
   const pageSlug = getUrlParams().get('page')
   if (!pageSlug) {
-    history.replaceState(null, '', '/?page=home')
+    history.replaceState(null, '', '/?page=' + Page.Home)
     return pages['home']
   }
 
