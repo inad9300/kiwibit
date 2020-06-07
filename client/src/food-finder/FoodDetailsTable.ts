@@ -13,10 +13,14 @@ import type { ApiOutput } from '../utils/api'
 
 export function FoodDetailsTable() {
   const title = Html('h1').with(it => {
-    it.style.color = '#000'
-    it.style.fontWeight = 'normal'
-    it.style.fontSize = '15px'
     it.style.margin = '0 3px 0 0'
+    it.style.width = '250px'
+    it.style.whiteSpace = 'nowrap'
+    it.style.overflow = 'hidden'
+    it.style.textOverflow = 'ellipsis'
+    it.style.fontWeight = 'normal'
+    it.style.fontSize = 'inherit'
+    it.style.color = '#000'
   })
 
   let lastIntakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>
