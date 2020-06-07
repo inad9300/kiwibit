@@ -88,8 +88,6 @@ export function Legend(
     it.style.overflowY = 'auto'
     it.style.fontSize = '13px'
 
-    // TODO? Remove previous event listeners.
-
     setTimeout(() => {
       const legendHeight = it.offsetHeight
       const { documentElement } = document
@@ -98,6 +96,11 @@ export function Legend(
         const chartBottom = parentChart.getBoundingClientRect().bottom
         const chartBottomOffset = Math.max(0, documentElement.offsetHeight - (chartBottom + 12))
         it.style.top = documentElement.offsetHeight - legendHeight - chartBottomOffset - 12 + 'px'
+
+        if (it.parentNode == null) {
+          window.removeEventListener('resize', reposition)
+          window.removeEventListener('scroll', reposition)
+        }
       }
 
       reposition()
