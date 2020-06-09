@@ -23,7 +23,7 @@ export function Select<O>(
     it.style.cursor = 'pointer'
   })
 
-  let options: O[] = []
+  const options: O[] = []
 
   return Vbox().with(it => {
     it.style.position = 'relative'
@@ -42,7 +42,13 @@ export function Select<O>(
 
     return {
       setOptions(opts: O[]) {
-        options = opts
+        while (select.options.length > 0) {
+          select.options.remove(0)
+        }
+
+        options.length = 0
+        options.push(...opts)
+
         options.forEach(o => {
           select.options.add(
             Html('option').with(it => {
