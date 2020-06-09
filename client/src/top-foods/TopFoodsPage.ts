@@ -28,25 +28,27 @@ export function TopFoodsPage() {
     const nutrientId = urlNutrientId()
     if (nutrientId) {
       nutrientSelect.setSelected(nutrientId)
-      reloadChart(nutrientId)
+      reloadChart()
     }
   })
 
   const nutrientSelect = NutrientSelect().with(it => {
-    it.onchange = () => reloadChart(it.getSelected()!.id)
+    it.onchange = () => reloadChart()
     it.onReady = () => {
-      const nutrientId = urlNutrientId() ?? it.getSelected()!.id
-      it.setSelected(nutrientId)
-      reloadChart(nutrientId)
+      const nutrientId = urlNutrientId()
+      if (nutrientId) {
+        it.setSelected(nutrientId)
+        reloadChart()
+      }
     }
   })
 
   const categorySelect = CategorySelect().with(it => {
-    it.onchange = () => reloadChart(nutrientSelect.getSelected()!.id)
+    it.onchange = () => reloadChart()
   })
 
   const perSelect = PerSelect().with(it => {
-    it.onchange = () => reloadChart(nutrientSelect.getSelected()!.id)
+    it.onchange = () => reloadChart()
   })
 
   const zoomTitle = ControlTitle('Zoom').with(it => {
@@ -80,7 +82,7 @@ export function TopFoodsPage() {
     it.style.margin = `0 ${barPadding}px`
     it.onclick = () => {
       topFoodsOffset += topFoodsLimit
-      reloadChart(nutrientSelect.getSelected()!.id, topFoodsOffset)
+      reloadChart(topFoodsOffset)
     }
   })
 
@@ -88,7 +90,12 @@ export function TopFoodsPage() {
   let lastTopFoodsCriteria: ApiInput<'getTopFoodsForNutrient'>
   let lastIntakeMetadata: ApiOutput<'getIntakeMetadataForNutrient'>
 
-  async function reloadChart(nutrientId: number, offset = 0) {
+  async function reloadChart(offset = 0) {
+    const nutrientId = nutrientSelect.getSelected()?.id
+    if (!nutrientId) {
+      return
+    }
+
     if (urlNutrientId() !== nutrientId) {
       history.pushState(null, '', `/?page=${Page.TopFoods}&nutrient-id=${nutrientId}`)
     }
