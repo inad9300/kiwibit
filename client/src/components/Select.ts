@@ -6,7 +6,8 @@ import { ControlTitle } from './ControlTitle'
 export function Select<O>(
   titleText: string,
   getId: (opt: O) => string | number,
-  getDisplayText: (opt: O) => string
+  getDisplayText: (opt: O) => string,
+  optional = false
 ) {
   const select = Html('select').with(it => {
     it.style.height = '26px'
@@ -41,6 +42,7 @@ export function Select<O>(
     )
 
     return {
+      select,
       setOptions(opts: O[]) {
         while (select.options.length > 0) {
           select.options.remove(0)
@@ -48,6 +50,17 @@ export function Select<O>(
 
         options.length = 0
         options.push(...opts)
+
+        if (optional) {
+          select.options.add(
+            Html('option').with(it => {
+              it.disabled = true
+              it.selected = true
+              it.value = ''
+              it.textContent = '— Select value —'
+            })
+          )
+        }
 
         options.forEach(o => {
           select.options.add(
