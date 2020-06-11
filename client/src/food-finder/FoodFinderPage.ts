@@ -1,6 +1,6 @@
 import { Page } from '../pages'
 import { api } from '../utils/api'
-import { UsdaCategorySelect } from './UsdaCategorySelect'
+import { FoodCategorySelect } from '../top-foods/FoodCategorySelect'
 import { FoodFinderInput } from './FoodFinderInput'
 import { FoodDetailsTable } from './FoodDetailsTable'
 import { getUrlParams } from '../utils/getUrlParams'
@@ -13,7 +13,7 @@ function urlFoodId() {
 }
 
 export function FoodFinderPage() {
-  const usdaCategorySelect = UsdaCategorySelect().with(it => {
+  const foodCategorySelect = FoodCategorySelect().with(it => {
     it.onchange = () => foodFinderInput.setUsdaCategoryId(it.getSelected()!.id)
   })
 
@@ -54,7 +54,7 @@ export function FoodFinderPage() {
   })
 
   const controlsRow = Hbox().with(it => {
-    it.append(usdaCategorySelect, foodFinderInput)
+    it.append(foodCategorySelect, foodFinderInput)
     it.style.marginBottom = '10px'
     it.style.minHeight = 'min-content'
   })
@@ -72,7 +72,7 @@ export function FoodFinderPage() {
   window.addEventListener('popstate', () => loadFoodDetailsFromUrl())
 
   return Vbox().with(it => {
-    it.style.padding = '12px 16px 16px 16px'
+    it.style.padding = '12px 16px 16px'
     it.append(controlsRow, foodDetailsTable, showMoreNutrientsBtn)
   })
 }
