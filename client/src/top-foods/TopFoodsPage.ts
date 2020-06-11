@@ -2,7 +2,7 @@ import { Page } from '../pages'
 import { api, ApiInput, ApiOutput } from '../utils/api'
 import { NutrientSelect } from './NutrientSelect'
 import { PerSelect } from './PerSelect'
-import { CategorySelect } from './CategorySelect'
+import { FoodCategorySelect } from './FoodCategorySelect'
 import { TopFoodsChart } from './TopFoodsChart'
 import { getUrlParams } from '../utils/getUrlParams'
 import { Html } from '../components/Html'
@@ -43,7 +43,7 @@ export function TopFoodsPage() {
     }
   })
 
-  const categorySelect = CategorySelect().with(it => {
+  const categorySelect = FoodCategorySelect().with(it => {
     it.onchange = () => reloadChart()
   })
 
