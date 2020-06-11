@@ -5,7 +5,8 @@ import { MenuItem, menuItemWidth } from './MenuItem'
 const findablePages = [
   pages['home'],
   pages['top-foods'],
-  pages['food-finder']
+  pages['food-finder'],
+  pages['settings']
 ]
 
 export function AppsMenu(trigger: HTMLElement) {
