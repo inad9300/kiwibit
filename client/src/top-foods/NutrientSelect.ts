@@ -28,7 +28,7 @@ export function NutrientSelect() {
   })
 
   api('getAllNutrients', undefined).then(nutrients => {
-    select.setOptions(nutrients.sort((a, b) => a.name > b.name ? 1 : -1))
+    select.setOptions(nutrients, 'category')
     select.onReady()
   })
 

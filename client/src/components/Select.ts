@@ -2,6 +2,7 @@ import { Html } from './Html'
 import { Vbox } from './Box'
 import { Icon } from './Icon'
 import { ControlTitle } from './ControlTitle'
+import { groupBy } from '../utils/groupBy'
 
 export function Select<O>(
   titleText: string,
@@ -43,7 +44,7 @@ export function Select<O>(
 
     return {
       select,
-      setOptions(opts: O[]) {
+      setOptions(opts: O[], groupKey?: keyof O) {
         while (select.options.length > 0) {
           select.options.remove(0)
         }
@@ -62,14 +63,32 @@ export function Select<O>(
           )
         }
 
-        options.forEach(o => {
-          select.options.add(
-            Html('option').with(it => {
-              it.value = getId(o) + ''
-              it.textContent = getDisplayText(o)
+        if (groupKey) {
+          const groupedOptions = groupBy(options, groupKey)
+          const optionGroups = Object.keys(groupedOptions).map(group => {
+            return Html('optgroup').with(it => {
+              it.label = group
+              it.append(
+                ...groupedOptions[group].map(o => {
+                  return Html('option').with(it => {
+                    it.value = getId(o) + ''
+                    it.textContent = getDisplayText(o)
+                  })
+                })
+              )
             })
-          )
-        })
+          })
+          select.append(...optionGroups)
+        } else {
+          options.forEach(o => {
+            select.options.add(
+              Html('option').with(it => {
+                it.value = getId(o) + ''
+                it.textContent = getDisplayText(o)
+              })
+            )
+          })
+        }
       },
       getSelected(): O | undefined {
         return options.find(o => getId(o) + '' === select.value)
