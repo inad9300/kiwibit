@@ -37,7 +37,7 @@ export function SettingsPage() {
 
     api('getAllNutrients', undefined).then(nutrients => {
       const groupedNutrients = groupBy(nutrients, 'category')
-      Object.keys(groupedNutrients).forEach((group, idx) => {
+      Object.keys(groupedNutrients).forEach(group => {
         const groupWrapper = Html('div').with(it => {
           it.style.float = 'left'
           it.style.marginRight = '16px'
