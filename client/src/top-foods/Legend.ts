@@ -12,6 +12,10 @@ export function Legend(
   intakeMetadata: ApiOutput<'getIntakeMetadataForNutrient'>,
   topFoods: ApiOutput<'getTopFoodsForNutrient'>
 ) {
+  if (topFoods.length === 0) {
+    return Html('div')
+  }
+
   const { rdi, ul } = intakeMetadata
   const { unit_abbr } = topFoods[0]
   const metadataLegendItems: HTMLElement[] = []

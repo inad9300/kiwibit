@@ -132,7 +132,9 @@ export function TopFoodsPage() {
     topFoodsAcc.length = 0
     topFoodsAcc.push(...topFoods)
     chart.update(intakeMetadata, topFoods)
-    if (topFoods.length === topFoodsLimit && topFoods.slice(-1)[0].amount !== 0) {
+    if (topFoods.length === 0) {
+      moreResultsBtn.hidden = true
+    } else if (topFoods.length === topFoodsLimit && topFoods.slice(-1)[0].amount !== 0) {
       moreResultsBtn.hidden = false
     }
 
