@@ -30,20 +30,21 @@ export function HomePage() {
       Hbox().with(it => {
         it.setChildren([
           FoodButton('Blueberries', 1792),
-          FoodButton('Dates', 2044),
-          FoodButton('Cashews', 3257),
           FoodButton('Flaxseeds', 3329),
-          FoodButton('Turmeric', 306)
+          FoodButton('Turmeric', 306),
+          FoodButton('Broccoli', 2493),
+          FoodButton('Mushrooms', 2631),
         ], '8px')
       }),
       Hbox().with(it => {
         it.style.marginTop = '8px'
         it.setChildren([
+          FoodButton('Dates', 2044),
+          FoodButton('Cashews', 3257),
           FoodButton('Parsley', 2665),
           FoodButton('Kale', 2604),
-          FoodButton('Broccoli', 2493),
+          FoodButton('Lentils', 4418),
           FoodButton('Garlic', 2589),
-          FoodButton('Lentils', 4418)
         ], '8px')
       })
     )
