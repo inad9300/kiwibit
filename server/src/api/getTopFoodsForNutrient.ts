@@ -17,13 +17,13 @@ type FoodNutrient = {
 
 export async function getTopFoodsForNutrient(data: {
   nutrientId: number
-  orderBy: 'weight' | 'energy'
+  per: 'weight' | 'energy'
   categories: number[]
   offset: number
   limit: number
 }) {
   const orderBy =
-    data.orderBy === 'weight' || data.nutrientId === energyId
+    data.per === 'weight' || data.nutrientId === energyId
       ? 'fn.amount'
       : `(
         100 * fn.amount / (
@@ -68,14 +68,14 @@ import { ok } from 'assert'
 test({
   'returns an array': async () => {
     const ironId = 25
-    const res = await getTopFoodsForNutrient({ nutrientId: ironId, orderBy: 'weight', offset: 0, limit: 11, categories: [] })
+    const res = await getTopFoodsForNutrient({ nutrientId: ironId, per: 'weight', offset: 0, limit: 11, categories: [] })
     ok(Array.isArray(res))
     ok(res.length > 10)
   },
   'returns an array, with categories': async () => {
     const ironId = 25
     const spicesAndHerbsId = 2
-    const res = await getTopFoodsForNutrient({ nutrientId: ironId, orderBy: 'weight', offset: 0, limit: 11, categories: [spicesAndHerbsId] })
+    const res = await getTopFoodsForNutrient({ nutrientId: ironId, per: 'weight', offset: 0, limit: 11, categories: [spicesAndHerbsId] })
     ok(Array.isArray(res))
     ok(res.length > 10)
   }
