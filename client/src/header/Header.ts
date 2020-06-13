@@ -19,21 +19,26 @@ export function Header() {
     it.style.fontSize = '17px'
   })
 
-  const buyMeACoffeeImg = Html('img').with(it => {
-    it.src = 'https://cdn.buymeacoffee.com/buttons/default-orange.png'
-    it.alt = 'Buy me a coffee'
-    it.width = 145
-    it.height = 34
-    it.style.borderRadius = '3px'
-    it.style.border = '1px solid rgba(0, 0, 0, 0.5)'
-    it.style.backgroundColor = '#ff813f'
-    it.style.color = '#fff'
-  })
-
-  const buyMeACoffeeLink = Link('https://www.buymeacoffee.com/wu6S9Ob0k').with(it => {
+  const buyMeACoffeeLink = Link('https://buymeacoffee.com/wu6S9Ob0k').with(it => {
     it.target = '_blank'
     it.style.margin = '7px 7px 0 0'
-    it.append(buyMeACoffeeImg)
+    it.style.padding = '0 8px'
+    it.textContent = 'Buy me a coffee!'
+    it.style.borderRadius = '3px'
+    it.style.height = '34px'
+    it.style.border = '1px solid rgba(0, 0, 0, 0.3)'
+    it.style.backgroundColor = '#ff8749'
+    it.style.color = '#fff'
+    it.style.fontFamily = 'Pacifico, sans-serif'
+    it.style.textShadow = '0 1px 0 rgba(0, 0, 0, 0.15)'
+
+    it.append(
+      Icon('mug-hot').with(it => {
+        it.style.color = 'rgba(0, 0, 0, 0.35)'
+        it.style.marginLeft = '7px'
+        it.style.filter = 'drop-shadow(0 1px 0 rgba(255, 255, 255, 0.6))'
+      })
+    )
   })
 
   return Html('header').with(it => {
