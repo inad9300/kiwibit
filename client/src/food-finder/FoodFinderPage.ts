@@ -5,7 +5,7 @@ import { FoodFinderInput } from './FoodFinderInput'
 import { FoodDetailsTable } from './FoodDetailsTable'
 import { getUrlParams } from '../utils/getUrlParams'
 import { Hbox, Vbox } from '../components/Box'
-import { RegularButton } from '../components/RegularButton'
+import { fetchAgeAndSexSettings, fetchNutrientsSettings, fetchFoodCategoriesSettings } from '../settings/SettingsApi'
 
 function urlFoodId() {
   const foodIdStr = getUrlParams().get('food-id')
@@ -14,39 +14,21 @@ function urlFoodId() {
 
 export function FoodFinderPage() {
   const foodCategorySelect = FoodCategorySelect().with(it => {
-    it.onchange = () => foodFinderInput.setUsdaCategoryId(it.getSelected()!.id)
-  })
+    it.promise
+      .then(fetchFoodCategoriesSettings)
+      .then(userCategories => {
+        foodFinderInput.setUsdaCategoryIds(userCategories)
 
-  const foodDetailsTable = FoodDetailsTable().with(it => {
-    it.hidden = true
-  })
-
-  let lastFoodId: number
-  let lastShowAll: boolean
-
-  async function loadFoodDetails(foodId: number, showAll: boolean) {
-    const [intakeMetadata, foodDetailsData] = await Promise.all([
-      api('getIntakeMetadataForAllNutrients', { age: 25, gender: 'M' }),
-      api('findFoodDetails', { id: foodId, showAll })
-    ])
-
-    lastFoodId = foodId
-    lastShowAll = showAll
-    showMoreNutrientsBtn.textContent = showAll ? 'Show less nutrients' : 'Show more nutrients'
-    foodDetailsTable.setData(intakeMetadata, foodDetailsData, 100)
-    foodDetailsTable.hidden = showMoreNutrientsBtn.hidden = false
-  }
-
-  const showMoreNutrientsBtn = RegularButton('Show more nutrients').with(it => {
-    it.hidden = true
-    it.style.width = '335px'
-    it.style.borderColor = '#ccc'
-    it.onclick = () => loadFoodDetails(lastFoodId, !lastShowAll)
+        const selectedCategory = it.getSelected()!.id
+        it.onchange = () => foodFinderInput.setUsdaCategoryIds(
+          selectedCategory === -1 ? userCategories : [selectedCategory]
+        )
+      })
   })
 
   const foodFinderInput = FoodFinderInput().with(it => {
     it.onSelect = async food => {
-      await loadFoodDetails(food.id, false)
+      await loadFoodDetails(food.id)
       if (urlFoodId() !== food.id) {
         history.pushState(null, '', `/?page=${Page.FoodFinder}&food-id=${food.id}`)
       }
@@ -59,12 +41,29 @@ export function FoodFinderPage() {
     it.style.minHeight = 'min-content'
   })
 
+  const foodDetailsTable = FoodDetailsTable().with(it => {
+    it.hidden = true
+  })
+
+  async function loadFoodDetails(foodId: number) {
+    const { age, sex } = await fetchAgeAndSexSettings()
+    const userNutrients = await api('getAllNutrients', undefined).then(fetchNutrientsSettings)
+
+    const [intakeMetadata, foodDetailsData] = await Promise.all([
+      api('getIntakeMetadataForAllNutrients', { age, gender: sex }),
+      api('findFoodDetails', { id: foodId, nutrients: userNutrients })
+    ])
+
+    foodDetailsTable.setData(intakeMetadata, foodDetailsData, 100)
+    foodDetailsTable.hidden = false
+  }
+
   function loadFoodDetailsFromUrl() {
     const foodId = urlFoodId()
     if (foodId) {
-      loadFoodDetails(foodId, false)
+      loadFoodDetails(foodId)
     } else {
-      foodDetailsTable.hidden = showMoreNutrientsBtn.hidden = true
+      foodDetailsTable.hidden = true
     }
   }
 
@@ -73,6 +72,6 @@ export function FoodFinderPage() {
 
   return Vbox().with(it => {
     it.style.padding = '12px 16px 16px'
-    it.append(controlsRow, foodDetailsTable, showMoreNutrientsBtn)
+    it.append(controlsRow, foodDetailsTable)
   })
 }

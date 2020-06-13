@@ -10,6 +10,7 @@ import { Hbox, Vbox } from '../components/Box'
 import { RegularButton } from '../components/RegularButton'
 import { barPadding } from './BarRow'
 import { ControlTitle } from '../components/ControlTitle'
+import { fetchAgeAndSexSettings, fetchFoodCategoriesSettings } from '../settings/SettingsApi'
 
 function urlNutrientId() {
   const nutrientIdStr = getUrlParams().get('nutrient-id')
@@ -34,21 +35,25 @@ export function TopFoodsPage() {
 
   const nutrientSelect = NutrientSelect().with(it => {
     it.onchange = () => reloadChart()
-    it.onReady = () => {
+    it.promise.then(() => {
       const nutrientId = urlNutrientId()
       if (nutrientId) {
         it.setSelected(nutrientId)
         reloadChart()
       }
-    }
+    })
   })
 
-  const categorySelect = FoodCategorySelect().with(it => {
+  const foodCategorySelect = FoodCategorySelect().with(it => {
     it.onchange = () => reloadChart()
+    it.promise.then(() => {
+      // TODO Load values from URL.
+    })
   })
 
   const perSelect = PerSelect().with(it => {
     it.onchange = () => reloadChart()
+    // TODO Load values from URL.
   })
 
   const zoomTitle = ControlTitle('Zoom').with(it => {
@@ -66,7 +71,7 @@ export function TopFoodsPage() {
   })
 
   const controlsRow = Hbox().with(it => {
-    it.setChildren([nutrientSelect, categorySelect, perSelect, zoomControl], '8px')
+    it.setChildren([nutrientSelect, foodCategorySelect, perSelect, zoomControl], '8px')
     it.style.minHeight = 'min-content'
     it.style.margin = '12px 16px'
   })
@@ -113,18 +118,21 @@ export function TopFoodsPage() {
     chart.style.width = ''
     topFoodsOffset = 0
 
-    const categoryId = categorySelect.getSelected()?.id
+    const categoryId = foodCategorySelect.getSelected()?.id
+    const userCategories = await fetchFoodCategoriesSettings(await foodCategorySelect.promise)
 
     lastTopFoodsCriteria = {
       limit: topFoodsLimit,
       nutrientId,
       orderBy: perSelect.getSelected()!.value,
-      categories: !categoryId || categoryId === -1 ? [] : [categoryId],
+      categories: !categoryId || categoryId === -1 ? userCategories : [categoryId],
       offset
     }
 
+    const { age, sex } = await fetchAgeAndSexSettings()
+
     const [intakeMetadata, topFoods] = await Promise.all([
-      api('getIntakeMetadataForNutrient', { nutrientId, age: 25, gender: 'M' }),
+      api('getIntakeMetadataForNutrient', { nutrientId, age, gender: sex }),
       api('getTopFoodsForNutrient', lastTopFoodsCriteria).then(roundAmount)
     ])
 

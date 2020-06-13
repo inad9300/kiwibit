@@ -8,18 +8,18 @@ type Food = {
 
 export async function findFoodsByNameAndUsdaCategory(data: {
   foodName: string
-  usdaCategoryId: number
+  usdaCategoryIds: number[]
 }) {
   const res = await pool.query<Food>(`
     select f.id, f.name
     from foods f
     where lower(f.name) like '%' || lower($1) || '%'
-    and f.usda_category_id = coalesce($2, f.usda_category_id)
+    and ($2::int[] is null or f.usda_category_id = any($2))
     order by f.name
     limit 100
   `, [
     data.foodName.replace(/ /g, '%'),
-    data.usdaCategoryId === -1 ? null : data.usdaCategoryId
+    data.usdaCategoryIds.length === 0 ? null : data.usdaCategoryIds
   ])
   return res.rows
 }
@@ -29,7 +29,7 @@ import { ok } from 'assert'
 
 test({
   'returns an array': async () => {
-    const res = await findFoodsByNameAndUsdaCategory({ foodName: 'blue', usdaCategoryId: -1 })
+    const res = await findFoodsByNameAndUsdaCategory({ foodName: 'blue', usdaCategoryIds: [] })
     ok(Array.isArray(res))
     ok(res.length > 10)
   }

@@ -1,8 +1,9 @@
 import { api, ApiOutput } from '../utils/api'
 import { Select } from '../components/Select'
+import { fetchNutrientsSettings } from '../settings/SettingsApi'
 
 export function NutrientSelect() {
-  const select = Select<ApiOutput<'getAllNutrients'>[0]>(
+  return Select<ApiOutput<'getAllNutrients'>[0]>(
     'Nutrient',
     n => n.id!,
     n => n.name + (n.alias ? ' / ' + n.alias : ''),
@@ -24,13 +25,13 @@ export function NutrientSelect() {
       it.removeEventListener('change', enable)
     }
 
-    return { onReady: () => {} }
-  })
+    const promise = api('getAllNutrients', undefined).then(async nutrients => {
+      const userNutrients = await fetchNutrientsSettings(nutrients)
+      it.setOptions(nutrients.filter(n => userNutrients.includes(n.id)), 'category')
 
-  api('getAllNutrients', undefined).then(nutrients => {
-    select.setOptions(nutrients, 'category')
-    select.onReady()
-  })
+      return nutrients
+    })
 
-  return select
+    return { promise }
+  })
 }

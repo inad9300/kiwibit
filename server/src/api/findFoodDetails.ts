@@ -11,7 +11,7 @@ type FoodDetails = {
   nutrient_category_name: schema.nutrient_categories['name']
 }
 
-export async function findFoodDetails(data: { id: number, showAll: boolean }) {
+export async function findFoodDetails(data: { id: number, nutrients: number[] }) {
   const res = await pool.query<FoodDetails>(`
     select
       f.name,
@@ -27,7 +27,7 @@ export async function findFoodDetails(data: { id: number, showAll: boolean }) {
     left join nutrient_categories nc on (nc.id = n.category_id)
     left join units u on (u.id = n.unit_id)
     where f.id = $1
-    ${data.showAll ? '' : 'and n.is_visible_default = true'}
+    and ($2::int[] is null or n.id = any($2))
     order by (case
       when nc.name = 'Minerals' then 1
       when nc.name = 'Vitamins' then 2
@@ -36,7 +36,7 @@ export async function findFoodDetails(data: { id: number, showAll: boolean }) {
       when nc.name = 'Carbohydrates' then 5
       when nc.name = 'Other' then 6
     end), n.name
-  `, [data.id])
+  `, [data.id, data.nutrients.length === 0 ? null : data.nutrients])
 
   return {
     name: res.rows[0].name,
@@ -56,7 +56,8 @@ import { ok } from 'assert'
 
 test({
   'returns an object': async () => {
-    const res = await findFoodDetails({ id: 1, showAll: false })
+    const ironId = 25
+    const res = await findFoodDetails({ id: 1, nutrients: [ironId] })
     ok(typeof res === 'object')
     ok(Object.keys(res).length > 1)
   }
