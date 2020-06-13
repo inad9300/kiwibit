@@ -103,16 +103,6 @@ export function TopFoodsPage() {
     const per = perSelect.getSelected()!.value
 
     if (urlNutrientId() !== nutrientId || urlFoodCategoryId() !== categoryId || urlPer() !== per) {
-      console.debug('url values', {
-        'nutrient-id': urlNutrientId(),
-        'food-category-id': urlFoodCategoryId(),
-        'per': urlPer(),
-      })
-      console.debug('selected values', {
-        'nutrient-id': nutrientId,
-        'food-category-id': categoryId,
-        'per': per,
-      })
       updateUrl(Page.TopFoods, {
         'nutrient-id': nutrientId,
         'food-category-id': categoryId === -1 ? '' : categoryId,
@@ -145,7 +135,7 @@ export function TopFoodsPage() {
       limit: topFoodsLimit,
       nutrientId,
       per,
-      categories: !categoryId ? userCategories : [categoryId],
+      categories: !categoryId || categoryId === -1 ? userCategories : [categoryId],
       offset
     }
 
