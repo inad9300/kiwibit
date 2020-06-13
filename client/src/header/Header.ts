@@ -22,10 +22,11 @@ export function Header() {
   const buyMeACoffeeLink = Link('https://buymeacoffee.com/wu6S9Ob0k').with(it => {
     it.target = '_blank'
     it.style.margin = '7px 7px 0 0'
-    it.style.padding = '0 8px'
+    it.style.padding = '1px 8px'
     it.textContent = 'Buy me a coffee!'
     it.style.borderRadius = '3px'
     it.style.height = '34px'
+    it.style.fontSize = '15px'
     it.style.border = '1px solid rgba(0, 0, 0, 0.3)'
     it.style.backgroundColor = '#ff8749'
     it.style.color = '#fff'
