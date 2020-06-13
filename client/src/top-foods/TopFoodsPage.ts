@@ -20,11 +20,11 @@ function urlNutrientId() {
 
 function urlFoodCategoryId() {
   const idStr = getUrlParams().get('food-category-id')
-  return idStr ? parseInt(idStr, 10) : ''
+  return idStr ? parseInt(idStr, 10) : -1
 }
 
 function urlPer() {
-  return getUrlParams().get('per') || ''
+  return getUrlParams().get('per') || 'weight' as 'weight' | 'energy'
 }
 
 function roundAmount(foods: ApiOutput<'getTopFoodsForNutrient'>) {
@@ -49,8 +49,8 @@ export function TopFoodsPage() {
 
   function loadFromUrl() {
     nutrientSelect.setSelected(urlNutrientId())
-    foodCategorySelect.setSelected(urlFoodCategoryId() || -1)
-    perSelect.setSelected(urlPer() || 'weight')
+    foodCategorySelect.setSelected(urlFoodCategoryId())
+    perSelect.setSelected(urlPer())
 
     reloadChart()
   }
@@ -98,14 +98,24 @@ export function TopFoodsPage() {
   let lastIntakeMetadata: ApiOutput<'getIntakeMetadataForNutrient'>
 
   async function reloadChart(offset = 0) {
-    const nutrientId = nutrientSelect.getSelected()?.id
-    const categoryId = !foodCategorySelect.getSelected() || foodCategorySelect.getSelected()?.id === -1 ? '' : foodCategorySelect.getSelected()?.id
+    const nutrientId = nutrientSelect.getSelected()?.id || ''
+    const categoryId = foodCategorySelect.getSelected()?.id
     const per = perSelect.getSelected()!.value
 
     if (urlNutrientId() !== nutrientId || urlFoodCategoryId() !== categoryId || urlPer() !== per) {
-      updateUrl(Page.TopFoods, {
+      console.debug('url values', {
+        'nutrient-id': urlNutrientId(),
+        'food-category-id': urlFoodCategoryId(),
+        'per': urlPer(),
+      })
+      console.debug('selected values', {
         'nutrient-id': nutrientId,
         'food-category-id': categoryId,
+        'per': per,
+      })
+      updateUrl(Page.TopFoods, {
+        'nutrient-id': nutrientId,
+        'food-category-id': categoryId === -1 ? '' : categoryId,
         'per': per
       })
     }
