@@ -2,15 +2,14 @@ insert into usda_categories (usda_id, name, is_visible_default, color)
 select
   fdgrp_cd,
   fdgrp_desc,
-  fdgrp_desc not in (
-    'American Indian/Alaska Native Foods',
-    'Beef Products',
-    'Dairy and Egg Products',
-    'Finfish and Shellfish Products',
-    'Lamb, Veal, and Game Products',
-    'Pork Products',
-    'Poultry Products',
-    'Sausages and Luncheon Meats'
+  fdgrp_desc in (
+    'Beverages',
+    'Cereal Grains and Pasta',
+    'Fruits and Fruit Juices',
+    'Legumes and Legume Products',
+    'Nut and Seed Products',
+    'Spices and Herbs',
+    'Vegetables and Vegetable Products'
   ),
   case
     when fdgrp_desc = 'American Indian/Alaska Native Foods' then '#ffa210'
