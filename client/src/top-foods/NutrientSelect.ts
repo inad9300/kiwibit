@@ -16,7 +16,9 @@ export function NutrientSelect() {
     const _setSelected = it.setSelected
     it.setSelected = (id: number) => {
       _setSelected(id)
-      enable()
+      if (it.getSelected()) {
+        enable()
+      }
     }
 
     function enable() {
