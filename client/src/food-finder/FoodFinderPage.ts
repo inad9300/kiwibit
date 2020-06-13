@@ -6,6 +6,7 @@ import { FoodDetailsTable } from './FoodDetailsTable'
 import { getUrlParams } from '../utils/getUrlParams'
 import { Hbox, Vbox } from '../components/Box'
 import { fetchAgeAndSexSettings, fetchNutrientsSettings, fetchFoodCategoriesSettings } from '../settings/SettingsApi'
+import { updateUrl } from '../utils/updateUrl'
 
 function urlFoodId() {
   const foodIdStr = getUrlParams().get('food-id')
@@ -30,7 +31,7 @@ export function FoodFinderPage() {
     it.onSelect = async food => {
       await loadFoodDetails(food.id)
       if (urlFoodId() !== food.id) {
-        history.pushState(null, '', `/?page=${Page.FoodFinder}&food-id=${food.id}`)
+        updateUrl(Page.FoodFinder, { 'food-id': food.id })
       }
     }
   })
