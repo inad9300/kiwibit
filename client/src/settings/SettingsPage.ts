@@ -25,10 +25,12 @@ export function SettingsPage() {
 
     const foodCategoriesBox = Fieldset('Food Categories').with(it => {
       it.style.marginTop = '10px'
+      it.style.backgroundColor = '#fafafa'
     })
 
     const nutrientsBox = Fieldset('Nutrients').with(it => {
       it.style.marginTop = '10px'
+      it.style.backgroundColor = '#fafafa'
     })
 
     const foodCategoryCheckboxes: HTMLInputElement[] = []
@@ -72,7 +74,8 @@ export function SettingsPage() {
             it.style.fontWeight = 'normal'
             it.style.paddingBottom = '2px'
             it.style.textAlign = 'center'
-            it.style.borderBottom = '1px solid #aaa'
+            it.style.color = '#444'
+            it.style.borderBottom = '1px solid #999'
           })
         )
         groupedNutrients[group].forEach(n => {

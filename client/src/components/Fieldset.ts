@@ -9,6 +9,7 @@ export function Fieldset(title: string) {
     it.append(
       Html('legend').with(it => {
         it.textContent = title
+        it.style.padding = '0 5px'
         it.style.fontSize = '13px'
         it.style.fontWeight = 'bold'
         it.style.color = '#555'
