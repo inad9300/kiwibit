@@ -9,8 +9,8 @@ import { fetchAgeAndSexSettings, fetchNutrientsSettings, fetchFoodCategoriesSett
 import { updateUrl } from '../utils/updateUrl'
 
 function urlFoodId() {
-  const foodIdStr = getUrlParams().get('food-id')
-  return foodIdStr ? parseInt(foodIdStr, 10) : null
+  const idStr = getUrlParams().get('food-id')
+  return idStr ? parseInt(idStr, 10) : ''
 }
 
 export function FoodFinderPage() {
