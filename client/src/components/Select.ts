@@ -58,7 +58,7 @@ export function Select<O>(
               it.disabled = true
               it.selected = true
               it.value = ''
-              it.textContent = ''
+              it.textContent = '—'
             })
           )
         }
