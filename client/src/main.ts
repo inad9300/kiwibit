@@ -38,19 +38,21 @@ document.body.with(it => {
   )
 })
 
-let i = 1
-const titleSuffix = ' meals'
-
-function slidingTitle() {
-  document.title = page.title + ' |' + titleSuffix.slice(-i)
-
-  if (++i <= titleSuffix.length) {
-    requestAnimationFrame(slidingTitle)
+if (navigator.userAgent.includes('Firefox')) {
+  let i = 1
+  const slidingTitle = () => {
+    document.title = page.title + ' |' + ' meals'.slice(-i)
+    if (++i <= 6) {
+      requestAnimationFrame(slidingTitle)
+    }
   }
+
+  setTimeout(() => {
+    document.title += ' |'
+    setTimeout(() => requestAnimationFrame(slidingTitle), 128)
+  }, 1_024)
+} else {
+  setTimeout(() => {
+    document.title += ' | meals'
+  }, 1_024)
 }
-
-setTimeout(() => {
-  document.title += ' |'
-
-  setTimeout(() => requestAnimationFrame(slidingTitle), 128)
-}, 1_024)
