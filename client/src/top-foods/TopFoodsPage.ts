@@ -11,10 +11,20 @@ import { RegularButton } from '../components/RegularButton'
 import { barPadding } from './BarRow'
 import { ControlTitle } from '../components/ControlTitle'
 import { fetchAgeAndSexSettings, fetchFoodCategoriesSettings } from '../settings/SettingsApi'
+import { updateUrl } from '../utils/updateUrl'
 
 function urlNutrientId() {
-  const nutrientIdStr = getUrlParams().get('nutrient-id')
-  return nutrientIdStr ? parseInt(nutrientIdStr, 10) : null
+  const idStr = getUrlParams().get('nutrient-id')
+  return idStr ? parseInt(idStr, 10) : ''
+}
+
+function urlFoodCategoryId() {
+  const idStr = getUrlParams().get('food-category-id')
+  return idStr ? parseInt(idStr, 10) : ''
+}
+
+function urlPer() {
+  return getUrlParams().get('per') || ''
 }
 
 function roundAmount(foods: ApiOutput<'getTopFoodsForNutrient'>) {
@@ -25,36 +35,28 @@ function roundAmount(foods: ApiOutput<'getTopFoodsForNutrient'>) {
 }
 
 export function TopFoodsPage() {
-  window.addEventListener('popstate', () => {
-    const nutrientId = urlNutrientId()
-    if (nutrientId) {
-      nutrientSelect.setSelected(nutrientId)
-      reloadChart()
-    }
-  })
-
   const nutrientSelect = NutrientSelect().with(it => {
     it.onchange = () => reloadChart()
-    it.promise.then(() => {
-      const nutrientId = urlNutrientId()
-      if (nutrientId) {
-        it.setSelected(nutrientId)
-        reloadChart()
-      }
-    })
   })
 
   const foodCategorySelect = FoodCategorySelect().with(it => {
     it.onchange = () => reloadChart()
-    it.promise.then(() => {
-      // TODO Load values from URL.
-    })
   })
 
   const perSelect = PerSelect().with(it => {
     it.onchange = () => reloadChart()
-    // TODO Load values from URL.
   })
+
+  function loadFromUrl() {
+    nutrientSelect.setSelected(urlNutrientId())
+    foodCategorySelect.setSelected(urlFoodCategoryId() || -1)
+    perSelect.setSelected(urlPer() || 'weight')
+
+    reloadChart()
+  }
+
+  Promise.all([nutrientSelect.promise, foodCategorySelect.promise]).then(() => loadFromUrl())
+  window.addEventListener('popstate', () => loadFromUrl())
 
   const zoomTitle = ControlTitle('Zoom').with(it => {
     it.style.marginBottom = '5px'
@@ -97,12 +99,21 @@ export function TopFoodsPage() {
 
   async function reloadChart(offset = 0) {
     const nutrientId = nutrientSelect.getSelected()?.id
-    if (!nutrientId) {
-      return
+    const categoryId = !foodCategorySelect.getSelected() || foodCategorySelect.getSelected()?.id === -1 ? '' : foodCategorySelect.getSelected()?.id
+    const per = perSelect.getSelected()!.value
+
+    if (urlNutrientId() !== nutrientId || urlFoodCategoryId() !== categoryId || urlPer() !== per) {
+      updateUrl(Page.TopFoods, {
+        'nutrient-id': nutrientId,
+        'food-category-id': categoryId,
+        'per': per
+      })
     }
 
-    if (urlNutrientId() !== nutrientId) {
-      history.pushState(null, '', `/?page=${Page.TopFoods}&nutrient-id=${nutrientId}`)
+    if (!nutrientId) {
+      chart.update({ rdi: 0, ul: 0 }, [])
+      moreResultsBtn.hidden = true
+      return
     }
 
     if (offset > 0) {
@@ -118,14 +129,13 @@ export function TopFoodsPage() {
     chart.style.width = ''
     topFoodsOffset = 0
 
-    const categoryId = foodCategorySelect.getSelected()?.id
     const userCategories = await fetchFoodCategoriesSettings(await foodCategorySelect.promise)
 
     lastTopFoodsCriteria = {
       limit: topFoodsLimit,
       nutrientId,
-      orderBy: perSelect.getSelected()!.value,
-      categories: !categoryId || categoryId === -1 ? userCategories : [categoryId],
+      per,
+      categories: !categoryId ? userCategories : [categoryId],
       offset
     }
 
