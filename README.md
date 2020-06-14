@@ -7,8 +7,5 @@ If you wish to collaborate, please [open a new issue](https://github.com/inad930
 ## Setup
 
 0. Install and run Docker
-0. `cd database && ./start.sh`
 0. Install Node.js
-0. `npm i`
-0. `cd server && npm i && npm start`
-0. `cd client && npm i && npm start`
+0. `npm run it`

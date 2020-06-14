@@ -4,10 +4,13 @@
     "heroku-postbuild": "npm run build-server && npm run build-client",
     "build-server": "cd server && npm i --only=prod && npm i --only=dev && npm run build",
     "build-client": "cd client && npm i --only=prod && npm i --only=dev && npm run build",
-    "start": "node server/bin/main.js"
+    "start": "node server/bin/main.js",
+    "it": "ts-node it.ts"
   },
   "devDependencies": {
-    "@types/webpack": "4.41.17"
+    "@types/webpack": "4.41.17",
+    "ts-node": "8.10.2",
+    "typescript": "3.9.5"
   },
   "engines": {
     "node": ">=14.0.0"
