@@ -8,13 +8,12 @@ import { Span } from '../components/Span'
 import { Vbox, Hbox } from '../components/Box'
 import { Italics } from '../components/Italics'
 import { Spacer } from '../components/Spacer'
-import { TextField } from '../components/TextField'
 import type { ApiOutput } from '../utils/api'
+import { CategoryCircle } from '../top-foods/CategoryCircle'
 
 export function FoodDetailsTable() {
   const title = Html('h1').with(it => {
-    it.style.margin = '0 3px 0 0'
-    it.style.width = '250px'
+    it.style.margin = '0'
     it.style.whiteSpace = 'nowrap'
     it.style.overflow = 'hidden'
     it.style.textOverflow = 'ellipsis'
@@ -23,36 +22,20 @@ export function FoodDetailsTable() {
     it.style.color = '#000'
   })
 
-  let lastIntakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>
-  let lastFoodDetails: ApiOutput<'findFoodDetails'>
-
-  const amountInput = TextField().with(it => {
-    it.style.height = it.style.minHeight = '17px'
-    it.style.width = 'calc(3ch + 6px)'
-    it.style.padding = '0'
-    it.style.marginTop = '2px'
-    it.style.textAlign = 'center'
-    it.oninput = () => {
-      it.style.width = `calc(${(it.value + '').length}ch + 6px)`
-      const value = parseFloat(it.value)
-      if (isNaN(value) || value < 0) {
-        it.style.borderColor = 'rgba(150, 0, 0, 0.5)'
-      } else {
-        it.style.borderColor = 'lightgrey'
-        root.setData(lastIntakeMetadata, lastFoodDetails, value)
-      }
-    }
+  const categoryCircle = CategoryCircle('transparent', 12).with(it => {
+    it.style.marginTop = '4px'
   })
 
   const ddgLink = Link('').with(it => {
     it.target = '_blank'
     it.style.lineHeight = '0'
+    it.style.marginTop = '2px'
 
     it.onmouseenter = () => img.style.filter = ''
     it.onmouseleave = () => img.style.filter = 'grayscale(100%)'
 
     const img = Image('https://duckduckgo.com/assets/common/dax-logo.svg').with(it => {
-      it.width = it.height = 18
+      it.width = it.height = 16
       it.style.filter = 'grayscale(100%)'
     })
 
@@ -62,17 +45,11 @@ export function FoodDetailsTable() {
   })
 
   const heading = Hbox().with(it => {
-    it.style.margin = '0 3px 3px 3px'
-    it.setChildren([
-      Hbox().with(it => {
-        it.style.fontSize = '15px'
-        it.append(title, '(', amountInput, ' g)')
-      }),
-      Spacer(),
-      Vbox().with(it => {
-        it.append(Spacer(), ddgLink)
-      })
-    ], '3px')
+    it.style.marginBottom = '3px'
+    it.style.fontSize = '15px'
+    const spacer = Spacer()
+    it.setChildren([categoryCircle, title, spacer, ddgLink], '4px')
+    spacer.style.margin = '0'
   })
 
   const tbody = Html('tbody').with(it => {
@@ -98,9 +75,6 @@ export function FoodDetailsTable() {
         foodDetails: ApiOutput<'findFoodDetails'>,
         foodAmount: number
       ) {
-        lastIntakeMetadata = intakeMetadata
-        lastFoodDetails = foodDetails
-
         foodDetails = {
           ...foodDetails,
           nutrients: foodDetails.nutrients.map(nutrient => ({
@@ -110,8 +84,10 @@ export function FoodDetailsTable() {
         }
 
         title.textContent = foodDetails.name
-        amountInput.value = foodAmount + ''
-        tooltip.attach(Span(foodDetails.name), title)
+        tooltip.attach(foodDetails.name, title)
+
+        categoryCircle.style.backgroundColor = foodDetails.food_category_color
+        tooltip.attach(foodDetails.food_category_name, categoryCircle)
 
         ddgLink.href = 'https://duckduckgo.com/?iax=images&ia=images&q=' + encodeURIComponent(foodDetails.name)
         // googleImagesLink.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(foodDetails.name)

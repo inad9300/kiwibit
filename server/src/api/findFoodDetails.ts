@@ -9,6 +9,8 @@ type FoodDetails = {
   unit_abbr: schema.units['abbr']
   amount: schema.food_nutrients['amount']
   nutrient_category_name: schema.nutrient_categories['name']
+  food_category_name: schema.usda_categories['name']
+  food_category_color: schema.usda_categories['color']
 }
 
 export async function findFoodDetails(data: { id: number, nutrients: number[] }) {
@@ -20,12 +22,15 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
       n.alias nutrient_alias,
       u.abbr unit_abbr,
       fn.amount,
-      nc.name nutrient_category_name
+      nc.name nutrient_category_name,
+      uc.name food_category_name,
+      uc.color food_category_color
     from foods f
     join food_nutrients fn on (fn.food_id = f.id)
     join nutrients n on (n.id = fn.nutrient_id)
     left join nutrient_categories nc on (nc.id = n.category_id)
     left join units u on (u.id = n.unit_id)
+    left join usda_categories uc on (uc.id = f.usda_category_id)
     where f.id = $1
     and ($2::int[] is null or n.id = any($2))
     order by (case
@@ -40,6 +45,8 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
 
   return {
     name: res.rows[0].name,
+    food_category_name: res.rows[0].food_category_name,
+    food_category_color: res.rows[0].food_category_color,
     nutrients: res.rows.map(d => ({
       id: d.nutrient_id,
       name: d.nutrient_name,
