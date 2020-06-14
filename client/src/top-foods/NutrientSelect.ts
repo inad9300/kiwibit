@@ -10,23 +10,6 @@ export function NutrientSelect() {
     true
   )
   .with(it => {
-    it.select.style.color = 'grey'
-    it.addEventListener('change', enable)
-
-    const _setSelected = it.setSelected
-    it.setSelected = (id: number) => {
-      _setSelected(id)
-      if (it.getSelected()) {
-        enable()
-      }
-    }
-
-    function enable() {
-      it.select.options.remove(0)
-      it.select.style.color = 'inherit'
-      it.removeEventListener('change', enable)
-    }
-
     const promise = api('getAllNutrients', undefined).then(async nutrients => {
       const userNutrients = await fetchNutrientsSettings(nutrients)
       it.setOptions(nutrients.filter(n => userNutrients.includes(n.id)), 'category')
