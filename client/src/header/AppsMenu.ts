@@ -6,6 +6,7 @@ const findablePages = [
   pages['home'],
   pages['top-foods'],
   pages['food-finder'],
+  pages['intake-references'],
   pages['settings']
 ]
 

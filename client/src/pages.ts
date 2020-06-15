@@ -6,11 +6,13 @@ import { SettingsPage } from './settings/SettingsPage'
 import { NotFoundPage } from './not-found/NotFoundPage'
 import type { IconName } from './components/Icon'
 import { getUrlParams } from './utils/getUrlParams'
+import { IntakeReferencesPage } from './intake-references/IntakeReferencesPage'
 
 export enum Page {
   Home = 'home',
   TopFoods = 'top-foods',
   FoodFinder = 'food-finder',
+  IntakeReferences = 'intake-references',
   MealPlan = 'meal-plan',
   Settings = 'settings',
   NotFound = 'not-found'
@@ -32,6 +34,7 @@ type PageMap = {
   [id in Page]: {
     slug: Page
     title: string
+    title_short?: string
     icon: IconName
     iconColor: string
     component: () => HTMLElement
@@ -59,6 +62,14 @@ export const pages: PageMap = {
     icon: 'binoculars',
     iconColor: 'rgb(189, 167, 148)',
     component: FoodFinderPage
+  },
+  [Page.IntakeReferences]: {
+    slug: Page.IntakeReferences,
+    title: 'Intake References',
+    title_short: 'Intake Refs.',
+    icon: 'ruler-combined',
+    iconColor: 'rgb(210, 218, 103)',
+    component: IntakeReferencesPage
   },
   [Page.MealPlan]: {
     slug: Page.MealPlan,

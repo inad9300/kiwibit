@@ -8,6 +8,7 @@ import { faUserCog } from '@fortawesome/free-solid-svg-icons/faUserCog'
 import { faHome } from '@fortawesome/free-solid-svg-icons/faHome'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons/faChevronDown'
 import { faMugHot } from '@fortawesome/free-solid-svg-icons/faMugHot'
+import { faRulerCombined } from '@fortawesome/free-solid-svg-icons/faRulerCombined'
 
 library.add(
   faBinoculars,
@@ -18,7 +19,8 @@ library.add(
   faUserCog,
   faHome,
   faChevronDown,
-  faMugHot
+  faMugHot,
+  faRulerCombined
 )
 
 export type IconName =
@@ -30,7 +32,8 @@ export type IconName =
   'user-cog' |
   'home' |
   'chevron-down' |
-  'mug-hot'
+  'mug-hot' |
+  'ruler-combined'
 
 export function Icon(name: IconName) {
   return icon(findIconDefinition({ prefix: 'fas', iconName: name })).node[0] as SVGSVGElement

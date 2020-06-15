@@ -14,7 +14,7 @@ export function MenuItem(page: typeof pages['top-foods']) {
   })
 
   const name = Html('span').with(it => {
-    it.textContent = page.title
+    it.textContent = page.title_short || page.title
   })
 
   return Link('?page=' + page.slug).with(it => {
