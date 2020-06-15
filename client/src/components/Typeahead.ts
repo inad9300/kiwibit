@@ -47,6 +47,8 @@ export function Typeahead<R>(
     it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
     it.style.backgroundColor = '#fff'
     it.style.minWidth = '100%'
+    it.style.width = 'max-content'
+    it.style.maxWidth = '400px'
     it.style.maxHeight = '400px'
     it.style.overflowY = 'auto'
     it.style.fontSize = '14px'
