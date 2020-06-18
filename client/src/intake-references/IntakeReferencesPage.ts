@@ -1,51 +1,75 @@
 import { Html, Svg } from '../components/Html'
 import { api, ApiOutput } from '../utils/api'
 import { NutrientSelect } from '../top-foods/NutrientSelect'
-import { Vbox } from '../components/Box'
+import { Vbox, Hbox } from '../components/Box'
+
+type Point = {
+  x: number
+  y: number
+}
 
 export function IntakeReferencesPage() {
   const container = Html('div').with(it => {
     it.style.flex = '1'
   })
 
+  let lastData: ApiOutput<'getAllIntakeMetadataForNutrient'>
+
+  window.addEventListener('resize', () => {
+    if (lastData) {
+      container.innerHTML = ''
+      container.append(LineChart(lastData, container.getBoundingClientRect()))
+    }
+  })
+
   return Vbox().with(it => {
     it.style.padding = '12px 16px 16px'
     it.append(
-      NutrientSelect().with(it => {
-        it.style.marginBottom = '12px'
-        it.onchange = () => {
-          api('getAllIntakeMetadataForNutrient', { nutrientId: it.getSelected()!.id }).then(data => {
-            container.innerHTML = ''
-            container.append(Chart(data, container.getBoundingClientRect()))
+      Hbox().with(it => {
+        it.append(
+          NutrientSelect().with(it => {
+            it.style.marginBottom = '12px'
+            it.onchange = () => {
+              api('getAllIntakeMetadataForNutrient', { nutrientId: it.getSelected()!.id }).then(data => {
+                lastData = data
+                container.innerHTML = ''
+                container.append(LineChart(data, container.getBoundingClientRect()))
+              })
+            }
+            // TODO Remove...
+            it.promise.then(() => {
+              it.setSelected(24)
+              api('getAllIntakeMetadataForNutrient', { nutrientId: it.getSelected()!.id }).then(data => {
+                lastData = data
+                container.innerHTML = ''
+                container.append(LineChart(data, container.getBoundingClientRect()))
+              })
+            })
           })
-        }
-        // TODO Remove...
-        it.promise.then(() => {
-          it.setSelected(24)
-          api('getAllIntakeMetadataForNutrient', { nutrientId: it.getSelected()!.id }).then(data => {
-            container.innerHTML = ''
-            container.append(Chart(data, container.getBoundingClientRect()))
-          })
-        })
+        )
       }),
       container
     )
   })
 }
 
-function Chart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container: DOMRect) {
+const toInt = (s: string) => parseInt(s, 10)
+
+function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container: DOMRect) {
   const allValues = [...data.rdis.map(rdi => rdi.value), ...data.uls.map(ul => ul.value)]
   const minYVal = Math.min(...allValues)
-  const maxYVal = Math.max(...allValues)
+  const maxYVal = Math.floor(Math.max(...allValues) * 1.05)
 
   const allMaxAges = [...data.rdis.map(rdi => rdi.age_max), ...data.uls.map(ul => ul.age_max)]
-  const minXVal = Math.min(...allMaxAges)
-  const maxXVal = Math.max(...allMaxAges)
+  const maxXVal = Math.min(85, Math.max(...allMaxAges))
 
-  const pixel = (x: number, y: number) => ({
-    x: x * container.width / maxXVal,
-    y: y * container.height / maxYVal
-  })
+  const leftMargin = 40
+  const bottomMargin = 20
+
+  const xPixels = (x: number) => x * container.width / maxXVal
+  const yPixels = (y: number) => (container.height - (y * container.height / maxYVal))
+  const xPixelPos = (x: number) => (x * container.width / maxXVal) + leftMargin
+  const yPixelPos = (y: number) => (container.height - bottomMargin - (y * container.height / maxYVal))
 
   const yAxis = Svg('line').with(it => {
     it.y1.baseVal.value = 0
@@ -55,22 +79,29 @@ function Chart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container: DO
     it.x2.baseVal.value = container.width
   })
 
-  yAxis.x1.baseVal.value = yAxis.x2.baseVal.value = xAxis.x1.baseVal.value = 0
-  yAxis.y2.baseVal.value = xAxis.y1.baseVal.value = xAxis.y2.baseVal.value = container.height
+  yAxis.x1.baseVal.value = yAxis.x2.baseVal.value = xAxis.x1.baseVal.value = leftMargin
+  yAxis.y2.baseVal.value = xAxis.y1.baseVal.value = xAxis.y2.baseVal.value = container.height - bottomMargin
+
   yAxis.style.stroke = xAxis.style.stroke = '#aaa'
 
-  const yStep = Math.floor((maxYVal - minYVal) / 10)
-  const xStep = Math.floor((maxXVal - minXVal) / 10)
-  const yStepPx = pixel(0, yStep).y
-  const xStepPx = pixel(xStep, 0).x
+  const labelFontSize = 13
+  const spaceBtwYLabels = 80
+  const vShiftYLabels = 4
+
+  const rounder = toInt('1' + '0'.repeat(Math.max(0, (maxYVal + '').length - 2)))
+  const yStep = toInt('' + ((maxYVal - minYVal) / (container.height / spaceBtwYLabels)) / rounder) * rounder
+  const xStep = 5
+  const yStepPx = yPixels(maxYVal - yStep)
+  const xStepPx = xPixels(xStep)
 
   const yLabels: SVGTextElement[] = []
   let nextYLabel = 0
   for (let i = container.height; i > 0; i -= yStepPx) {
     yLabels.push(
-      SvgText('' + nextYLabel, 0, container.height - pixel(0, nextYLabel).y).with(it => {
-        it.style.textAnchor = 'start' // TODO 'end'
-        it.style.stroke = 'orange'
+      SvgText('' + nextYLabel, leftMargin - 8, yPixels(nextYLabel) - bottomMargin + vShiftYLabels).with(it => {
+        it.style.textAnchor = 'end'
+        it.style.fill = '#333'
+        it.style.fontSize = labelFontSize + 'px'
       })
     )
     nextYLabel += yStep
@@ -80,65 +111,55 @@ function Chart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container: DO
   let nextXLabel = 0
   for (let i = 0; i < container.width; i += xStepPx) {
     xLabels.push(
-      SvgText('' + nextXLabel, pixel(nextXLabel, 0).x, container.height).with(it => {
+      SvgText('' + nextXLabel, xPixels(nextXLabel) + leftMargin, container.height).with(it => {
         it.style.textAnchor = 'middle'
-        it.style.stroke = 'green'
+        it.style.fill = '#333'
+        it.style.fontSize = labelFontSize + 'px'
       })
     )
     nextXLabel += xStep
   }
 
-  const rdiPoints: SVGElement[] = []
-  data.rdis.forEach(rdi => {
-    const x1 = pixel(rdi.age_min, 0).x
-    const y1 = container.height - pixel(0, rdi.value).y
-    const x2 = pixel(rdi.age_max, 0).x
-    const y2 = y1
-    const color = rdi.gender === 'M' ? 'lightblue' : 'pink'
+  function pointsToLine(points: Point[], color: string) {
+    return points.slice(1).map((point, i) => {
+      const priorPoint = points[i]
+      return SvgLine(
+        xPixelPos(priorPoint.x), yPixelPos(priorPoint.y),
+        xPixelPos(point.x), yPixelPos(point.y)
+      ).with(it => {
+        it.style.stroke = color
+        it.style.strokeWidth = '2'
+      })
+    })
+  }
 
-    const priorPoint = rdiPoints.slice(-1)[0] as SVGCircleElement | undefined
-    if (priorPoint) {
-      rdiPoints.push(
-        SvgLine(priorPoint.cx.baseVal.value, priorPoint.cy.baseVal.value, x1, y1).with(it => {
-          it.style.stroke = priorPoint.style.fill
-        })
-      )
-    }
+  const femaleRdiValues: Point[] = []
+  const maleRdiValues: Point[] = []
+  const femaleUlValues: Point[] = []
+  const maleUlValues: Point[] = []
 
-    rdiPoints.push(
-      SvgLine(x1, y1, x2, y2).with(it => { it.style.stroke = color }),
-      SvgCircle(x1, y1, 3).with(it => { it.style.fill = color }),
-      SvgCircle(x2, y2, 3).with(it => { it.style.fill = color })
-    )
-  })
+  for (const rdi of data.rdis) {
+    const target = rdi.gender === 'F' ? femaleRdiValues : maleRdiValues
+    target.push({ x: rdi.age_min, y: rdi.value }, { x: rdi.age_max, y: rdi.value })
+  }
 
-  const ulPoints: SVGElement[] = []
-  data.uls.forEach(ul => {
-    const x1 = pixel(ul.age_min, 0).x
-    const y1 = container.height - pixel(0, ul.value).y
-    const x2 = pixel(ul.age_max, 0).x
-    const y2 = y1
-    const color = ul.gender === 'M' ? 'blue' : 'purple'
-
-    const priorPoint = ulPoints.slice(-1)[0] as SVGCircleElement | undefined
-    if (priorPoint) {
-      ulPoints.push(
-        SvgLine(priorPoint.cx.baseVal.value, priorPoint.cy.baseVal.value, x1, y1).with(it => {
-          it.style.stroke = priorPoint.style.fill
-        })
-      )
-    }
-
-    ulPoints.push(
-      SvgLine(x1, y1, x2, y2).with(it => { it.style.stroke = color }),
-      SvgCircle(x1, y1, 3).with(it => { it.style.fill = color }),
-      SvgCircle(x2, y2, 3).with(it => { it.style.fill = color })
-    )
-  })
+  for (const ul of data.uls) {
+    const target = ul.gender === 'F' ? femaleUlValues : maleUlValues
+    target.push({ x: ul.age_min, y: ul.value }, { x: ul.age_max, y: ul.value })
+  }
 
   return Svg('svg').with(it => {
     it.style.width = it.style.height = '100%'
-    it.append(yAxis, xAxis, ...yLabels, ...xLabels, ...rdiPoints, ...ulPoints)
+    it.append(
+      yAxis,
+      xAxis,
+      ...yLabels,
+      ...xLabels,
+      ...pointsToLine(maleRdiValues, 'lightblue'),
+      ...pointsToLine(femaleRdiValues, 'pink'),
+      ...pointsToLine(maleUlValues, 'steelblue'),
+      ...pointsToLine(femaleUlValues, 'mediumpurple')
+    )
   })
 }
 
@@ -159,10 +180,10 @@ function SvgText(text: string, x: number, y: number) {
   })
 }
 
-function SvgCircle(cx: number, cy: number, r: number) {
-  return Svg('circle').with(it => {
-    it.cx.baseVal.value = cx
-    it.cy.baseVal.value = cy
-    it.setAttributeNS(null, 'r', '' + r)
-  })
-}
+// function SvgCircle(cx: number, cy: number, r: number) {
+//   return Svg('circle').with(it => {
+//     it.cx.baseVal.value = cx
+//     it.cy.baseVal.value = cy
+//     it.setAttributeNS(null, 'r', '' + r)
+//   })
+// }
