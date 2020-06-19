@@ -2,6 +2,7 @@ import { Html, Svg } from '../components/Html'
 import { api, ApiOutput } from '../utils/api'
 import { NutrientSelect } from '../top-foods/NutrientSelect'
 import { Vbox, Hbox } from '../components/Box'
+import { toInt } from '../utils/toInt'
 
 type Point = {
   x: number
@@ -53,8 +54,6 @@ export function IntakeReferencesPage() {
   })
 }
 
-const toInt = (s: string) => parseInt(s, 10)
-
 function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container: DOMRect) {
   const allValues = [...data.rdis.map(rdi => rdi.value), ...data.uls.map(ul => ul.value)]
   const minYVal = Math.min(...allValues)
@@ -63,8 +62,8 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
   const allMaxAges = [...data.rdis.map(rdi => rdi.age_max), ...data.uls.map(ul => ul.age_max)]
   const maxXVal = Math.min(85, Math.max(...allMaxAges))
 
-  const leftMargin = 40
-  const bottomMargin = 20
+  const leftMargin = 8 + 8 * (maxYVal + '').length
+  const bottomMargin = 18
 
   const xPixels = (x: number) => x * container.width / maxXVal
   const yPixels = (y: number) => (container.height - (y * container.height / maxYVal))
