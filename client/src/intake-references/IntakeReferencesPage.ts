@@ -2,6 +2,11 @@ import { Html, Svg } from '../components/Html'
 import { api, ApiOutput } from '../utils/api'
 import { NutrientSelect } from '../top-foods/NutrientSelect'
 import { Vbox, Hbox } from '../components/Box'
+import { Italics } from '../components/Italics'
+import { SvgLine } from '../components/SvgLine'
+import { SvgText } from '../components/SvgText'
+import { SvgCircle } from '../components/SvgCircle'
+import { tooltip } from '../main'
 import { toInt } from '../utils/toInt'
 
 type Point = {
@@ -10,44 +15,54 @@ type Point = {
 }
 
 export function IntakeReferencesPage() {
+  const nutrientSelect = NutrientSelect().with(it => {
+    it.style.marginBottom = '12px'
+    it.onchange = () => {
+      api('getAllIntakeMetadataForNutrient', { nutrientId: it.getSelected()!.id }).then(data => {
+        lastData = data
+        drawLastData()
+      })
+    }
+  })
+
   const container = Html('div').with(it => {
     it.style.flex = '1'
+    it.style.position = 'relative'
   })
 
   let lastData: ApiOutput<'getAllIntakeMetadataForNutrient'>
 
-  window.addEventListener('resize', () => {
+  function drawLastData() {
     if (lastData) {
       container.innerHTML = ''
-      container.append(LineChart(lastData, container.getBoundingClientRect()))
+      container.style.backgroundColor = '#fff'
+      if (lastData.rdis.length > 0 || lastData.uls.length > 0) {
+        container.append(LineChart(lastData, container.getBoundingClientRect()))
+      } else {
+        container.style.backgroundColor = '#f5f5f5'
+        container.append(
+          Italics(`No RDI nor UL data found for ${nutrientSelect.getSelected()?.name}.`).with(it => {
+            it.style.display = 'inline-block'
+            it.style.width = '100%'
+            it.style.position = 'absolute'
+            it.style.top = '50%'
+            it.style.transform = 'translateY(-50%)'
+            it.style.textAlign = 'center'
+            it.style.fontSize = '15px'
+            it.style.color = '#555'
+          })
+        )
+      }
     }
-  })
+  }
+
+  window.addEventListener('resize', () => drawLastData())
 
   return Vbox().with(it => {
     it.style.padding = '12px 16px 16px'
     it.append(
       Hbox().with(it => {
-        it.append(
-          NutrientSelect().with(it => {
-            it.style.marginBottom = '12px'
-            it.onchange = () => {
-              api('getAllIntakeMetadataForNutrient', { nutrientId: it.getSelected()!.id }).then(data => {
-                lastData = data
-                container.innerHTML = ''
-                container.append(LineChart(data, container.getBoundingClientRect()))
-              })
-            }
-            // TODO Remove...
-            it.promise.then(() => {
-              it.setSelected(24)
-              api('getAllIntakeMetadataForNutrient', { nutrientId: it.getSelected()!.id }).then(data => {
-                lastData = data
-                container.innerHTML = ''
-                container.append(LineChart(data, container.getBoundingClientRect()))
-              })
-            })
-          })
-        )
+        it.append(nutrientSelect)
       }),
       container
     )
@@ -119,19 +134,6 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
     nextXLabel += xStep
   }
 
-  function pointsToLine(points: Point[], color: string) {
-    return points.slice(1).map((point, i) => {
-      const priorPoint = points[i]
-      return SvgLine(
-        xPixelPos(priorPoint.x), yPixelPos(priorPoint.y),
-        xPixelPos(point.x), yPixelPos(point.y)
-      ).with(it => {
-        it.style.stroke = color
-        it.style.strokeWidth = '2'
-      })
-    })
-  }
-
   const femaleRdiValues: Point[] = []
   const maleRdiValues: Point[] = []
   const femaleUlValues: Point[] = []
@@ -147,6 +149,42 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
     target.push({ x: ul.age_min, y: ul.value }, { x: ul.age_max, y: ul.value })
   }
 
+  function pointsToLine(points: Point[], color: string) {
+    if (points.length < 2) return []
+
+    return points.slice(1).map((point, i) => {
+      const priorPoint = points[i]
+      return SvgLine(
+        xPixelPos(priorPoint.x), yPixelPos(priorPoint.y),
+        xPixelPos(point.x), yPixelPos(point.y)
+      ).with(it => {
+        it.style.stroke = color
+        it.style.strokeWidth = '2'
+      })
+    })
+  }
+
+  function pointsToCircles(points: Point[], color: string, prop: 'UL' | 'RDI', sex: 'males' | 'females') {
+    return points.map(({ x, y }) => {
+      return SvgCircle(xPixelPos(x), yPixelPos(y), 8).with(it => {
+        it.style.fill = color
+        it.style.opacity = '0'
+        it.addEventListener('mouseenter', () => it.style.opacity = '0.7')
+        it.addEventListener('mouseleave', () => it.style.opacity = '0')
+
+        let finalSex = sex
+        if (sex === 'males') {
+          const targetArr = prop === 'RDI' ? femaleRdiValues : femaleUlValues
+          if (targetArr.find(p => p.x === x && p.y === y)) {
+            finalSex += ' and females'
+          }
+        }
+
+        tooltip.attach(`${prop} for ${x}-year-old ${finalSex}: ${y} ${data.unit_abbr}`, it)
+      })
+    })
+  }
+
   return Svg('svg').with(it => {
     it.style.width = it.style.height = '100%'
     it.append(
@@ -154,35 +192,14 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
       xAxis,
       ...yLabels,
       ...xLabels,
-      ...pointsToLine(maleRdiValues, 'lightblue'),
-      ...pointsToLine(femaleRdiValues, 'pink'),
-      ...pointsToLine(maleUlValues, 'steelblue'),
-      ...pointsToLine(femaleUlValues, 'mediumpurple')
+      ...pointsToLine(femaleRdiValues, '#ff9fb0'),
+      ...pointsToLine(maleRdiValues, '#9cd6e8'),
+      ...pointsToLine(femaleUlValues, '#ff607d'),
+      ...pointsToLine(maleUlValues, '#56a7c1'),
+      ...pointsToCircles(femaleRdiValues, '#ff9fb0', 'RDI', 'females'),
+      ...pointsToCircles(maleRdiValues, '#9cd6e8', 'RDI', 'males'),
+      ...pointsToCircles(femaleUlValues, '#ff607d', 'UL', 'females'),
+      ...pointsToCircles(maleUlValues, '#56a7c1', 'UL', 'males'),
     )
   })
 }
-
-function SvgLine(x1: number, y1: number, x2: number, y2: number) {
-  return Svg('line').with(it => {
-    it.x1.baseVal.value = x1
-    it.y1.baseVal.value = y1
-    it.x2.baseVal.value = x2
-    it.y2.baseVal.value = y2
-  })
-}
-
-function SvgText(text: string, x: number, y: number) {
-  return Svg('text').with(it => {
-    it.textContent = text
-    it.setAttributeNS(null, 'x', '' + x)
-    it.setAttributeNS(null, 'y', '' + y)
-  })
-}
-
-// function SvgCircle(cx: number, cy: number, r: number) {
-//   return Svg('circle').with(it => {
-//     it.cx.baseVal.value = cx
-//     it.cy.baseVal.value = cy
-//     it.setAttributeNS(null, 'r', '' + r)
-//   })
-// }
