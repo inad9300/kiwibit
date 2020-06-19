@@ -26,7 +26,7 @@ export function Tooltip() {
     }
 
     return {
-      attach(content: string | HTMLElement, ref: HTMLElement) {
+      attach(content: string | HTMLElement, ref: Element) {
         if (content instanceof HTMLElement) {
           content.style.maxWidth = '300px'
         }
@@ -35,9 +35,9 @@ export function Tooltip() {
           it.innerHTML = ''
           it.append(content)
           it.hidden = false
-          reposition(evt)
+          reposition(evt as MouseEvent)
         })
-        ref.addEventListener('mousemove', reposition)
+        ref.addEventListener('mousemove', reposition as (evt: Event) => void)
         ref.addEventListener('mouseleave', () => it.hidden = true)
       }
     }
