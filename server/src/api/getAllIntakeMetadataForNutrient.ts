@@ -11,7 +11,13 @@ type IntakeMetadata = {
 export async function getAllIntakeMetadataForNutrient(data: { nutrientId: number }) {
   const values = [data.nutrientId]
 
-  const [rdis, uls] = await Promise.all([
+  const [unitMetadata, rdis, uls] = await Promise.all([
+    pool.query<{ abbr: schema.units['abbr'] }>(`
+      select u.abbr
+      from nutrients n
+      left join units u on (u.id = n.unit_id)
+      where n.id = $1
+    `, values),
     pool.query<IntakeMetadata>(`
       select rdi.value, rdi.age_min, rdi.age_max, rdi.gender
       from reference_intakes rdi
@@ -28,7 +34,11 @@ export async function getAllIntakeMetadataForNutrient(data: { nutrientId: number
     `, values)
   ])
 
-  return { rdis: rdis.rows, uls: uls.rows }
+  return {
+    unit_abbr: unitMetadata.rows[0]?.abbr,
+    rdis: rdis.rows,
+    uls: uls.rows
+  }
 }
 
 import { test } from '../../../shared/test'
@@ -39,12 +49,21 @@ test({
     const ironId = 25
     const res = await getAllIntakeMetadataForNutrient({ nutrientId: ironId })
     ok(typeof res === 'object')
-    ok(Object.keys(res).length === 2)
+    ok(Object.keys(res).length === 3)
+
+    ok(typeof res.unit_abbr === 'string')
 
     ok(Array.isArray(res.rdis))
     ok(res.rdis.length > 0)
 
     ok(Array.isArray(res.uls))
     ok(res.uls.length > 0)
+  },
+  'stands nutrients without data': async () => {
+    const unknownNutrientId = 1234567890
+    const res = await getAllIntakeMetadataForNutrient({ nutrientId: unknownNutrientId })
+    ok(res.unit_abbr === undefined)
+    ok(res.rdis.length === 0)
+    ok(res.uls.length === 0)
   }
 })
