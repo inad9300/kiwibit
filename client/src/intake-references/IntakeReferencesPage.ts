@@ -107,7 +107,8 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
   const allMaxAges = [...data.rdis.map(rdi => rdi.age_max), ...data.uls.map(ul => ul.age_max)]
   const maxXVal = Math.min(85, Math.max(...allMaxAges))
 
-  const leftMargin = 8 + 8 * (maxYVal + '').length
+  const sizeOfLongestYVal = Math.max(...allValues.map(v => ('' + v).length))
+  const leftMargin = 8 + 8 * sizeOfLongestYVal
   const bottomMargin = 18
 
   const xPixels = (x: number) => x * container.width / maxXVal
@@ -130,10 +131,13 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
 
   const labelFontSize = 13
   const spaceBtwYLabels = 80
-  const vShiftYLabels = 4
+  const vShiftYLabels = 3
 
+  const maxNumOfYValDecimals = Math.max(...allValues.map(v => ('' + v).split('.')[1]?.length || 0))
   const rounder = toInt('1' + '0'.repeat(Math.max(0, (maxYVal + '').length - 2)))
-  const yStep = toInt('' + ((maxYVal - minYVal) / (container.height / spaceBtwYLabels)) / rounder) * rounder
+  const yStep = maxNumOfYValDecimals === 0
+    ? toInt('' + ((maxYVal - minYVal) / (container.height / spaceBtwYLabels)) / rounder) * rounder
+    : (maxYVal - minYVal) / (container.height / spaceBtwYLabels)
   const xStep = 5
   const yStepPx = yPixels(maxYVal - yStep)
   const xStepPx = xPixels(xStep)
@@ -142,7 +146,11 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
   let nextYLabel = 0
   for (let i = container.height; i > 0; i -= yStepPx) {
     yLabels.push(
-      SvgText('' + nextYLabel, leftMargin - 8, yPixels(nextYLabel) - bottomMargin + vShiftYLabels).with(it => {
+      SvgText(
+        '' + nextYLabel.toFixed(maxNumOfYValDecimals),
+        leftMargin - 8,
+        yPixels(nextYLabel) - bottomMargin + vShiftYLabels
+      ).with(it => {
         it.style.textAnchor = 'end'
         it.style.fill = '#333'
         it.style.fontSize = labelFontSize + 'px'
