@@ -5,6 +5,12 @@ function sleep(time: number) {
 }
 
 (async () => {
+  process.on('SIGINT', () => {
+    clientStart?.kill()
+    serverStart?.kill()
+    process.exit(0)
+  })
+
   console.info('\n➜ Building image from Dockerfile (verify with \`docker images\`)')
   spawnSync('docker', ['build', '--tag', 'kiwibiti', 'database'], { stdio: 'inherit' })
 
@@ -34,7 +40,7 @@ function sleep(time: number) {
   spawnSync('npm', ['i'], { stdio: 'inherit' })
 
   console.info('\n➜ Starting client')
-  spawn('npm', ['start'], { stdio: 'inherit' })
+  const clientStart = spawn('npm', ['start'], { stdio: 'inherit' })
 
   process.chdir('../server')
 
@@ -42,5 +48,5 @@ function sleep(time: number) {
   spawnSync('npm', ['i'], { stdio: 'inherit' })
 
   console.info('\n➜ Starting server')
-  spawn('npm', ['start'], { stdio: 'inherit' })
+  const serverStart = spawn('npm', ['start'], { stdio: 'inherit' })
 })()
