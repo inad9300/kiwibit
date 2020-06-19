@@ -12,15 +12,16 @@ import { barPadding } from './BarRow'
 import { ControlTitle } from '../components/ControlTitle'
 import { fetchAgeAndSexSettings, fetchFoodCategoriesSettings } from '../settings/SettingsApi'
 import { updateUrl } from '../utils/updateUrl'
+import { toInt } from '../utils/toInt'
 
 function urlNutrientId() {
   const idStr = getUrlParams().get('nutrient-id')
-  return idStr ? parseInt(idStr, 10) : ''
+  return idStr ? toInt(idStr) : ''
 }
 
 function urlFoodCategoryId() {
   const idStr = getUrlParams().get('food-category-id')
-  return idStr ? parseInt(idStr, 10) : -1
+  return idStr ? toInt(idStr) : -1
 }
 
 function urlPer() {

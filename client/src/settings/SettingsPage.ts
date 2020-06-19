@@ -8,6 +8,7 @@ import { Fieldset } from '../components/Fieldset'
 import { groupBy } from '../utils/groupBy'
 import { LabeledCheckbox } from '../components/LabeledCheckbox'
 import { fetchSettings, saveSettings } from './SettingsApi'
+import { toInt } from '../utils/toInt'
 
 export function SettingsPage() {
   return Html('div').with(it => {
@@ -97,10 +98,10 @@ export function SettingsPage() {
       })
 
       it.oninput = () => saveSettings({
-        age: parseInt(ageTextField.value, 10),
+        age: toInt(ageTextField.value),
         sex: sexSelect.getSelected()!.slice(0, 1) as 'M' | 'F',
-        food_categories: foodCategoryCheckboxes.filter(c => c.checked).map(c => parseInt(c.dataset.id!, 10)),
-        nutrients: nutrientCheckboxes.filter(c => c.checked).map(c => parseInt(c.dataset.id!, 10))
+        food_categories: foodCategoryCheckboxes.filter(c => c.checked).map(c => toInt(c.dataset.id!)),
+        nutrients: nutrientCheckboxes.filter(c => c.checked).map(c => toInt(c.dataset.id!))
       })
     })
 

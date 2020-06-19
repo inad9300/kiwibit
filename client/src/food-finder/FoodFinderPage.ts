@@ -9,10 +9,11 @@ import { fetchAgeAndSexSettings, fetchNutrientsSettings, fetchFoodCategoriesSett
 import { updateUrl } from '../utils/updateUrl'
 import { TextField } from '../components/TextField'
 import { ControlTitle } from '../components/ControlTitle'
+import { toInt } from '../utils/toInt'
 
 function urlFoodId() {
   const idStr = getUrlParams().get('food-id')
-  return idStr ? parseInt(idStr, 10) : ''
+  return idStr ? toInt(idStr) : ''
 }
 
 export function FoodFinderPage() {
