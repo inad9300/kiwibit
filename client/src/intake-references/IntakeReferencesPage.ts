@@ -8,6 +8,14 @@ import { SvgText } from '../components/SvgText'
 import { SvgCircle } from '../components/SvgCircle'
 import { tooltip } from '../main'
 import { toInt } from '../utils/toInt'
+import { getUrlParams } from '../utils/getUrlParams'
+import { updateUrl } from '../utils/updateUrl'
+import { Page } from '../pages'
+
+function urlNutrientId() {
+  const idStr = getUrlParams().get('nutrient-id')
+  return idStr ? toInt(idStr) : ''
+}
 
 type Point = {
   x: number
@@ -18,10 +26,11 @@ export function IntakeReferencesPage() {
   const nutrientSelect = NutrientSelect().with(it => {
     it.style.marginBottom = '12px'
     it.onchange = () => {
-      api('getAllIntakeMetadataForNutrient', { nutrientId: it.getSelected()!.id }).then(data => {
-        lastData = data
-        drawLastData()
-      })
+      const nutrientId = nutrientSelect.getSelected()?.id || ''
+      if (urlNutrientId() !== nutrientId) {
+        updateUrl(Page.IntakeReferences, { 'nutrient-id': nutrientId })
+      }
+      loadAndDrawData(it.getSelected()!.id)
     }
   })
 
@@ -31,6 +40,13 @@ export function IntakeReferencesPage() {
   })
 
   let lastData: ApiOutput<'getAllIntakeMetadataForNutrient'>
+
+  function loadAndDrawData(nutrientId: number) {
+    api('getAllIntakeMetadataForNutrient', { nutrientId }).then(data => {
+      lastData = data
+      drawLastData()
+    })
+  }
 
   function drawLastData() {
     if (lastData) {
@@ -57,6 +73,20 @@ export function IntakeReferencesPage() {
   }
 
   window.addEventListener('resize', () => drawLastData())
+
+  function loadFromUrl() {
+    const nutrientId = urlNutrientId()
+    if (nutrientId) {
+      nutrientSelect.setSelected(nutrientId)
+      loadAndDrawData(nutrientId)
+    } else {
+      container.innerHTML = ''
+      nutrientSelect.setSelected('')
+    }
+  }
+
+  nutrientSelect.promise.then(() => loadFromUrl())
+  window.addEventListener('popstate', () => loadFromUrl())
 
   return Vbox().with(it => {
     it.style.padding = '12px 16px 16px'
