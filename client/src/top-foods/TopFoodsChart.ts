@@ -17,7 +17,8 @@ export function TopFoodsChart(nutrientSelect: ReturnType<typeof NutrientSelect>)
         intakeMetadata: ApiOutput<'getIntakeMetadataForNutrient'>,
         topFoods: ApiOutput<'getTopFoodsForNutrient'>
       ) {
-        if (topFoods.length === 0) {
+        const selectedNutrient = nutrientSelect.getSelected()?.name
+        if (selectedNutrient && topFoods.length === 0) {
           it.innerHTML = ''
           it.style.flex = '1'
           it.style.marginBottom = '0'
@@ -27,7 +28,7 @@ export function TopFoodsChart(nutrientSelect: ReturnType<typeof NutrientSelect>)
               it.style.margin = '0 16px'
               it.style.backgroundColor = '#f5f5f5'
               it.append(
-                Italics(`No data found for ${nutrientSelect.getSelected()?.name}.`).with(it => {
+                Italics(`No data found for ${selectedNutrient}.`).with(it => {
                   it.style.display = 'inline-block'
                   it.style.width = '100%'
                   it.style.position = 'absolute'
