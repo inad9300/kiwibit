@@ -79,7 +79,7 @@ export function FoodDetailsTable() {
           ...foodDetails,
           nutrients: foodDetails.nutrients.map(nutrient => ({
             ...nutrient,
-            amount: parseFloat((foodAmount * nutrient.amount / 100).toFixed(3))
+            amount: nutrient.amount === null ? null : parseFloat((foodAmount * nutrient.amount / 100).toFixed(3))
           }))
         }
 
@@ -134,7 +134,7 @@ export function FoodDetailsTable() {
           })
 
           const amountCell = Html('td').with(it => {
-            it.textContent = n.amount + ' ' + n.unit_abbr
+            it.textContent = n.amount === null ? '—' : n.amount + ' ' + n.unit_abbr
             it.style.textAlign = 'right'
             it.style.whiteSpace = 'nowrap'
             it.style.borderRight = '1px solid #ccc'
@@ -142,7 +142,7 @@ export function FoodDetailsTable() {
 
           const im = intakeMetadata.find(im => im.nutrient_id === n.id)
 
-          if (im?.ul != null || im?.rdi != null) {
+          if ((im?.ul != null || im?.rdi != null) && n.amount !== null) {
             if (im.ul != null && n.amount >= im.ul) {
               tr.style.backgroundImage = `linear-gradient(90deg, rgba(150, 0, 0, 0.15) 100%, transparent 0)`
             } else if (im.rdi != null && im.ul == null && pct(n.amount, im.rdi) > 100) {
@@ -152,18 +152,20 @@ export function FoodDetailsTable() {
             }
           }
 
-          const imTooltip = Vbox().with(it => {
-            it.setChildren([
-              im?.rdi
-                ? Span(`${pct(n.amount, im.rdi).toFixed(2)} % of the RDI (${im.rdi} ${n.unit_abbr})`)
-                : Italics('No RDI information'),
-              im?.ul
-                ? Span(`${pct(n.amount, im.ul).toFixed(2)} % of the UL (${im.ul} ${n.unit_abbr})`)
-                : Italics('No UL information')
-            ], '4px')
-          })
+          if (n.amount !== null) {
+            const imTooltip = Vbox().with(it => {
+              it.setChildren([
+                im?.rdi
+                  ? Span(`${pct(n.amount as number, im.rdi).toFixed(2)} % of the RDI (${im.rdi} ${n.unit_abbr})`)
+                  : Italics('No RDI information'),
+                im?.ul
+                  ? Span(`${pct(n.amount as number, im.ul).toFixed(2)} % of the UL (${im.ul} ${n.unit_abbr})`)
+                  : Italics('No UL information')
+              ], '4px')
+            })
 
-          tooltip.attach(imTooltip, tr)
+            tooltip.attach(imTooltip, tr)
+          }
 
           const cells = [nutrientCell, amountCell]
           cells.forEach(td => (td.style.padding = '6px'))
