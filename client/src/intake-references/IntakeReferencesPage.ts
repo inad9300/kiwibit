@@ -52,8 +52,14 @@ export function IntakeReferencesPage() {
     if (lastData) {
       container.innerHTML = ''
       container.style.backgroundColor = '#fff'
+
       if (lastData.rdis.length > 0 || lastData.uls.length > 0) {
-        container.append(LineChart(lastData, container.getBoundingClientRect()))
+        const chart = LineChart(lastData, container.getBoundingClientRect())
+        container.append(chart)
+
+        const chartRect = chart.getBoundingClientRect()
+        chart.yLabels.filter(l => l.getBoundingClientRect().top < chartRect.top).forEach(l => l.remove())
+        chart.xLabels.filter(l => l.getBoundingClientRect().right > chartRect.right).forEach(l => l.remove())
       } else {
         container.style.backgroundColor = '#f5f5f5'
         container.append(
@@ -101,20 +107,19 @@ export function IntakeReferencesPage() {
 
 function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container: DOMRect) {
   const allValues = [...data.rdis.map(rdi => rdi.value), ...data.uls.map(ul => ul.value)]
-  const minYVal = Math.min(...allValues)
-  const maxYVal = Math.floor(Math.max(...allValues) * 1.05)
+  const maxYVal = Math.max(...allValues)
 
   const allMaxAges = [...data.rdis.map(rdi => rdi.age_max), ...data.uls.map(ul => ul.age_max)]
   const maxXVal = Math.min(85, Math.max(...allMaxAges))
 
-  const sizeOfLongestYVal = Math.max(...allValues.map(v => ('' + v).length))
-  const leftMargin = 8 + 8 * sizeOfLongestYVal
-  const bottomMargin = 18
+  const lengthOfLongestYVal = Math.max(...allValues.map(v => ('' + v).length))
+  const maxNumOfYValDecimals = Math.max(...allValues.map(v => ('' + v).split('.')[1]?.length || 0))
 
-  const xPixels = (x: number) => x * container.width / maxXVal
-  const yPixels = (y: number) => (container.height - (y * container.height / maxYVal))
-  const xPixelPos = (x: number) => (x * container.width / maxXVal) + leftMargin
-  const yPixelPos = (y: number) => (container.height - bottomMargin - (y * container.height / maxYVal))
+  const leftMarginPx = 8 + 8 * lengthOfLongestYVal
+  const bottomMarginPx = 18
+
+  const xPixel = (x: number) => (x * container.width / maxXVal) + leftMarginPx
+  const yPixel = (y: number) => container.height - bottomMarginPx - (y * (container.height - bottomMarginPx) / maxYVal)
 
   const yAxis = Svg('line').with(it => {
     it.y1.baseVal.value = 0
@@ -124,52 +129,39 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
     it.x2.baseVal.value = container.width
   })
 
-  yAxis.x1.baseVal.value = yAxis.x2.baseVal.value = xAxis.x1.baseVal.value = leftMargin
-  yAxis.y2.baseVal.value = xAxis.y1.baseVal.value = xAxis.y2.baseVal.value = container.height - bottomMargin
+  yAxis.x1.baseVal.value = yAxis.x2.baseVal.value = xAxis.x1.baseVal.value = leftMarginPx
+  yAxis.y2.baseVal.value = xAxis.y1.baseVal.value = xAxis.y2.baseVal.value = container.height - bottomMarginPx
 
   yAxis.style.stroke = xAxis.style.stroke = '#aaa'
 
-  const labelFontSize = 13
-  const spaceBtwYLabels = 80
-  const vShiftYLabels = 3
+  const numOfYLabels = Math.ceil((container.height - bottomMarginPx) / 50)
+  const numOfXLabels = Math.ceil((container.width - leftMarginPx) / 50)
 
-  const maxNumOfYValDecimals = Math.max(...allValues.map(v => ('' + v).split('.')[1]?.length || 0))
-  const rounder = toInt('1' + '0'.repeat(Math.max(0, (maxYVal + '').length - 2)))
-  const yStep = maxNumOfYValDecimals === 0
-    ? toInt('' + ((maxYVal - minYVal) / (container.height / spaceBtwYLabels)) / rounder) * rounder
-    : (maxYVal - minYVal) / (container.height / spaceBtwYLabels)
-  const xStep = 5
-  const yStepPx = yPixels(maxYVal - yStep)
-  const xStepPx = xPixels(xStep)
+  const yStep = maxNumOfYValDecimals === 0 ? Math.ceil(maxYVal / numOfYLabels) : maxYVal / numOfYLabels
+  const xStep = Math.ceil(maxXVal / numOfXLabels)
 
   const yLabels: SVGTextElement[] = []
-  let nextYLabel = 0
-  for (let i = container.height; i > 0; i -= yStepPx) {
+  for (let i = 0; i < numOfYLabels + 1; ++i) {
+    const value = i * yStep
     yLabels.push(
-      SvgText(
-        '' + nextYLabel.toFixed(maxNumOfYValDecimals),
-        leftMargin - 8,
-        yPixels(nextYLabel) - bottomMargin + vShiftYLabels
-      ).with(it => {
+      SvgText(value.toFixed(maxNumOfYValDecimals), leftMarginPx - 8, yPixel(value) + 3).with(it => {
         it.style.textAnchor = 'end'
         it.style.fill = '#333'
-        it.style.fontSize = labelFontSize + 'px'
+        it.style.fontSize = '13px'
       })
     )
-    nextYLabel += yStep
   }
 
   const xLabels: SVGTextElement[] = []
-  let nextXLabel = 0
-  for (let i = 0; i < container.width; i += xStepPx) {
+  for (let i = 0; i < numOfXLabels + 1; ++i) {
+    const value = i * xStep
     xLabels.push(
-      SvgText('' + nextXLabel, xPixels(nextXLabel) + leftMargin, container.height).with(it => {
+      SvgText('' + value, xPixel(value), container.height).with(it => {
         it.style.textAnchor = 'middle'
         it.style.fill = '#333'
-        it.style.fontSize = labelFontSize + 'px'
+        it.style.fontSize = '13px'
       })
     )
-    nextXLabel += xStep
   }
 
   const femaleRdiValues: Point[] = []
@@ -193,8 +185,8 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
     return points.slice(1).map((point, i) => {
       const priorPoint = points[i]
       return SvgLine(
-        xPixelPos(priorPoint.x), yPixelPos(priorPoint.y),
-        xPixelPos(point.x), yPixelPos(point.y)
+        xPixel(priorPoint.x), yPixel(priorPoint.y),
+        xPixel(point.x), yPixel(point.y)
       ).with(it => {
         it.style.stroke = color
         it.style.strokeWidth = '2'
@@ -204,7 +196,7 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
 
   function pointsToCircles(points: Point[], color: string, prop: 'UL' | 'RDI', sex: 'males' | 'females') {
     return points.map(({ x, y }) => {
-      return SvgCircle(xPixelPos(x), yPixelPos(y), 8).with(it => {
+      return SvgCircle(xPixel(x), yPixel(y), 8).with(it => {
         it.style.fill = color
         it.style.opacity = '0'
         it.addEventListener('mouseenter', () => it.style.opacity = '0.7')
@@ -225,6 +217,7 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
 
   return Svg('svg').with(it => {
     it.style.width = it.style.height = '100%'
+    it.style.overflow = 'visible'
     it.append(
       yAxis,
       xAxis,
@@ -239,5 +232,7 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
       ...pointsToCircles(femaleUlValues, '#ff607d', 'UL', 'females'),
       ...pointsToCircles(maleUlValues, '#56a7c1', 'UL', 'males'),
     )
+
+    return { yLabels, xLabels }
   })
 }
