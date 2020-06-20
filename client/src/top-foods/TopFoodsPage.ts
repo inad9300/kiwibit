@@ -79,7 +79,7 @@ export function TopFoodsPage() {
     it.style.margin = '12px 16px'
   })
 
-  const chart = TopFoodsChart()
+  const chart = TopFoodsChart(nutrientSelect)
 
   const topFoodsLimit = 100
   let topFoodsOffset = 0
