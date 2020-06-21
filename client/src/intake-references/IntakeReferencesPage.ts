@@ -11,6 +11,7 @@ import { toInt } from '../utils/toInt'
 import { getUrlParams } from '../utils/getUrlParams'
 import { updateUrl } from '../utils/updateUrl'
 import { Page } from '../pages'
+import { fetchAgeAndSexSettings } from '../settings/SettingsApi'
 
 function urlNutrientId() {
   const idStr = getUrlParams().get('nutrient-id')
@@ -48,13 +49,15 @@ export function IntakeReferencesPage() {
     })
   }
 
-  function drawLastData() {
+  async function drawLastData() {
+    const { sex } = await fetchAgeAndSexSettings()
+
     if (lastData) {
       container.innerHTML = ''
       container.style.backgroundColor = '#fff'
 
       if (lastData.rdis.length > 0 || lastData.uls.length > 0) {
-        const chart = LineChart(lastData, container.getBoundingClientRect())
+        const chart = LineChart(lastData, container.getBoundingClientRect(), sex)
         container.append(chart)
 
         const chartRect = chart.getBoundingClientRect()
@@ -105,7 +108,7 @@ export function IntakeReferencesPage() {
   })
 }
 
-function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container: DOMRect) {
+function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container: DOMRect, sex: 'M' | 'F') {
   const allValues = [...data.rdis.map(rdi => rdi.value), ...data.uls.map(ul => ul.value)]
   const maxYVal = Math.max(...allValues)
 
@@ -215,6 +218,23 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
     })
   }
 
+  const linesAndCircles = [
+    pointsToLine(femaleRdiValues, '#ff9fb0'),
+    pointsToLine(maleRdiValues, '#9cd6e8'),
+    pointsToLine(femaleUlValues, '#ff607d'),
+    pointsToLine(maleUlValues, '#56a7c1'),
+    pointsToCircles(femaleRdiValues, '#ff9fb0', 'RDI', 'females'),
+    pointsToCircles(maleRdiValues, '#9cd6e8', 'RDI', 'males'),
+    pointsToCircles(femaleUlValues, '#ff607d', 'UL', 'females'),
+    pointsToCircles(maleUlValues, '#56a7c1', 'UL', 'males'),
+  ]
+
+  if (sex === 'F') {
+    for (let i = 0; i < linesAndCircles.length; i += 2) {
+      [linesAndCircles[i], linesAndCircles[i + 1]] = [linesAndCircles[i + 1], linesAndCircles[i]]
+    }
+  }
+
   return Svg('svg').with(it => {
     it.style.width = it.style.height = '100%'
     it.style.overflow = 'visible'
@@ -223,14 +243,7 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
       xAxis,
       ...yLabels,
       ...xLabels,
-      ...pointsToLine(femaleRdiValues, '#ff9fb0'),
-      ...pointsToLine(maleRdiValues, '#9cd6e8'),
-      ...pointsToLine(femaleUlValues, '#ff607d'),
-      ...pointsToLine(maleUlValues, '#56a7c1'),
-      ...pointsToCircles(femaleRdiValues, '#ff9fb0', 'RDI', 'females'),
-      ...pointsToCircles(maleRdiValues, '#9cd6e8', 'RDI', 'males'),
-      ...pointsToCircles(femaleUlValues, '#ff607d', 'UL', 'females'),
-      ...pointsToCircles(maleUlValues, '#56a7c1', 'UL', 'males'),
+      ...([] as SVGElement[]).concat.apply([], linesAndCircles)
     )
 
     return { yLabels, xLabels }
