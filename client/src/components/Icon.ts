@@ -1,6 +1,6 @@
 import { library, icon, findIconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faBinoculars } from '@fortawesome/free-solid-svg-icons/faBinoculars'
-import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons/faCalendarWeek'
+import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons/faCalendarAlt'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { faQuestion } from '@fortawesome/free-solid-svg-icons/faQuestion'
 import { faSeedling } from '@fortawesome/free-solid-svg-icons/faSeedling'
@@ -12,7 +12,7 @@ import { faRulerCombined } from '@fortawesome/free-solid-svg-icons/faRulerCombin
 
 library.add(
   faBinoculars,
-  faCalendarWeek,
+  faCalendarAlt,
   faPlus,
   faQuestion,
   faSeedling,
@@ -25,7 +25,7 @@ library.add(
 
 export type IconName =
   'binoculars' |
-  'calendar-week' |
+  'calendar-alt' |
   'plus' |
   'question' |
   'seedling' |

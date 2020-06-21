@@ -74,8 +74,8 @@ export const pages: PageMap = {
   [Page.MealPlan]: {
     slug: Page.MealPlan,
     title: 'Meal Plan',
-    icon: 'calendar-week',
-    iconColor: '#777',
+    icon: 'calendar-alt',
+    iconColor: '#ce5a6e',
     component: MealPlanPage
   },
   [Page.Settings]: {
