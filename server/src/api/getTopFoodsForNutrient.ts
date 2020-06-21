@@ -46,7 +46,6 @@ export async function getTopFoodsForNutrient(data: {
     join food_nutrients fn on (fn.food_id = f.id)
     left join usda_categories uc on (uc.id = f.usda_category_id)
     where fn.nutrient_id = $1
-    and uc.is_visible_default = true
     and ${orderBy} is not null
     and ($2::int[] is null or uc.id = any($2))
     order by ${orderBy} desc
