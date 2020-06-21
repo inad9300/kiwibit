@@ -189,7 +189,7 @@ function LineChart(data: ApiOutput<'getAllIntakeMetadataForNutrient'>, container
       const priorPoint = points[i]
       return SvgLine(
         xPixel(priorPoint.x), yPixel(priorPoint.y),
-        xPixel(point.x), yPixel(point.y)
+        Math.min(container.width, xPixel(point.x)), yPixel(point.y)
       ).with(it => {
         it.style.stroke = color
         it.style.strokeWidth = '2'
