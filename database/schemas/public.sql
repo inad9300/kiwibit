@@ -116,6 +116,7 @@ create table foods (
   external_id varchar(100) not null,
   is_public bool not null default true,
   name varchar(140) not null check (length(name) > 0),
+  name_tokens tsvector not null,
   usda_category_id int not null,
   nf_dd_category_id int,
   picture bytea,

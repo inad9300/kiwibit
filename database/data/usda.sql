@@ -387,11 +387,12 @@ from usda.nutr_def nd
 where nd.tagname is null
 or nd.tagname != 'ENERC_KJ';
 
-insert into foods (source_id, external_id, name, usda_category_id)
+insert into foods (source_id, external_id, name, name_tokens, usda_category_id)
 select
   (select id from data_sources where short_title = 'USDA Food Database'),
   fd.ndb_no,
   fd.long_desc,
+  to_tsvector(fd.long_desc),
   (select c.id from usda_categories c where c.usda_id = fd.fdgrp_cd)
 from usda.food_des fd;
 
