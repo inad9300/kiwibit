@@ -11,15 +11,24 @@ export async function findFoodsByNameAndUsdaCategory(data: {
   usdaCategoryIds: number[]
 }) {
   const res = await pool.query<Food>(`
-    select f.id, f.name
-    from foods f
-    where f.name_tokens @@ websearch_to_tsquery($1)
-    and ($2::int[] is null or f.usda_category_id = any($2))
-    order by f.name
+    (
+      (select f.id, f.name
+      from foods f
+      where ($1::int[] is null or f.usda_category_id = any($1))
+      and f.name_tokens @@ websearch_to_tsquery($2)
+      order by f.name)
+    union
+      (select f.id, f.name
+      from foods f
+      where ($1::int[] is null or f.usda_category_id = any($1))
+      and lower(f.name) like '%' || lower($3) || '%'
+      order by f.name)
+    )
     limit 100
   `, [
+    data.usdaCategoryIds.length === 0 ? null : data.usdaCategoryIds,
     data.foodName,
-    data.usdaCategoryIds.length === 0 ? null : data.usdaCategoryIds
+    data.foodName.replace(/ /g, '%')
   ])
   return res.rows
 }
