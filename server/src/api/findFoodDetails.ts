@@ -7,7 +7,7 @@ type FoodDetails = {
   nutrient_name: schema.nutrients['name']
   nutrient_alias: schema.nutrients['alias']
   unit_abbr: schema.units['abbr']
-  amount: schema.food_nutrients['amount'] | null
+  amount: schema.food_nutrients['amount']
   nutrient_category_name: schema.nutrient_categories['name']
   food_category_name: schema.usda_categories['name']
   food_category_color: schema.usda_categories['color']
@@ -77,7 +77,7 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
         name: d.nutrient_name,
         alias: d.nutrient_alias,
         unit_abbr: d.unit_abbr,
-        amount: d.amount,
+        amount: d.amount as number | null,
         category_name: d.nutrient_category_name
       }))
   }

@@ -9,6 +9,9 @@ import { groupBy } from '../utils/groupBy'
 import { LabeledCheckbox } from '../components/LabeledCheckbox'
 import { fetchSettings, saveSettings } from './SettingsApi'
 import { toInt } from '../utils/toInt'
+import { Checkbox } from '../components/Checkbox'
+import { Span } from '../components/Span'
+import { Spacer } from '../components/Spacer'
 
 export function SettingsPage() {
   return Html('div').with(it => {
@@ -30,6 +33,7 @@ export function SettingsPage() {
     })
 
     const nutrientsBox = Fieldset('Nutrients').with(it => {
+      it.style.minWidth = 'max-content'
       it.style.marginTop = '10px'
       it.style.backgroundColor = '#fafafa'
     })
@@ -65,36 +69,62 @@ export function SettingsPage() {
 
       const groupedNutrients = groupBy(nutrients, 'category')
       Object.keys(groupedNutrients).forEach(group => {
-        const groupWrapper = Html('div').with(it => {
-          it.style.float = 'left'
-          it.style.marginRight = '16px'
+        const groupContent = Html('div').with(it => {
+          it.style.height = '432px'
+          it.style.padding = '4px 0'
+          it.style.overflowY = 'auto'
+          it.style.border = '1px solid #ccc'
+          it.style.backgroundColor = '#fff'
         })
-        groupWrapper.append(
-          ControlTitle(group).with(it => {
-            it.style.marginBottom = '4px'
-            it.style.fontWeight = 'normal'
-            it.style.paddingBottom = '2px'
-            it.style.textAlign = 'center'
-            it.style.color = '#444'
-            it.style.borderBottom = '1px solid #999'
+
+        groupedNutrients[group].forEach(n => {
+          const checkbox = Checkbox().with(it => {
+            it.dataset.id = '' + n.id
+            it.checked = settings.nutrients.includes(n.id)
+            it.style.marginLeft = '18px'
+          })
+
+          const labeledCheckbox = Html('label').with(it => {
+            it.style.display = 'flex'
+            it.style.fontSize = '14px'
+            it.style.padding = '2px 8px'
+            it.style.cursor = 'pointer'
+
+            it.onmouseenter = () => it.style.backgroundColor = '#f3f3f3'
+            it.onmouseleave = () => it.style.backgroundColor = '#fff'
+
+            it.append(
+              Span(n.name + (n.alias ? ' / ' + n.alias : '')),
+              Spacer(),
+              checkbox
+            )
+          })
+
+          nutrientCheckboxes.push(checkbox)
+          groupContent.append(labeledCheckbox)
+        })
+
+        nutrientsBox.append(
+          Vbox().with(it => {
+            it.style.float = 'left'
+            it.style.marginRight = '-1px'
+
+            it.append(
+              ControlTitle(group).with(it => {
+                it.style.margin = '0'
+                it.style.padding = '6px'
+                it.style.fontWeight = 'bold'
+                it.style.textAlign = 'center'
+                it.style.textTransform = 'uppercase'
+                it.style.fontSize = '13px'
+                it.style.color = '#333'
+                it.style.borderTop = it.style.borderRight = it.style.borderLeft = '1px solid #ccc'
+                it.style.backgroundColor = '#eee'
+              }),
+              groupContent
+            )
           })
         )
-        groupedNutrients[group].forEach(n => {
-          const labeledCheckbox = LabeledCheckbox(n.name + (n.alias ? ' / ' + n.alias : '')).with(it => {
-            it.checkbox.dataset.id = '' + n.id
-            it.checkbox.checked = settings.nutrients.includes(n.id)
-          })
-
-          nutrientCheckboxes.push(labeledCheckbox.checkbox)
-          groupWrapper.append(
-            Hbox().with(it => {
-              it.style.marginLeft = '4px'
-              it.append(labeledCheckbox)
-            })
-          )
-        })
-
-        nutrientsBox.append(groupWrapper)
       })
 
       it.oninput = () => saveSettings({

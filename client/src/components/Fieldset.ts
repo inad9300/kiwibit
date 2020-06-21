@@ -3,7 +3,7 @@ import { Html } from '../components/Html'
 export function Fieldset(title: string) {
   return Html('fieldset').with(it => {
     it.style.margin = '0'
-    it.style.padding = '4px 8px'
+    it.style.padding = '4px 8px 8px 8px'
     it.style.border = '1px solid lightgrey'
 
     it.append(

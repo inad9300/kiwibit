@@ -5,10 +5,11 @@ import { Span } from './Span'
 export function LabeledCheckbox(label: string) {
   return Html('label').with(it => {
     it.style.fontSize = '13px'
+    it.style.cursor = 'pointer'
 
     const checkbox = Checkbox().with(it => {
-      it.type = 'checkbox'
-      it.style.cursor = 'pointer'
+      it.style.position = 'relative'
+      it.style.top = '2px'
     })
 
     it.append(
