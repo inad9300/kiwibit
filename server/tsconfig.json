@@ -1,5 +1,6 @@
 {
   "extends": "../tsconfig.json",
+  "include": ["src/"],
   "compilerOptions": {
     "target": "es5",
     "lib": ["es7", "esnext"]
