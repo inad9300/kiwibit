@@ -127,8 +127,6 @@ export function FoodDetailsTable() {
             it.append(
               Link(`?page=${Page.TopFoods}&nutrient-id=${n.id}`).with(it => {
                 it.textContent = n.name + (n.alias ? ' / ' + n.alias : '')
-                it.style.color = 'black'
-                it.style.textDecoration = 'none'
               })
             )
           })

@@ -20,7 +20,6 @@ export function MenuItem(page: typeof pages['top-foods']) {
   return Link('?page=' + page.slug).with(it => {
     it.append(icon, name)
     it.style.float = 'left'
-    it.style.textDecoration = 'none'
     it.style.display = 'flex'
     it.style.flexDirection = 'column'
     it.style.width = menuItemWidth + 'px'
@@ -28,7 +27,6 @@ export function MenuItem(page: typeof pages['top-foods']) {
     it.style.border = '1px solid transparent'
     it.style.textAlign = 'center'
     it.style.textShadow = '0 1px 0 rgba(255, 255, 255, 0.8)'
-    it.style.color = '#000'
     it.onmouseover = it.onfocus = () => {
       it.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'
       it.style.borderColor = 'rgba(0, 0, 0, 0.08)'
