@@ -46,7 +46,7 @@ export function Header() {
     it.style.display = 'flex'
     it.style.flexDirection = 'row'
     it.style.borderBottom = '1px solid lightgrey'
-    it.style.boxShadow = '0 1px 5px rgba(0, 0, 0, 0.1)'
+    it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
 
     it.append(Logo(), pageIcon, pageTitle, Spacer(), buyMeACoffeeLink)
   })
