@@ -18,6 +18,10 @@ const globalCss = Style(`
   ::-moz-focus-inner {
     border: 0;
   }
+
+  [hidden] {
+    display: none !important;
+  }
 `)
 
 export const tooltip = Tooltip()
