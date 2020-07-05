@@ -3,17 +3,17 @@ import { Vbox, Hbox } from '../components/Box'
 import { CategoryCircle } from './CategoryCircle'
 import type { ApiOutput } from '../utils/api'
 
-export function BarTooltipContent(f: ApiOutput<'getTopFoodsForNutrient'>[0]) {
+export function BarTooltipContent(food: ApiOutput<'getTopFoodsForNutrient'>[0]) {
   const nameRow = Html('div').with(it => {
-    it.textContent = f.name
+    it.textContent = food.name
   })
 
-  const categoryCircle = CategoryCircle(f.color).with(it => {
+  const categoryCircle = CategoryCircle(food.color).with(it => {
     it.style.marginTop = '2px'
   })
 
   const categoryName = Html('div').with(it => {
-    it.textContent = f.usda_category_name
+    it.textContent = food.usda_category_name
     it.style.fontStyle = 'italic'
   })
 
@@ -22,7 +22,7 @@ export function BarTooltipContent(f: ApiOutput<'getTopFoodsForNutrient'>[0]) {
   })
 
   const amountRow = Html('div').with(it => {
-    it.textContent = `${f.amount} ${f.unit_abbr}`
+    it.textContent = `${food.amount} ${food.unit_abbr}`
     it.style.fontWeight = 'bold'
   })
 
