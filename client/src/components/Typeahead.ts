@@ -169,7 +169,10 @@ export function Typeahead<R>(
     it.append(ControlTitle(titleText), textField, list)
 
     return {
-      onSelect(_result: R) {}
+      onSelect(_result: R) {},
+      focus() {
+        textField.focus()
+      }
     }
   })
 
