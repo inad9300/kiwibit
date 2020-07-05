@@ -1,15 +1,16 @@
-import { pct } from '../utils/pct'
 import { Page } from '../pages'
 import { Html } from '../components/Html'
 import { Link } from '../components/Link'
 import { Image } from '../components/Image'
 import { tooltip } from '../main'
 import { Span } from '../components/Span'
-import { Vbox, Hbox } from '../components/Box'
-import { Italics } from '../components/Italics'
+import { Hbox } from '../components/Box'
 import { Spacer } from '../components/Spacer'
 import type { ApiOutput } from '../utils/api'
 import { CategoryCircle } from '../top-foods/CategoryCircle'
+import { IntakeMetadataTooltip } from './IntakeMetadataTooltip'
+import { getNutrientPctBg } from './getNutrientPctBg'
+import { NonNull } from '../utils/NonNull'
 
 export function FoodDetailsTable() {
   const title = Html('h1').with(it => {
@@ -139,30 +140,9 @@ export function FoodDetailsTable() {
           })
 
           const im = intakeMetadata.find(im => im.nutrient_id === n.id)
-
-          if ((im?.ul != null || im?.rdi != null) && n.amount !== null) {
-            if (im.ul != null && n.amount >= im.ul) {
-              tr.style.backgroundImage = `linear-gradient(90deg, rgba(150, 0, 0, 0.15) 100%, transparent 0)`
-            } else if (im.rdi != null && im.ul == null && pct(n.amount, im.rdi) > 100) {
-              tr.style.backgroundImage = `linear-gradient(90deg, rgba(240, 240, 0, 0.15) 100%, transparent 0)`
-            } else if (im.rdi != null && (im.ul != null || pct(n.amount, im.rdi) <= 100)) {
-              tr.style.backgroundImage = `linear-gradient(90deg, rgba(0, 150, 0, 0.15) ${pct(n.amount, im.rdi)}%, transparent 0)`
-            }
-          }
-
           if (n.amount !== null) {
-            const imTooltip = Vbox().with(it => {
-              it.setChildren([
-                im?.rdi
-                  ? Span(`${pct(n.amount as number, im.rdi).toFixed(2)} % of the RDI (${im.rdi} ${n.unit_abbr})`)
-                  : Italics('No RDI information'),
-                im?.ul
-                  ? Span(`${pct(n.amount as number, im.ul).toFixed(2)} % of the UL (${im.ul} ${n.unit_abbr})`)
-                  : Italics('No UL information')
-              ], '4px')
-            })
-
-            tooltip.attach(imTooltip, tr)
+            tr.style.backgroundImage = getNutrientPctBg(im, n as NonNull<typeof n>)
+            tooltip.attach(IntakeMetadataTooltip(im, n as NonNull<typeof n>), tr)
           }
 
           const cells = [nutrientCell, amountCell]
