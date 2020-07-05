@@ -19,7 +19,7 @@ export function AppsMenu(trigger: HTMLElement) {
     it.style.padding = '12px'
     it.style.width = (menuItemWidth * 3 + 26) + 'px'
     it.style.border = '1px solid lightgrey'
-    it.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'
+    it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08)'
     it.style.fontSize = '13px'
     it.style.fontFamily = 'system-ui, sans-serif'
     it.style.lineHeight = 'initial'
@@ -42,13 +42,13 @@ export function AppsMenu(trigger: HTMLElement) {
     }
   })
 
-  document.body.addEventListener('click', evt => {
+  window.addEventListener('click', evt => {
     if (!root.hidden && !root.contains(evt.target as Node) && !trigger.contains(evt.target as Node)) {
       close()
     }
   })
 
-  document.body.addEventListener('keyup', evt => {
+  window.addEventListener('keyup', evt => {
     if (evt.key === 'Esc' || evt.key === 'Escape') {
       close()
     }
