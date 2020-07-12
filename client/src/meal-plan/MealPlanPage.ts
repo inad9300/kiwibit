@@ -1,32 +1,27 @@
 import { Vbox } from '../components/Box'
 import { fetchNutrientsSettings, fetchAgeAndSexSettings } from '../settings/SettingsApi'
 import { api } from '../utils/api'
-import { FoodCard } from './FoodCard'
 import { NutritionalOverview } from './NutritionalOverview'
-import { getDatePartAsString } from '../utils/getDatePartAsString'
 import { AddFoodModal } from './AddFoodModal'
 import { toInt } from '../utils/toInt'
-import { FoodCardsContainer } from './FoodCardsContainer'
 import { foodRegistry, updateFoodRegistry } from './FoodRegistryApi'
-import { getWeekDays } from './getWeekDays'
 import { fetchFoodDetails } from './fetchFoodDetails'
-import { getWeekNumber } from './getWeekNumber'
-
-const msInOneWeek = 7 * 24 * 60 * 60 * 1_000
-const selectedDate = new Date()
+import { WeekDeck } from './WeekDeck'
+import type { FoodCard } from './FoodCard'
 
 export function MealPlanPage() {
   const userNutrientIds: number[] = []
 
   function daysWithFoods() {
-    return foodDayCards
-      .map(({ date }) => date)
+    return weekDeck
+      .foodCards
+      .map(card => card.getDate())
       .filter(date => foodRegistry[date])
   }
 
-  async function addFoodToCard(cardDate: string, foodId: number, amount: number) {
+  async function addFoodToCard(card: ReturnType<typeof FoodCard>, foodId: number, amount: number) {
     foodRegistry[nextFoodDate] = foodRegistry[nextFoodDate] || {}
-    foodDayCards.find(card => card.date === cardDate)!.addFood({
+    card.addFood({
       id: foodId,
       name: (await fetchFoodDetails(foodId, userNutrientIds)).name
     }, amount)
@@ -52,82 +47,74 @@ export function MealPlanPage() {
     nutritionalOverview.initialize(userNutrients, intakeMetadata)
 
     daysWithFoods().forEach(date => {
+      const card = weekDeck.findFoodCardByDate(date)!
       Object
         .keys(foodRegistry[date])
         .map(toInt)
-        .forEach(foodId =>
-          addFoodToCard(date, foodId, foodRegistry[date][foodId].amount)
-        )
+        .forEach(foodId => addFoodToCard(card, foodId, foodRegistry[date][foodId].amount))
     })
+  })
+
+  const weekDeck = WeekDeck().with(it => {
+    it.onDateChange = () => {
+      nutritionalOverview.reset()
+
+      daysWithFoods().forEach(date => {
+        const card = weekDeck.findFoodCardByDate(date)!
+        Object
+          .keys(foodRegistry[date])
+          .map(toInt)
+          .forEach(foodId => addFoodToCard(card, foodId, foodRegistry[date][foodId].amount))
+      })
+    }
   })
 
   let nextFoodDate: string
 
-  const addFoodModal = AddFoodModal().with(it => {
-    it.onAddFood = foodId => addFoodToCard(nextFoodDate, foodId, 100)
-  })
+  weekDeck.foodCards.forEach(card => {
+    card.onAddFoodClick = () => {
+      nextFoodDate = card.getDate()
+      addFoodModal.hidden = false
+      addFoodModal.focus()
+    }
 
-  const foodDayCards = getWeekDays(selectedDate).map(d =>
-    FoodCard(d).with(it => {
-      const date = getDatePartAsString(d)
+    card.onAmountChange = async (foodId, amount) => {
+      updateFoodRegistry(card.getDate(), foodId, amount)
 
-      it.onAddFoodClick = () => {
-        nextFoodDate = date
-        addFoodModal.hidden = false
-        addFoodModal.focus()
-      }
+      const nutrientAmounts: { [nutrientId: number]: number } = {}
 
-      it.onAmountChange = async (foodId, amount) => {
-        updateFoodRegistry(date, foodId, amount)
-
-        const nutrientAmounts: { [nutrientId: number]: number } = {}
-
-        await daysWithFoods().map(async date => {
-          await Object
-            .keys(foodRegistry[date])
-            .map(toInt)
-            .map(async registryFoodId => {
-              (await fetchFoodDetails(registryFoodId, userNutrientIds)).nutrients.forEach(n => {
-                const nutrientAmountPerGram = (n.amount || 0) / 100
-                nutrientAmounts[n.id] = nutrientAmounts[n.id] || 0
-                nutrientAmounts[n.id] += foodRegistry[date][registryFoodId].amount * nutrientAmountPerGram
-              })
-          })
+      await daysWithFoods().map(async date => {
+        await Object
+          .keys(foodRegistry[date])
+          .map(toInt)
+          .map(async registryFoodId => {
+            (await fetchFoodDetails(registryFoodId, userNutrientIds)).nutrients.forEach(n => {
+              const nutrientAmountPerGram = (n.amount || 0) / 100
+              nutrientAmounts[n.id] = nutrientAmounts[n.id] || 0
+              nutrientAmounts[n.id] += foodRegistry[date][registryFoodId].amount * nutrientAmountPerGram
+            })
         })
+      })
 
-        Object.keys(nutrientAmounts).map(toInt).forEach(nutrientId =>
-          nutritionalOverview
-            .nutrientRows[nutrientId]
-            .setAmount(nutrientAmounts[nutrientId])
-        )
-      }
-
-      return { date }
-    })
-  )
-
-  const nutritionalOverview = NutritionalOverview().with(it => {
-    it.style.margin = '16px'
-  })
-
-  const [weekNo, weekYear] = getWeekNumber(selectedDate)
-
-  const foodCardsContainer = FoodCardsContainer(`Week ${weekNo}, ${weekYear}`, foodDayCards).with(it => {
-    it.onPriorWeek = () => {
-      selectedDate.setTime(selectedDate.getTime() - msInOneWeek)
-    }
-    it.onNextWeek = () => {
-      selectedDate.setTime(selectedDate.getTime() + msInOneWeek)
+      Object.keys(nutrientAmounts).map(toInt).forEach(nutrientId =>
+        nutritionalOverview
+          .nutrientRows[nutrientId]
+          .setAmount(nutrientAmounts[nutrientId])
+      )
     }
   })
 
-  const root = Vbox().with(it => {
+  const nutritionalOverview = NutritionalOverview()
+
+  const addFoodModal = AddFoodModal().with(it => {
+    it.onAddFood = foodId => addFoodToCard(weekDeck.findFoodCardByDate(nextFoodDate)!, foodId, 100)
+  })
+
+  return Vbox().with(it => {
     it.append(
-      addFoodModal,
-      foodCardsContainer,
-      nutritionalOverview
+      weekDeck,
+      nutritionalOverview,
+      addFoodModal
     )
   })
-
-  return root
 }

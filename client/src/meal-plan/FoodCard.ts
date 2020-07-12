@@ -3,6 +3,7 @@ import { List } from '../components/List'
 import { Card } from '../components/Card'
 import { Icon } from '../components/Icon'
 import { FoodListItem } from './FoodListItem'
+import { getDatePartAsString } from '../utils/getDatePartAsString'
 
 const longWeekDayFmt = new Intl.DateTimeFormat('en-US', { weekday: 'long' })
 
@@ -51,6 +52,13 @@ export function FoodCard(date: Date) {
     return {
       onAddFoodClick() {},
       onAmountChange(_foodId: number, _amount: number) {},
+      setDate(d: Date) {
+        date = d
+        foodList.innerHTML = ''
+      },
+      getDate() {
+        return getDatePartAsString(date)
+      },
       addFood(food: { id: number, name: string }, initialAmount: number) {
         foodList.append(
           FoodListItem(food, initialAmount).with(it => {
@@ -59,9 +67,6 @@ export function FoodCard(date: Date) {
           })
         )
         root.onAmountChange(food.id, initialAmount)
-      },
-      reset() {
-        foodList.innerHTML = ''
       }
     }
   })
