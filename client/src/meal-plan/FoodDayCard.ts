@@ -59,6 +59,9 @@ export function FoodDayCard(date: Date) {
           })
         )
         root.onAmountChange(food.id, initialAmount)
+      },
+      reset() {
+        foodList.innerHTML = ''
       }
     }
   })
