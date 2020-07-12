@@ -1,7 +1,7 @@
 import { Vbox } from '../components/Box'
 import { fetchNutrientsSettings, fetchAgeAndSexSettings } from '../settings/SettingsApi'
 import { api } from '../utils/api'
-import { FoodDayCard } from './FoodDayCard'
+import { FoodCard } from './FoodCard'
 import { NutritionalOverview } from './NutritionalOverview'
 import { getDatePartAsString } from '../utils/getDatePartAsString'
 import { AddFoodModal } from './AddFoodModal'
@@ -68,7 +68,7 @@ export function MealPlanPage() {
   })
 
   const foodDayCards = getWeekDays(selectedDate).map(d =>
-    FoodDayCard(d).with(it => {
+    FoodCard(d).with(it => {
       const date = getDatePartAsString(d)
 
       it.onAddFoodClick = () => {

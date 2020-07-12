@@ -2,9 +2,9 @@ import { Html } from '../components/Html'
 import { Vbox, Hbox } from '../components/Box'
 import { Icon } from '../components/Icon'
 import { Spacer } from '../components/Spacer'
-import type { FoodDayCard } from './FoodDayCard'
+import type { FoodCard } from './FoodCard'
 
-export function FoodCardsContainer(title: string, children: ReturnType<typeof FoodDayCard>[]) {
+export function FoodCardsContainer(title: string, children: ReturnType<typeof FoodCard>[]) {
   const root = Vbox().with(it => {
     it.style.backgroundColor = '#f5f5f5'
     it.style.borderBottom = '1px solid lightgrey'
@@ -69,6 +69,7 @@ export function FoodCardsContainer(title: string, children: ReturnType<typeof Fo
             it.style.textShadow = '0 1px 0 rgba(255, 255, 255, 1)'
           }),
           CalendarArrow('chevron-right').with(it => {
+            // TODO Disable/hide if there is no next.
             it.style.paddingRight = '1px'
             it.onclick = () => root.onNextWeek()
           }),

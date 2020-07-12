@@ -6,7 +6,7 @@ import { FoodListItem } from './FoodListItem'
 
 const longWeekDayFmt = new Intl.DateTimeFormat('en-US', { weekday: 'long' })
 
-export function FoodDayCard(date: Date) {
+export function FoodCard(date: Date) {
   const foodList = List().with(it => {
     it.style.padding = '8px'
     it.style.height = '280px'
