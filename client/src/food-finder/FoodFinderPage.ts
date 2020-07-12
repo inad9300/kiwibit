@@ -23,10 +23,10 @@ export function FoodFinderPage() {
       .then(userCategories => {
         foodFinderInput.setUsdaCategoryIds(userCategories)
 
-        const selectedCategory = it.getSelected()!.id
-        it.onchange = () => foodFinderInput.setUsdaCategoryIds(
-          selectedCategory === -1 ? userCategories : [selectedCategory]
-        )
+        it.onchange = () => {
+          const selectedCategory = it.getSelected()!.id
+          foodFinderInput.setUsdaCategoryIds(selectedCategory === -1 ? userCategories : [selectedCategory])
+        }
       })
   })
 
