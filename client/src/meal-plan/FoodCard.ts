@@ -49,15 +49,17 @@ export function FoodCard(date: Date) {
       foodList
     )
 
+    let dateStr = getDatePartAsString(date)
+
     return {
       onAddFoodClick() {},
       onAmountChange(_foodId: number, _amount: number) {},
-      setDate(d: Date) {
-        date = d
-        foodList.innerHTML = ''
-      },
       getDate() {
-        return getDatePartAsString(date)
+        return dateStr
+      },
+      setDate(d: Date) {
+        dateStr = getDatePartAsString(d)
+        foodList.innerHTML = ''
       },
       addFood(food: { id: number, name: string }, initialAmount: number) {
         foodList.append(
