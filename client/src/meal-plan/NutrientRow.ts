@@ -1,3 +1,4 @@
+import { Html } from '../components/Html'
 import { Span } from '../components/Span'
 import { Hbox, } from '../components/Box'
 import { Spacer } from '../components/Spacer'
@@ -13,24 +14,26 @@ export function NutrientRow(
   nutrient: ApiOutput<'getAllNutrients'>[0],
   im: ApiOutput<'getIntakeMetadataForAllNutrients'>[0] | undefined
 ) {
-  const amountBox = Span('' + initialAmount)
-
+  const amountElem = Span('' + initialAmount)
   return Hbox().with(it => {
+    it.style.alignItems = 'center'
     it.style.padding = '6px 8px'
     it.append(
       Link(`?page=${Page.TopFoods}&nutrient-id=${nutrient.id}`).with(it => {
         it.textContent = nutrient.name + (nutrient.alias ? ' / ' + nutrient.alias : '')
       }),
       Spacer().with(it => {
-        it.style.minWidth = '32px'
+        it.style.minWidth = '16px'
       }),
-      amountBox,
-      ' ' + nutrient.unit_abbr
+      Html('span').with(it => {
+        it.style.whiteSpace = 'nowrap'
+        it.append(amountElem, ' ', nutrient.unit_abbr)
+      })
     )
 
     return {
       setAmount(amount: number) {
-        amountBox.textContent = '' + amount.toFixed(1)
+        amountElem.textContent = '' + amount.toFixed(1)
 
         it.style.backgroundImage = getNutrientPctBg(im, { amount })
         tooltip.attach(IntakeMetadataTooltip(im, { ...nutrient, amount }), it)
