@@ -14,7 +14,7 @@ export function NutrientRow(
   nutrient: ApiOutput<'getAllNutrients'>[0],
   im: ApiOutput<'getIntakeMetadataForAllNutrients'>[0] | undefined
 ) {
-  const amountElem = Span('' + initialAmount)
+  const amountElem = Span('' + initialAmount.toFixed(1))
   return Hbox().with(it => {
     it.style.alignItems = 'center'
     it.style.padding = '6px 8px'
