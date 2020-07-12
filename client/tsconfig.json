@@ -3,7 +3,7 @@
   "include": ["src/"],
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "es6"],
+    "lib": ["dom", "es6", "es2019.array"],
     "skipLibCheck": true
   }
 }
