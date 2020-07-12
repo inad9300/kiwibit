@@ -1,7 +1,6 @@
 import { Page } from '../pages'
 import { Html } from '../components/Html'
 import { Link } from '../components/Link'
-import { Image } from '../components/Image'
 import { tooltip } from '../main'
 import { Span } from '../components/Span'
 import { Hbox } from '../components/Box'
@@ -11,6 +10,7 @@ import { CategoryCircle } from '../top-foods/CategoryCircle'
 import { IntakeMetadataTooltip } from './IntakeMetadataTooltip'
 import { getNutrientPctBg } from './getNutrientPctBg'
 import { NonNull } from '../utils/NonNull'
+import { Icon } from '../components/Icon'
 
 export function FoodDetailsTable() {
   const title = Html('h1').with(it => {
@@ -32,12 +32,12 @@ export function FoodDetailsTable() {
     it.style.lineHeight = '0'
     it.style.marginTop = '2px'
 
-    it.onmouseenter = () => img.style.filter = ''
-    it.onmouseleave = () => img.style.filter = 'grayscale(100%)'
+    it.onmouseenter = () => img.style.opacity = '1'
+    it.onmouseleave = () => img.style.opacity = '0.5'
 
-    const img = Image('https://duckduckgo.com/assets/common/dax-logo.svg').with(it => {
-      it.width = it.height = 16
-      it.style.filter = 'grayscale(100%)'
+    const img = Icon('images').with(it => {
+      it.style.fontSize = '15px'
+      it.style.opacity = '0.5'
     })
 
     tooltip.attach(Span('Find images in DuckDuckGo'), it)

@@ -2,7 +2,10 @@ import { library, icon, findIconDefinition } from '@fortawesome/fontawesome-svg-
 import { faBinoculars } from '@fortawesome/free-solid-svg-icons/faBinoculars'
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons/faCalendarAlt'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons/faChevronDown'
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft'
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons/faChevronRight'
 import { faHome } from '@fortawesome/free-solid-svg-icons/faHome'
+import { faImages } from '@fortawesome/free-solid-svg-icons/faImages'
 import { faMugHot } from '@fortawesome/free-solid-svg-icons/faMugHot'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { faQuestion } from '@fortawesome/free-solid-svg-icons/faQuestion'
@@ -14,7 +17,10 @@ library.add(
   faBinoculars,
   faCalendarAlt,
   faChevronDown,
+  faChevronLeft,
+  faChevronRight,
   faHome,
+  faImages,
   faMugHot,
   faPlus,
   faQuestion,
@@ -27,7 +33,10 @@ export type IconName =
   'binoculars' |
   'calendar-alt' |
   'chevron-down' |
+  'chevron-left' |
+  'chevron-right' |
   'home' |
+  'images' |
   'mug-hot' |
   'plus' |
   'question' |
