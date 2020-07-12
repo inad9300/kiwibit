@@ -4,6 +4,7 @@ import { NutrientGroupTitle } from './NutrientGroupTitle'
 import { NutrientRow } from './NutrientRow'
 import { groupBy } from '../utils/groupBy'
 import { ApiOutput } from '../utils/api'
+import { toInt } from '../utils/toInt'
 
 export function NutritionalOverview() {
   return Html('div').with(it => {
@@ -14,7 +15,6 @@ export function NutritionalOverview() {
     const nutrientRows: { [nutrientId: number]: ReturnType<typeof NutrientRow> } = {}
 
     return {
-      nutrientRows,
       initialize(
         userNutrients: ApiOutput<'getAllNutrients'>,
         intakeMetadata: ApiOutput<'getIntakeMetadataForAllNutrients'>
@@ -45,11 +45,16 @@ export function NutritionalOverview() {
           )
         })
       },
+      setAmounts(nutrientAmounts: { [nutrientId: number]: number }) {
+        Object.keys(nutrientAmounts).map(toInt).forEach(nutrientId =>
+          nutrientRows[nutrientId].setAmount(nutrientAmounts[nutrientId])
+        )
+      },
       reset() {
         Object
           .values(nutrientRows)
           .forEach(row => row.setAmount(0))
       }
-    } as const
+    }
   })
 }
