@@ -1,10 +1,15 @@
 import { FoodCard } from './FoodCard'
 import { FoodCardsContainer } from './FoodCardsContainer'
 import { getWeekDays } from './getWeekDays'
-import { getWeekNumber } from './getWeekNumber'
 
 const msInOneWeek = 7 * 24 * 60 * 60 * 1_000
 const date = new Date()
+
+const weekTitleFmt = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+})
 
 export function WeekDeck() {
   const foodCards = getWeekDays(date).map(FoodCard)
@@ -35,8 +40,10 @@ export function WeekDeck() {
   updateTitle()
 
   function updateTitle() {
-    const [weekNo, weekYear] = getWeekNumber(date)
-    root.setTitle(`Week ${weekNo}, ${weekYear}`)
+    const weekDates = getWeekDays(date)
+    const monday = new Date(weekDates[0])
+    const sunday = new Date(weekDates[6])
+    root.setTitle(`${weekTitleFmt.format(monday)} – ${weekTitleFmt.format(sunday)}`)
   }
 
   function updateCardDates() {
