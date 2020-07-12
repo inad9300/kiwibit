@@ -43,6 +43,11 @@ export function NutritionalOverview() {
             })
           )
         })
+      },
+      reset() {
+        Object
+          .values(nutrientRows)
+          .forEach(row => row.setAmount(0))
       }
     } as const
   })
