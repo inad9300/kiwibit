@@ -10,6 +10,10 @@ import { FoodCardsContainer } from './FoodCardsContainer'
 import { foodRegistry, updateFoodRegistry } from './FoodRegistryApi'
 import { getWeekDays } from './getWeekDays'
 import { fetchFoodDetails } from './fetchFoodDetails'
+import { getWeekNumber } from './getWeekNumber'
+
+const msInOneWeek = 7 * 24 * 60 * 60 * 1_000
+const selectedDate = new Date()
 
 export function MealPlanPage() {
   const userNutrientIds: number[] = []
@@ -63,7 +67,7 @@ export function MealPlanPage() {
     it.onAddFood = foodId => addFoodToCard(nextFoodDate, foodId, 100)
   })
 
-  const foodDayCards = getWeekDays(new Date).map(d =>
+  const foodDayCards = getWeekDays(selectedDate).map(d =>
     FoodDayCard(d).with(it => {
       const date = getDatePartAsString(d)
 
@@ -92,7 +96,9 @@ export function MealPlanPage() {
         })
 
         Object.keys(nutrientAmounts).map(toInt).forEach(nutrientId =>
-          nutritionalOverview.nutrientRows[nutrientId].setAmount(nutrientAmounts[nutrientId])
+          nutritionalOverview
+            .nutrientRows[nutrientId]
+            .setAmount(nutrientAmounts[nutrientId])
         )
       }
 
@@ -104,11 +110,24 @@ export function MealPlanPage() {
     it.style.margin = '16px'
   })
 
-  return Vbox().with(it => {
+  const [weekNo, weekYear] = getWeekNumber(selectedDate)
+
+  const foodCardsContainer = FoodCardsContainer(`Week ${weekNo}, ${weekYear}`, foodDayCards).with(it => {
+    it.onPriorWeek = () => {
+      selectedDate.setTime(selectedDate.getTime() - msInOneWeek)
+    }
+    it.onNextWeek = () => {
+      selectedDate.setTime(selectedDate.getTime() + msInOneWeek)
+    }
+  })
+
+  const root = Vbox().with(it => {
     it.append(
       addFoodModal,
-      FoodCardsContainer(foodDayCards),
+      foodCardsContainer,
       nutritionalOverview
     )
   })
+
+  return root
 }
