@@ -10,10 +10,10 @@ export function IntakeMetadataTooltip(
   return Vbox().with(it => {
     it.setChildren([
       im?.rdi
-        ? Span(`${pct(nutrient.amount, im.rdi).toFixed(2)} % of the RDI (${im.rdi} ${nutrient.unit_abbr})`)
+        ? Span(`${pct(nutrient.amount, im.rdi).toFixed(2)} % of the RDI (${im.rdi.toFixed(1)} ${nutrient.unit_abbr})`)
         : Italics('No RDI information'),
       im?.ul
-        ? Span(`${pct(nutrient.amount, im.ul).toFixed(2)} % of the UL (${im.ul} ${nutrient.unit_abbr})`)
+        ? Span(`${pct(nutrient.amount, im.ul).toFixed(2)} % of the UL (${im.ul.toFixed(1)} ${nutrient.unit_abbr})`)
         : Italics('No UL information')
     ], '4px')
   })
