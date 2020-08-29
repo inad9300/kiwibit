@@ -13,7 +13,7 @@ const page = getCurrentPage()
 const globalCss = Style(`
   * { box-sizing: border-box }
 
-  ::-moz-focu border: 0 }
+  ::-moz-focus-inner { border: 0 }
 
   [hidden] { display: none !important }
 `)
