@@ -11,7 +11,7 @@ import { toInt } from '../utils/toInt'
 import { getUrlParams } from '../utils/getUrlParams'
 import { updateUrl } from '../utils/updateUrl'
 import { Page } from '../pages'
-import { fetchAgeAndSexSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsApi'
 
 function urlNutrientId() {
   const idStr = getUrlParams().get('nutrient-id')
@@ -50,13 +50,12 @@ export function IntakeReferencesPage() {
   }
 
   async function drawLastData() {
-    const { sex } = await fetchAgeAndSexSettings()
-
     if (lastData) {
       container.innerHTML = ''
       container.style.backgroundColor = '#fff'
 
       if (lastData.rdis.length > 0 || lastData.uls.length > 0) {
+        const { sex } = await fetchSettings()
         const chart = LineChart(lastData, container.getBoundingClientRect(), sex)
         container.append(chart)
 

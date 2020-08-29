@@ -5,7 +5,7 @@ import { FoodFinderInput } from './FoodFinderInput'
 import { FoodDetailsTable } from './FoodDetailsTable'
 import { getUrlParams } from '../utils/getUrlParams'
 import { Hbox, Vbox } from '../components/Box'
-import { fetchAgeAndSexSettings, fetchNutrientsSettings, fetchFoodCategoriesSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsApi'
 import { updateUrl } from '../utils/updateUrl'
 import { TextField } from '../components/TextField'
 import { ControlTitle } from '../components/ControlTitle'
@@ -18,16 +18,14 @@ function urlFoodId() {
 
 export function FoodFinderPage() {
   const foodCategorySelect = FoodCategorySelect().with(it => {
-    it.promise
-      .then(fetchFoodCategoriesSettings)
-      .then(userCategories => {
-        foodFinderInput.setUsdaCategoryIds(userCategories)
+    fetchSettings().then(({ food_categories }) => {
+      foodFinderInput.setUsdaCategoryIds(food_categories)
 
-        it.onchange = () => {
-          const selectedCategory = it.getSelected()!.id
-          foodFinderInput.setUsdaCategoryIds(selectedCategory === -1 ? userCategories : [selectedCategory])
-        }
-      })
+      it.onchange = () => {
+        const selectedCategory = it.getSelected()!.id
+        foodFinderInput.setUsdaCategoryIds(selectedCategory === -1 ? food_categories : [selectedCategory])
+      }
+    })
   })
 
   const foodFinderInput = FoodFinderInput().with(it => {
@@ -81,12 +79,11 @@ export function FoodFinderPage() {
   })
 
   async function loadFoodDetails(foodId: number) {
-    const { age, sex } = await fetchAgeAndSexSettings()
-    const userNutrients = await api('getAllNutrients', undefined, { cache: true }).then(fetchNutrientsSettings)
+    const { age, sex, nutrients } = await fetchSettings()
 
     const [intakeMetadata, foodDetails] = await Promise.all([
       api('getIntakeMetadataForAllNutrients', { age, gender: sex }, { cache: true }),
-      api('findFoodDetails', { id: foodId, nutrients: userNutrients }, { cache: true })
+      api('findFoodDetails', { id: foodId, nutrients }, { cache: true })
     ])
 
     lastIntakeMetadata = intakeMetadata

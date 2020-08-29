@@ -1,6 +1,6 @@
 import { api, ApiOutput } from '../utils/api'
 import { Select } from '../components/Select'
-import { fetchNutrientsSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsApi'
 
 export function NutrientSelect() {
   return Select<ApiOutput<'getAllNutrients'>[0]>(
@@ -10,11 +10,11 @@ export function NutrientSelect() {
     true
   )
   .with(it => {
-    const promise = api('getAllNutrients', undefined, { cache: true }).then(async nutrients => {
-      const userNutrients = await fetchNutrientsSettings(nutrients)
-      it.setOptions(nutrients.filter(n => userNutrients.includes(n.id)), 'category')
+    const promise = api('getAllNutrients', undefined, { cache: true }).then(async allNutrients => {
+      const { nutrients } = await fetchSettings()
+      it.setOptions(allNutrients.filter(n => nutrients.includes(n.id)), 'category')
 
-      return nutrients
+      return allNutrients
     })
 
     return { promise }

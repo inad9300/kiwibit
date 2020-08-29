@@ -46,7 +46,7 @@ export function SettingsPage() {
       api('getAllNutrients', undefined, { cache: true })
     ])
     .then(async ([foodCategories, nutrients]) => {
-      const settings = await fetchSettings(foodCategories, nutrients)
+      const settings = await fetchSettings()
       return [foodCategories, nutrients, settings] as const
     })
     .then(([foodCategories, nutrients, settings]) => {

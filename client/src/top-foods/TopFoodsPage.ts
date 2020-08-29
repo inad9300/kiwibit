@@ -10,7 +10,7 @@ import { Hbox, Vbox } from '../components/Box'
 import { RegularButton } from '../components/RegularButton'
 import { barPadding } from './BarRow'
 import { ControlTitle } from '../components/ControlTitle'
-import { fetchAgeAndSexSettings, fetchFoodCategoriesSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsApi'
 import { updateUrl } from '../utils/updateUrl'
 import { toInt } from '../utils/toInt'
 
@@ -130,17 +130,15 @@ export function TopFoodsPage() {
     chart.style.width = ''
     topFoodsOffset = 0
 
-    const userCategories = await fetchFoodCategoriesSettings(await foodCategorySelect.promise)
+    const { age, sex, food_categories } = await fetchSettings()
 
     lastTopFoodsCriteria = {
       limit: topFoodsLimit,
       nutrientId,
       per,
-      categories: !categoryId || categoryId === -1 ? userCategories : [categoryId],
+      categories: !categoryId || categoryId === -1 ? food_categories : [categoryId],
       offset
     }
-
-    const { age, sex } = await fetchAgeAndSexSettings()
 
     const [intakeMetadata, topFoods] = await Promise.all([
       api('getIntakeMetadataForNutrient', { nutrientId, age, gender: sex }, { cache: true }),

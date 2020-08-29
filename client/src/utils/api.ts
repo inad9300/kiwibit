@@ -11,13 +11,21 @@ export type ApiOutput<Fn extends keyof Api> = ThenArg<ReturnType<Api[Fn]>>
 
 export type AbortablePromise<T> = Promise<T> & { abort(): void }
 
+const ongoingRequests: Record<string, Promise<any>> = {}
+
 const cacheStr = sessionStorage.getItem('apiCache')
-const cache: Record<string, Record<number, any>> = cacheStr ? JSON.parse(cacheStr) : {}
+const cache: Record<string, any> = cacheStr ? JSON.parse(cacheStr) : {}
 window.addEventListener('unload', () => sessionStorage.setItem('apiCache', JSON.stringify(cache)))
 
 export function api<Fn extends keyof Api>(fn: Fn, payload: ApiInput<Fn>, options?: { cache?: boolean }) {
-  if (options?.cache && cache[fn]) {
-    const data = cache[fn][hashCode(payload)]
+  const reqHash = fn + hashCode(payload)
+
+  if (ongoingRequests[reqHash]) {
+    return ongoingRequests[reqHash] as ReturnType<Api[Fn]> & { abort(): void }
+  }
+
+  if (options?.cache) {
+    const data = cache[reqHash]
     if (data) {
       return Object.assign(Promise.resolve(data) as ReturnType<Api[Fn]>, {
         abort() {}
@@ -36,9 +44,11 @@ export function api<Fn extends keyof Api>(fn: Fn, payload: ApiInput<Fn>, options
   .then(res => res.text())
   .then(body => body ? JSON.parse(body) : undefined)
 
+  ongoingRequests[reqHash] = promise
+  promise.finally(() => delete ongoingRequests[reqHash])
+
   if (options?.cache) {
-    cache[fn] = cache[fn] || {}
-    promise.then(data => cache[fn][hashCode(payload)] = data)
+    promise.then(data => cache[reqHash] = data)
   }
 
   return Object.assign(promise as ReturnType<Api[Fn]>, {

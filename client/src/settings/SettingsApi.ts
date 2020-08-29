@@ -1,4 +1,4 @@
-import { ApiOutput } from '../utils/api'
+import { api } from '../utils/api'
 
 interface Settings {
   age: number
@@ -11,14 +11,16 @@ export async function saveSettings(s: Settings) {
   localStorage.setItem('settings', JSON.stringify(s))
 }
 
-export async function fetchSettings(
-  foodCategories: ApiOutput<'getAllUsdaCategories'>,
-  nutrients: ApiOutput<'getAllNutrients'>
-): Promise<Settings> {
+export async function fetchSettings(): Promise<Settings> {
   const s = localStorage.getItem('settings')
   if (s) {
     return JSON.parse(s)
   }
+
+  const [foodCategories, nutrients] = await Promise.all([
+    api('getAllUsdaCategories', undefined, { cache: true }),
+    api('getAllNutrients', undefined, { cache: true })
+  ])
 
   return {
     age: 25,
@@ -26,17 +28,4 @@ export async function fetchSettings(
     food_categories: foodCategories.filter(c => c.is_visible_default).map(c => c.id),
     nutrients: nutrients.filter(n => n.is_visible_default).map(n => n.id)
   }
-}
-
-export async function fetchAgeAndSexSettings() {
-  const { age, sex } = await fetchSettings([], [])
-  return { age, sex }
-}
-
-export async function fetchFoodCategoriesSettings(foodCategories: ApiOutput<'getAllUsdaCategories'>) {
-  return (await fetchSettings(foodCategories, [])).food_categories
-}
-
-export async function fetchNutrientsSettings(nutrients: ApiOutput<'getAllNutrients'>) {
-  return (await fetchSettings([], nutrients)).nutrients
 }

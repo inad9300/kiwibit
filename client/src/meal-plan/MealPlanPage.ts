@@ -1,5 +1,5 @@
 import { Vbox } from '../components/Box'
-import { fetchNutrientsSettings, fetchAgeAndSexSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsApi'
 import { api } from '../utils/api'
 import { NutritionalOverview } from './NutritionalOverview'
 import { AddFoodModal } from './AddFoodModal'
@@ -44,10 +44,10 @@ export function MealPlanPage() {
 
   Promise.all([
     api('getAllNutrients', undefined, { cache: true }).then(async allNutrients => {
-      const userNutrientIds = await fetchNutrientsSettings(allNutrients)
-      return allNutrients.filter(({ id }) => userNutrientIds.includes(id))
+      const { nutrients } = await fetchSettings()
+      return allNutrients.filter(({ id }) => nutrients.includes(id))
     }),
-    fetchAgeAndSexSettings().then(({ age, sex }) =>
+    fetchSettings().then(({ age, sex }) =>
       api('getIntakeMetadataForAllNutrients', { age, gender: sex }, { cache: true }).then(ims =>
         ims.map(im => ({
           ...im,

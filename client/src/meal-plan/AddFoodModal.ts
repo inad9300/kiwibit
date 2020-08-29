@@ -1,14 +1,11 @@
 import { Html } from '../components/Html'
 import { Backdrop } from '../components/Backdrop'
 import { FoodFinderInput } from '../food-finder/FoodFinderInput'
-import { api } from '../utils/api'
-import { fetchFoodCategoriesSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsApi'
 
 export function AddFoodModal() {
   const foodFinderInput = FoodFinderInput().with(it => {
-    api('getAllUsdaCategories', undefined, { cache: true })
-      .then(fetchFoodCategoriesSettings)
-      .then(userCategories => it.setUsdaCategoryIds(userCategories))
+    fetchSettings().then(({ food_categories }) => it.setUsdaCategoryIds(food_categories))
 
     it.onSelect = food => {
       root.onAddFood(food.id)

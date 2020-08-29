@@ -1,20 +1,18 @@
 import { api, ApiOutput } from '../utils/api'
 import { Select } from '../components/Select'
-import { fetchFoodCategoriesSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsApi'
 
 export function FoodCategorySelect() {
   return Select<ApiOutput<'getAllUsdaCategories'>[0]>('Food Category', n => n.id!, n => n.name).with(it => {
     const promise = api('getAllUsdaCategories', undefined, { cache: true }).then(async categories => {
-      const userCategories = await fetchFoodCategoriesSettings(categories)
+      const { food_categories } = await fetchSettings()
 
       it.setOptions([
         { id: -1, name: 'All', color: '#fff', is_visible_default: false },
         ...categories
-          .filter(n => userCategories.includes(n.id))
+          .filter(n => food_categories.includes(n.id))
           .sort((a, b) => (a.name > b.name ? 1 : -1))
       ])
-
-      return categories
     })
 
     return { promise }
