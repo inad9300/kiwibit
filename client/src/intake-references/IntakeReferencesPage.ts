@@ -43,7 +43,7 @@ export function IntakeReferencesPage() {
   let lastData: ApiOutput<'getAllIntakeMetadataForNutrient'>
 
   function loadAndDrawData(nutrientId: number) {
-    api('getAllIntakeMetadataForNutrient', { nutrientId }).then(data => {
+    api('getAllIntakeMetadataForNutrient', { nutrientId }, { cache: true }).then(data => {
       lastData = data
       drawLastData()
     })

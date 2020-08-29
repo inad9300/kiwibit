@@ -42,8 +42,8 @@ export function SettingsPage() {
     const nutrientCheckboxes: HTMLInputElement[] = []
 
     Promise.all([
-      api('getAllUsdaCategories', undefined),
-      api('getAllNutrients', undefined)
+      api('getAllUsdaCategories', undefined, { cache: true }),
+      api('getAllNutrients', undefined, { cache: true })
     ])
     .then(async ([foodCategories, nutrients]) => {
       const settings = await fetchSettings(foodCategories, nutrients)

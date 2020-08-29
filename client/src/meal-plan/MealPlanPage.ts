@@ -5,7 +5,6 @@ import { NutritionalOverview } from './NutritionalOverview'
 import { AddFoodModal } from './AddFoodModal'
 import { toInt } from '../utils/toInt'
 import { foodRegistry, updateFoodRegistry } from './FoodRegistryApi'
-import { fetchFoodDetails } from './fetchFoodDetails'
 import { WeekDeck } from './WeekDeck'
 
 export function MealPlanPage() {
@@ -23,7 +22,7 @@ export function MealPlanPage() {
         .map(({ foodId }) => foodId)
         .filter((val, idx, arr) => arr.indexOf(val) === idx)
         .map(foodId =>
-          fetchFoodDetails(foodId, userNutrientIds)
+          api('findFoodDetails', { id: foodId, nutrients: userNutrientIds }, { cache: true })
             .then(food => ({ ...food, id: foodId }))
         )
     )
@@ -44,12 +43,12 @@ export function MealPlanPage() {
   }
 
   Promise.all([
-    api('getAllNutrients', undefined).then(async allNutrients => {
+    api('getAllNutrients', undefined, { cache: true }).then(async allNutrients => {
       const userNutrientIds = await fetchNutrientsSettings(allNutrients)
       return allNutrients.filter(({ id }) => userNutrientIds.includes(id))
     }),
     fetchAgeAndSexSettings().then(({ age, sex }) =>
-      api('getIntakeMetadataForAllNutrients', { age, gender: sex }).then(ims =>
+      api('getIntakeMetadataForAllNutrients', { age, gender: sex }, { cache: true }).then(ims =>
         ims.map(im => ({
           ...im,
           rdi: im.rdi ? im.rdi * 7 : im.rdi,
@@ -103,7 +102,7 @@ export function MealPlanPage() {
 
       weekDeck.findFoodCardByDate(nextDate)!.addFood({
         id: foodId,
-        name: (await fetchFoodDetails(foodId, userNutrientIds)).name
+        name: (await api('findFoodDetails', { id: foodId, nutrients: userNutrientIds }, { cache: true })).name
       }, 100)
     }
   })

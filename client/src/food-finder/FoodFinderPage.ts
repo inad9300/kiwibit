@@ -82,11 +82,11 @@ export function FoodFinderPage() {
 
   async function loadFoodDetails(foodId: number) {
     const { age, sex } = await fetchAgeAndSexSettings()
-    const userNutrients = await api('getAllNutrients', undefined).then(fetchNutrientsSettings)
+    const userNutrients = await api('getAllNutrients', undefined, { cache: true }).then(fetchNutrientsSettings)
 
     const [intakeMetadata, foodDetails] = await Promise.all([
-      api('getIntakeMetadataForAllNutrients', { age, gender: sex }),
-      api('findFoodDetails', { id: foodId, nutrients: userNutrients })
+      api('getIntakeMetadataForAllNutrients', { age, gender: sex }, { cache: true }),
+      api('findFoodDetails', { id: foodId, nutrients: userNutrients }, { cache: true })
     ])
 
     lastIntakeMetadata = intakeMetadata

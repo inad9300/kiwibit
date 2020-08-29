@@ -6,7 +6,7 @@ import { fetchFoodCategoriesSettings } from '../settings/SettingsApi'
 
 export function AddFoodModal() {
   const foodFinderInput = FoodFinderInput().with(it => {
-    api('getAllUsdaCategories', undefined)
+    api('getAllUsdaCategories', undefined, { cache: true })
       .then(fetchFoodCategoriesSettings)
       .then(userCategories => it.setUsdaCategoryIds(userCategories))
 

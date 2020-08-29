@@ -7,7 +7,7 @@ export function FoodFinderInput() {
   return Typeahead<ApiOutput<'findFoodsByNameAndUsdaCategory'>[0]>(
     'Food',
     'e.g. "cooked lentils" (at least 3 characters)',
-    searchTerm => api('findFoodsByNameAndUsdaCategory', { foodName: searchTerm, usdaCategoryIds }),
+    searchTerm => api('findFoodsByNameAndUsdaCategory', { foodName: searchTerm, usdaCategoryIds }, { cache: true }),
     f => f.name
   )
   .with(it => {

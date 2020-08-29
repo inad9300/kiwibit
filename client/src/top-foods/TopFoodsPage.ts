@@ -118,7 +118,7 @@ export function TopFoodsPage() {
     }
 
     if (offset > 0) {
-      const topFoods = await api('getTopFoodsForNutrient', { ...lastTopFoodsCriteria, offset }).then(roundAmount)
+      const topFoods = await api('getTopFoodsForNutrient', { ...lastTopFoodsCriteria, offset }, { cache: true }).then(roundAmount)
       if (topFoods.length < topFoodsLimit || topFoods.slice(-1)[0].amount === 0) {
         moreResultsBtn.hidden = true
       }
@@ -143,8 +143,8 @@ export function TopFoodsPage() {
     const { age, sex } = await fetchAgeAndSexSettings()
 
     const [intakeMetadata, topFoods] = await Promise.all([
-      api('getIntakeMetadataForNutrient', { nutrientId, age, gender: sex }),
-      api('getTopFoodsForNutrient', lastTopFoodsCriteria).then(roundAmount)
+      api('getIntakeMetadataForNutrient', { nutrientId, age, gender: sex }, { cache: true }),
+      api('getTopFoodsForNutrient', lastTopFoodsCriteria, { cache: true }).then(roundAmount)
     ])
 
     lastIntakeMetadata = intakeMetadata

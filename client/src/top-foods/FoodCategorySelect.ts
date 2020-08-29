@@ -4,7 +4,7 @@ import { fetchFoodCategoriesSettings } from '../settings/SettingsApi'
 
 export function FoodCategorySelect() {
   return Select<ApiOutput<'getAllUsdaCategories'>[0]>('Food Category', n => n.id!, n => n.name).with(it => {
-    const promise = api('getAllUsdaCategories', undefined).then(async categories => {
+    const promise = api('getAllUsdaCategories', undefined, { cache: true }).then(async categories => {
       const userCategories = await fetchFoodCategoriesSettings(categories)
 
       it.setOptions([

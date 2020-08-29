@@ -10,7 +10,7 @@ export function NutrientSelect() {
     true
   )
   .with(it => {
-    const promise = api('getAllNutrients', undefined).then(async nutrients => {
+    const promise = api('getAllNutrients', undefined, { cache: true }).then(async nutrients => {
       const userNutrients = await fetchNutrientsSettings(nutrients)
       it.setOptions(nutrients.filter(n => userNutrients.includes(n.id)), 'category')
 
