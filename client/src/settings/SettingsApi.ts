@@ -17,7 +17,7 @@ export async function fetchSettings(
 ): Promise<Settings> {
   const s = localStorage.getItem('settings')
   if (s) {
-    return JSON.parse(s);
+    return JSON.parse(s)
   }
 
   return {

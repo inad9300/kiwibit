@@ -11,17 +11,11 @@ window.addEventListener('unhandledRejection', evt => log.error('Unhandled reject
 const page = getCurrentPage()
 
 const globalCss = Style(`
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box }
 
-  ::-moz-focus-inner {
-    border: 0;
-  }
+  ::-moz-focu border: 0 }
 
-  [hidden] {
-    display: none !important;
-  }
+  [hidden] { display: none !important }
 `)
 
 export const tooltip = Tooltip()

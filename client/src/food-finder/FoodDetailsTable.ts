@@ -2,7 +2,6 @@ import { Page } from '../pages'
 import { Html } from '../components/Html'
 import { Link } from '../components/Link'
 import { tooltip } from '../main'
-import { Span } from '../components/Span'
 import { Hbox } from '../components/Box'
 import { Spacer } from '../components/Spacer'
 import type { ApiOutput } from '../utils/api'
@@ -40,7 +39,7 @@ export function FoodDetailsTable() {
       it.style.opacity = '0.5'
     })
 
-    tooltip.attach(Span('Find images in DuckDuckGo'), it)
+    tooltip.attach('Find images in DuckDuckGo', it)
 
     it.append(img)
   })
