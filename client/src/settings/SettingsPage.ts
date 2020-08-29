@@ -42,14 +42,11 @@ export function SettingsPage() {
     const nutrientCheckboxes: HTMLInputElement[] = []
 
     Promise.all([
-      api('getAllUsdaCategories', undefined, { cache: true }),
-      api('getAllNutrients', undefined, { cache: true })
+      fetchSettings(),
+      api('getAllNutrients', undefined, { cache: true }),
+      api('getAllUsdaCategories', undefined, { cache: true })
     ])
-    .then(async ([foodCategories, nutrients]) => {
-      const settings = await fetchSettings()
-      return [foodCategories, nutrients, settings] as const
-    })
-    .then(([foodCategories, nutrients, settings]) => {
+    .then(([settings, nutrients, foodCategories]) => {
       ageTextField.value = '' + settings.age
       sexSelect.select.value = settings.sex
 

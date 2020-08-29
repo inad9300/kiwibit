@@ -118,7 +118,9 @@ export function TopFoodsPage() {
     }
 
     if (offset > 0) {
-      const topFoods = await api('getTopFoodsForNutrient', { ...lastTopFoodsCriteria, offset }, { cache: true }).then(roundAmount)
+      const topFoods = roundAmount(
+        await api('getTopFoodsForNutrient', { ...lastTopFoodsCriteria, offset }, { cache: true })
+      )
       if (topFoods.length < topFoodsLimit || topFoods.slice(-1)[0].amount === 0) {
         moreResultsBtn.hidden = true
       }

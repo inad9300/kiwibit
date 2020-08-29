@@ -7,7 +7,7 @@ interface Settings {
   nutrients: number[]
 }
 
-export async function saveSettings(s: Settings) {
+export function saveSettings(s: Settings) {
   localStorage.setItem('settings', JSON.stringify(s))
 }
 

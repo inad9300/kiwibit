@@ -42,12 +42,11 @@ export function MealPlanPage() {
     })
   }
 
-  Promise.all([
-    api('getAllNutrients', undefined, { cache: true }).then(async allNutrients => {
-      const { nutrients } = await fetchSettings()
-      return allNutrients.filter(({ id }) => nutrients.includes(id))
-    }),
-    fetchSettings().then(({ age, sex }) =>
+  fetchSettings()
+    .then(({ age, sex, nutrients }) => Promise.all([
+      api('getAllNutrients', undefined, { cache: true }).then(allNutrients =>
+        allNutrients.filter(({ id }) => nutrients.includes(id))
+      ),
       api('getIntakeMetadataForAllNutrients', { age, gender: sex }, { cache: true }).then(ims =>
         ims.map(im => ({
           ...im,
@@ -55,13 +54,12 @@ export function MealPlanPage() {
           ul: im.ul ? im.ul * 7 : im.ul
         }))
       )
-    )
-  ])
-  .then(([userNutrients, intakeMetadata]) => {
-    userNutrientIds.push(...userNutrients.map(({ id }) => id))
-    nutritionalOverview.initialize(userNutrients, intakeMetadata)
-    addFoodFromRegistry()
-  })
+    ]))
+    .then(([userNutrients, intakeMetadata]) => {
+      userNutrientIds.push(...userNutrients.map(({ id }) => id))
+      nutritionalOverview.initialize(userNutrients, intakeMetadata)
+      addFoodFromRegistry()
+    })
 
   const weekDeck = WeekDeck().with(it => {
     it.onDateChange = () => {
