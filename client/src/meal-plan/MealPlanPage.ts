@@ -73,8 +73,7 @@ export function MealPlanPage() {
   weekDeck.foodCards.forEach(card => {
     card.onAddFoodClick = () => {
       nextDate = card.getDate()
-      addFoodModal.hidden = false
-      addFoodModal.focus()
+      addFoodModal.open()
     }
 
     card.onAmountChange = async (foodId, amount) => {
