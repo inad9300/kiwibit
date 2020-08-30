@@ -15,6 +15,7 @@ export function FoodCardsContainer(children: HTMLElement[]) {
 
       children.forEach(child => {
         child.style.cursor = 'initial'
+        child.addEventListener('mousedown', evt => evt.stopPropagation())
         child.addEventListener('mouseup', evt => {
           evt.stopPropagation()
           stopGrabbing()
