@@ -1,5 +1,5 @@
 import { Vbox } from '../components/Box'
-import { fetchSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsStore'
 import { api } from '../utils/api'
 import { NutritionalOverview } from './NutritionalOverview'
 import { AddFoodModal } from './AddFoodModal'

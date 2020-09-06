@@ -1,6 +1,6 @@
 import { api, ApiOutput } from '../utils/api'
 import { Select } from '../components/Select'
-import { fetchSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsStore'
 
 export function FoodCategorySelect() {
   return Select<ApiOutput<'getAllUsdaCategories'>[0]>('Food Category', n => n.id!, n => n.name).with(it => {

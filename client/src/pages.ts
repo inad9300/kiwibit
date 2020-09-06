@@ -2,6 +2,7 @@ import { HomePage } from './home/HomePage'
 import { TopFoodsPage } from './top-foods/TopFoodsPage'
 import { FoodFinderPage } from './food-finder/FoodFinderPage'
 import { MealPlanPage } from './meal-plan/MealPlanPage'
+import { CookbookPage } from './cookbook/CookbookPage'
 import { SettingsPage } from './settings/SettingsPage'
 import { NotFoundPage } from './not-found/NotFoundPage'
 import type { IconName } from './components/Icon'
@@ -14,6 +15,7 @@ export enum Page {
   FoodFinder = 'food-finder',
   IntakeReferences = 'intake-references',
   MealPlan = 'meal-plan',
+  Cookbook = 'cookbook',
   Settings = 'settings',
   NotFound = 'not-found'
 }
@@ -77,6 +79,13 @@ export const pages: PageMap = {
     icon: 'calendar-alt',
     iconColor: '#ce5a6e',
     component: MealPlanPage
+  },
+  [Page.Cookbook]: {
+    slug: Page.Cookbook,
+    title: 'Cookbook',
+    icon: 'book-open',
+    iconColor: '#ba75d2',
+    component: CookbookPage
   },
   [Page.Settings]: {
     slug: Page.Settings,

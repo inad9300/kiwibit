@@ -11,7 +11,7 @@ import { toInt } from '../utils/toInt'
 import { getUrlParams } from '../utils/getUrlParams'
 import { updateUrl } from '../utils/updateUrl'
 import { Page } from '../pages'
-import { fetchSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsStore'
 
 function urlNutrientId() {
   const idStr = getUrlParams().get('nutrient-id')

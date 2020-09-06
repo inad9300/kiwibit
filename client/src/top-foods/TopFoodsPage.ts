@@ -10,7 +10,7 @@ import { Hbox, Vbox } from '../components/Box'
 import { RegularButton } from '../components/RegularButton'
 import { barPadding } from './BarRow'
 import { ControlTitle } from '../components/ControlTitle'
-import { fetchSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsStore'
 import { updateUrl } from '../utils/updateUrl'
 import { toInt } from '../utils/toInt'
 

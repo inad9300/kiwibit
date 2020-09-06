@@ -1,6 +1,6 @@
 import { api } from '../utils/api'
 import { toInt } from '../utils/toInt'
-import { fetchSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsStore'
 
 type FoodRegistry = {
   [date: string]: {

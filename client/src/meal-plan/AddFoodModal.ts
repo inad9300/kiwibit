@@ -1,7 +1,7 @@
 import { Html } from '../components/Html'
 import { Backdrop } from '../components/Backdrop'
 import { FoodFinderInput } from '../food-finder/FoodFinderInput'
-import { fetchSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsStore'
 import { mostFrequentFoods } from './FoodRegistryApi'
 import { Vbox } from '../components/Box'
 import { ControlTitle } from '../components/ControlTitle'
@@ -33,7 +33,7 @@ export function AddFoodModal() {
   const root = Backdrop().with(it => {
     it.append(
       Html('div').with(it => {
-        it.style.height = 'fit-content'
+        it.style.height = 'min-content'
         it.style.padding = '16px'
         it.style.backgroundColor = '#fff'
         it.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.3)'
@@ -41,12 +41,6 @@ export function AddFoodModal() {
         it.append(foodFinderInput, recurrentFoods)
       })
     )
-
-    window.addEventListener('keyup', evt => {
-      if (evt.key === 'Esc' || evt.key === 'Escape') {
-        it.hidden = true
-      }
-    })
 
     return {
       onAddFood(_foodId: number) {},

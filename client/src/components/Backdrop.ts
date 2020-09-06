@@ -12,5 +12,11 @@ export function Backdrop() {
     it.style.zIndex = '2'
     it.style.top = it.style.left = '0'
     it.style.backgroundColor = 'rgba(0, 0, 0, 0.32)'
+
+    window.addEventListener('keyup', evt => {
+      if (evt.key === 'Esc' || evt.key === 'Escape') {
+        it.hidden = true
+      }
+    })
   })
 }

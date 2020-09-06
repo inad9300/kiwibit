@@ -1,6 +1,6 @@
 import { api, ApiOutput } from '../utils/api'
 import { Select } from '../components/Select'
-import { fetchSettings } from '../settings/SettingsApi'
+import { fetchSettings } from '../settings/SettingsStore'
 
 export function NutrientSelect() {
   return Select<ApiOutput<'getAllNutrients'>[0]>(
