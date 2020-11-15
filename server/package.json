@@ -6,15 +6,15 @@
     "generators": "ts-node --files ./src/schema.gen.ts"
   },
   "dependencies": {
-    "pg": "8.3.3"
+    "pg": "8.5.1"
   },
   "devDependencies": {
-    "@types/node": "14.6.2",
-    "@types/pg": "7.14.4",
-    "ts-loader": "8.0.3",
+    "@types/node": "14.14.7",
+    "@types/pg": "7.14.6",
+    "ts-loader": "8.0.11",
     "ts-node": "9.0.0",
-    "typescript": "4.0.2",
-    "webpack": "4.44.1",
-    "webpack-cli": "3.3.12"
+    "typescript": "4.0.5",
+    "webpack": "5.4.0",
+    "webpack-cli": "4.2.0"
   }
 }
