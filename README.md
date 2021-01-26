@@ -6,6 +6,6 @@ If you wish to collaborate, please [open a new issue](https://github.com/inad930
 
 ## Setup
 
-0. Install and run Docker
+0. Install Docker
 0. Install Node.js
 0. `npm run it`

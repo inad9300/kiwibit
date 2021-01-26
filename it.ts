@@ -4,12 +4,29 @@ function sleep(time: number) {
   return new Promise(resolve => setTimeout(resolve, time))
 }
 
+function isDockerRunning() {
+  return spawnSync('docker', ['stats', '--no-stream'], { stdio: 'pipe' }).status === 0
+}
+
 (async () => {
   process.on('SIGINT', () => {
     clientStart?.kill()
     serverStart?.kill()
     process.exit(0)
   })
+
+  if (!isDockerRunning()) {
+    console.info('\n➜ Starting Docker daemon')
+    if (process.platform === 'darwin') {
+      spawnSync('open', ['--hide', '--background', '-a', 'Docker'], { stdio: 'inherit' })
+    } else if (process.platform === 'linux') {
+      // TODO spawnSync('systemctl', ['start', 'docker'], { stdio: 'inherit' })
+    }
+
+    do {
+      await sleep(1_000)
+    } while (!isDockerRunning())
+  }
 
   console.info('\n➜ Building image from Dockerfile (verify with \`docker images\`)')
   spawnSync('docker', ['build', '--tag', 'kiwibiti', 'database'], { stdio: 'inherit' })
