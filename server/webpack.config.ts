@@ -1,11 +1,10 @@
-import { ConfigurationFactory, DefinePlugin, IgnorePlugin } from 'webpack'
-import { resolve } from 'path'
+import { Configuration, DefinePlugin, IgnorePlugin } from 'webpack'
 import { ChildProcess, spawn } from 'child_process'
-import { HookPlugin } from '../shared/HookPlugin'
+import { resolve } from 'path'
 
 let lastChild: ChildProcess | undefined
 
-const config: ConfigurationFactory = (_env, args) => ({
+const config: Configuration = {
   entry: './src/main.ts',
   target: 'node',
   node: false,
@@ -20,14 +19,17 @@ const config: ConfigurationFactory = (_env, args) => ({
     }]
   },
   plugins: [
-    new DefinePlugin({ DEBUG: args.mode === 'development' }),
-    new IgnorePlugin(/^pg-native$/),
-    HookPlugin('done', () => {
-      if (args.mode === 'development') {
-        lastChild?.kill()
-        lastChild = spawn('node', ['--inspect=9229', 'bin/main.js'], { stdio: 'inherit' })
-      }
-    })
+    function () {
+      new DefinePlugin({ DEBUG: this.options.mode === 'development' }).apply(this)
+      new IgnorePlugin({ resourceRegExp: /^pg-native$/ }).apply(this)
+
+      this.hooks.done.tap('hooks::done', () => {
+        if (this.options.mode === 'development') {
+          lastChild?.kill()
+          lastChild = spawn('node', ['--inspect=9229', 'bin/main.js'], { stdio: 'inherit' })
+        }
+      })
+    }
   ],
   resolve: {
     extensions: ['.ts', '.js']
@@ -36,6 +38,6 @@ const config: ConfigurationFactory = (_env, args) => ({
     filename: 'main.js',
     path: resolve(__dirname, 'bin')
   }
-})
+}
 
 export default config

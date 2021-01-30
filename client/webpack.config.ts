@@ -1,7 +1,7 @@
-import { ConfigurationFactory, DefinePlugin } from 'webpack'
+import { Configuration, DefinePlugin } from 'webpack'
 import { resolve } from 'path'
 
-const config: ConfigurationFactory = (_env, args) => ({
+const config: Configuration = {
   entry: './src/main.ts',
   module: {
     rules: [{
@@ -11,7 +11,9 @@ const config: ConfigurationFactory = (_env, args) => ({
     }]
   },
   plugins: [
-    new DefinePlugin({ DEBUG: args.mode === 'development' })
+    function () {
+      new DefinePlugin({ DEBUG: this.options.mode === 'development' }).apply(this)
+    }
   ],
   resolve: {
     extensions: ['.ts', '.js']
@@ -20,6 +22,6 @@ const config: ConfigurationFactory = (_env, args) => ({
     filename: 'main.js',
     path: resolve(__dirname, 'bin')
   }
-})
+}
 
 export default config

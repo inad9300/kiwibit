@@ -20,7 +20,7 @@ function registerError(file: string, testName: string, err: any) {
     ;(err as TestError)._testName = testName
     errors.push(err as TestError)
   } else {
-    console.error('Unexpected error while running tests.', err)
+    console.error(`Unexpected error while running test "${testName}" at ${file}.`, err)
     process.exit(-1)
   }
 }

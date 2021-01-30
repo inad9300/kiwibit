@@ -51,19 +51,19 @@ function isDockerRunning() {
   console.info('\n➜ Installing root-level dependencies')
   spawnSync('npm', ['i'], { stdio: 'inherit' })
 
-  process.chdir('./client')
-
-  console.info('\n➜ Installing client dependencies')
-  spawnSync('npm', ['i'], { stdio: 'inherit' })
-
-  console.info('\n➜ Starting client')
-  const clientStart = spawn('npm', ['start'], { stdio: 'inherit' })
-
-  process.chdir('../server')
+  process.chdir('./server')
 
   console.info('\n➜ Installing server dependencies')
   spawnSync('npm', ['i'], { stdio: 'inherit' })
 
   console.info('\n➜ Starting server')
   const serverStart = spawn('npm', ['start'], { stdio: 'inherit' })
+
+  process.chdir('../client')
+
+  console.info('\n➜ Installing client dependencies')
+  spawnSync('npm', ['i'], { stdio: 'inherit' })
+
+  console.info('\n➜ Starting client')
+  const clientStart = spawn('npm', ['start'], { stdio: 'inherit' })
 })()
