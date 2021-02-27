@@ -1,4 +1,3 @@
-import './polyfills'
 import { log } from './utils/log'
 import { getCurrentPage } from './pages'
 import { Style } from './components/Style'
