@@ -2,6 +2,14 @@ import { createConnection, Socket } from 'net'
 import { createHash } from 'crypto'
 import { ConnectionOptions } from 'tls'
 
+// References:
+// - https://postgresql.org/docs/13/protocol.html
+// - https://github.com/sfackler/rust-postgres/tree/master/postgres-protocol/src
+// - https://github.com/porsager/postgres/blob/master/lib
+// - https://github.com/postgres/postgres/tree/master/src/backend/libpq
+// - https://github.com/postgres/postgres/tree/master/src/backend/utils/adt
+// - https://github.com/brianc/node-postgres/blob/master/packages/pg-protocol/src
+
 // TODO For transaction operations, the simple query protocol should be considered for 'BEGIN', 'COMMIT' and 'ROLLBACK' messages
 
 export interface ConnectionPoolOptions {
@@ -22,7 +30,7 @@ export interface PreparedQuery {
   __kind: 'PreparedQuery'
 }
 
-export type QueryResult<R extends Record<string, any>> = R[] & {
+export type QueryResult<R extends { [columnName: string]: any }> = R[] & {
   metadata: {
     rowCount: number
     columns: { name: string, type: ColumnType }[]
@@ -67,12 +75,6 @@ export function prepareQuery(conn: Socket, query: string): Promise<PreparedQuery
 export function runPreparedQuery<T>(conn: Socket, query: PreparedQuery): Promise<QueryResult<T>> {
   return new Promise((resolve, reject) => {})
 }
-
-// https://www.postgresql.org/docs/13/protocol.html
-// https://github.com/postgres/postgres/tree/master/src/backend/utils/adt
-// https://github.com/postgres/postgres/tree/master/src/backend/libpq
-// https://github.com/porsager/postgres/blob/master/lib
-// https://github.com/brianc/node-postgres/blob/master/packages/pg-protocol/src
 
 export const enum ColumnType {
   Bit         = 1560,
@@ -174,11 +176,17 @@ enum TransactionStatus {
   InFailedTransactionBlock = 'E'.charCodeAt(0),
 }
 
-// (Parse + Describe? + Bind + Execute + Sync)
-// (Parse + Describe? + Sync) + (Bind + Execute + Sync)
-// (Close + Sync)
+function debugMessage(data: Buffer) {
+  const msgType = readInt8(data, 0)
+  const msgSize = readInt32(data, 1)
+  console.debug(
+    `[DEBUG] ${1 + msgSize} bytes received (${data.byteLength - (1 + msgSize)} pending)`,
+    [BackendMessage[msgType]],
+    data.slice(1, 1 + msgSize).toString()
+  )
+}
 
-newConnection({
+establishConnection({
   host: 'localhost',
   port: 5000,
   database: 'postgres',
@@ -186,85 +194,114 @@ newConnection({
   password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
   connectTimeout: 5_000
 } as Required<ConnectionPoolOptions>).then(conn => {
-  conn.write(createParseMessage('select 4444'))
-  // conn.write(createDescribeMessage())
-  // createBindMessage([])
+
+  conn.on('data', onData)
+
+  function onData(data: Buffer): void {
+    const msgType = readInt8(data, 0) as BackendMessage
+    if (msgType === BackendMessage.ParseComplete) {
+    } else if (msgType === BackendMessage.ParameterDescription) {
+    } else if (msgType === BackendMessage.RowDescription) {
+    } else if (msgType === BackendMessage.BindComplete) {
+    } else if (msgType === BackendMessage.CommandComplete) {
+    } else if (msgType === BackendMessage.DataRow) {
+    } else if (msgType === BackendMessage.EmptyQueryResponse) {
+    } else if (msgType === BackendMessage.ReadyForQuery) {
+    } else if (msgType === BackendMessage.PortalSuspended) {
+    } else {
+      // console.warn('[WARN] Unexpected message received during query execution phase.')
+    }
+
+    debugMessage(data)
+
+    const msgSize = readInt32(data, 1)
+    if (data.byteLength > 1 + msgSize) {
+      onData(data.slice(1 + msgSize))
+    }
+  }
+
+  // Simple query
+  // conn.write(createQueryMessage('select id, name from foods where id = 9'))
+
+  // Extended query
+  // (Parse + Describe? + Bind + Execute + Sync)
+  // (Parse + Describe? + Sync) + (Bind + Execute + Sync)
+  // (Close + Sync)
+
+  conn.write(createParseMessage('select id, name from foods where id = $1', '', [ColumnType.Int4]))
+  // conn.write(createFlushMessage())
+  conn.write(createDescribeMessage())
+  conn.write(createBindMessage([9]))
+  conn.write(createExecuteMessage())
   conn.write(createSyncMessage())
 })
-.catch(err => console.error(err))
 
-function newConnection(options: Required<ConnectionPoolOptions>): Promise<Socket> {
-  return new Promise<Socket>((resolve, reject) => {
-    setTimeout(() => reject(new Error('...')), options.connectTimeout)
+// Set up basic error handling, send startup message and authenticate.
+function establishConnection(options: Required<ConnectionPoolOptions>): Promise<Socket> {
+  return new Promise((resolve, reject) => {
+    const conn = createConnection(options.port, options.host)
+    const connTimeout = setTimeout(() => conn.destroy(new Error('Connection timed out.')), options.connectTimeout)
 
-    const { database, username, password } = options
-    const socket = createConnection(options.port, options.host)
+    conn.on('connect', () => conn.write(createStartupMessage(options.username, options.database)))
 
-    // socket.on('lookup', (err, addr, family, host) => console.debug('socket::lookup', err, addr, family, host))
-    socket.on('connect', () => {
-      console.debug('socket::connect')
-      socket.write(createStartupMessage(username, database))
+    conn.on('error', err => {
+      conn.destroy(err)
+      console.error(`[ERROR] ${err.message}`)
+      reject(err)
     })
-    // socket.on('drain', () => console.debug('socket::drain'))
-    // socket.on('timeout', () => reject(new Error('socket::timeout')))
-    socket.on('error', err => reject(err))
-    // socket.on('close', hadErr => console.debug('socket::close', hadErr))
-    // socket.on('end', () => console.debug('socket::end'))
-    socket.on('data', data => {
-      console.debug('socket::data', data.byteLength, 'bytes', [String.fromCharCode(readInt8(data, 0))], data.toString())
 
-      const messageType = readInt8(data, 0) as BackendMessage
-      switch (messageType) {
-      case BackendMessage.Authentication:
-        const authResponse = readInt32(data, 5) as AuthenticationResponse
-        switch (authResponse) {
-        case AuthenticationResponse.Ok:
-          let messageSize = readInt32(data, 1)
-          while (data.length > 1 + messageSize) {
-            data = data.slice(1 + messageSize)
-            switch (readInt8(data, 0) as BackendMessage) {
-            case BackendMessage.ParameterStatus:
-              break
-            case BackendMessage.ReadyForQuery:
-              const transactionStatus = readInt8(data, 5) as TransactionStatus
-              console.debug('Transaction status:', String.fromCharCode(transactionStatus))
-              resolve(socket)
-              break
-            }
-            messageSize = readInt32(data, 1)
-          }
-          break
-        case AuthenticationResponse.CleartextPassword:
-          socket.write(createCleartextPasswordMessage(password))
-          break
-        case AuthenticationResponse.Md5:
-          const salt = data.slice(9)
-          socket.write(createMd5PasswordMessage(username, password, salt))
-          break
-        default:
-          console.error(`Unsupported authentication response sent by backend: "${authResponse}".`)
-        }
-        break
-      case BackendMessage.ReadyForQuery:
-        break
-      case BackendMessage.ParseComplete:
-      case BackendMessage.NoticeResponse:
-      case BackendMessage.BackendKeyData:
-        break
-      case BackendMessage.ErrorResponse:
-        reject(new Error(data.toString()))
-        break
-      default:
-        reject(new Error(`Unsupported message type sent by backend: "${String.fromCharCode(messageType)}".`))
-        console.debug(data.toString())
+    conn.on('data', data => {
+      const msgType = readInt8(data, 0) as BackendMessage
+      if (msgType === BackendMessage.ErrorResponse) {
+        conn.destroy(new Error(`Error message sent by backend: ${data}`))
       }
     })
+
+    conn.on('data', handleAuthentication)
+
+    function handleAuthentication(data: Buffer): void {
+      const msgType = readInt8(data, 0) as BackendMessage
+      if (msgType !== BackendMessage.Authentication) {
+        console.warn(`[WARN] Unexpected message type sent by backend during connection establishment: "${msgType}".`)
+        return
+      }
+
+      const authRes = readInt32(data, 5) as AuthenticationResponse
+      switch (authRes) {
+      case AuthenticationResponse.CleartextPassword:
+        conn.write(createCleartextPasswordMessage(options.password))
+        break
+      case AuthenticationResponse.Md5:
+        const salt = data.slice(9)
+        conn.write(createMd5PasswordMessage(options.username, options.password, salt))
+        break
+      case AuthenticationResponse.Ok:
+        let msgSize = readInt32(data, 1)
+        while (data.byteLength > 1 + msgSize) {
+          data = data.slice(1 + msgSize)
+          const msgType = readInt8(data, 0) as BackendMessage
+          if (msgType === BackendMessage.ReadyForQuery) {
+            // const transactionStatus = readInt8(data, 5) as TransactionStatus
+            // console.debug('Transaction status:', String.fromCharCode(transactionStatus))
+            clearTimeout(connTimeout)
+            conn.removeListener('data', handleAuthentication)
+            resolve(conn)
+          } else {
+            console.warn(`[WARN] Unhandled message type sent by backend after succesful authentication: "${msgType}".`)
+          }
+          msgSize = readInt32(data, 1)
+        }
+        break
+      default:
+        conn.destroy(new Error(`Unsupported authentication response sent by backend: "${authRes}".`))
+      }
+    }
   })
 }
 
 function createStartupMessage(username: string, database: string): Buffer {
   let size
-    = 4 // Message payload
+    = 4 // Message size
     + 4 // Protocol version
     + 5 // "user" + 1
     + Buffer.byteLength(username) + 1
@@ -273,6 +310,7 @@ function createStartupMessage(username: string, database: string): Buffer {
   const differentNames = database !== username
   if (differentNames) {
     size += 9 // "database" + 1
+    size += Buffer.byteLength(database) + 1
   }
 
   const message = Buffer.allocUnsafe(size)
@@ -296,7 +334,7 @@ function createStartupMessage(username: string, database: string): Buffer {
 function createCleartextPasswordMessage(password: string) {
   const size
     = 1 // Message type
-    + 4 // Message payload
+    + 4 // Message size
     + Buffer.byteLength(password) + 1
 
   const message = Buffer.allocUnsafe(size)
@@ -313,7 +351,7 @@ function createMd5PasswordMessage(username: string, password: string, salt: Buff
   const credentialsMd5 = 'md5' + md5(Buffer.concat([Buffer.from(md5(password + username)), salt]))
   const size
     = 1 // Message type
-    + 4 // Message payload
+    + 4 // Message size
     + Buffer.byteLength(credentialsMd5) + 1
 
   const message = Buffer.allocUnsafe(size)
@@ -333,7 +371,7 @@ function md5(x: string | Buffer) {
 function createQueryMessage(query: string): Buffer {
   const bufferSize
     = 1 // Message type
-    + 4 // Message payload
+    + 4 // Message size
     + Buffer.byteLength(query) + 1
 
   const message = Buffer.allocUnsafe(bufferSize)
@@ -346,10 +384,10 @@ function createQueryMessage(query: string): Buffer {
   return message
 }
 
-function createParseMessage(query: string, queryId = '', paramTypes: number[] = []): Buffer {
+function createParseMessage(query: string, queryId = '', paramTypes: ColumnType[] = []): Buffer {
   const bufferSize
     = 1 // Message type
-    + 4 // Message payload
+    + 4 // Message size
     + Buffer.byteLength(queryId) + 1
     + Buffer.byteLength(query) + 1
     + 2 // Number of parameter data
@@ -374,7 +412,7 @@ function createParseMessage(query: string, queryId = '', paramTypes: number[] = 
 function createDescribeMessage(queryId = ''): Buffer {
   const bufferSize
     = 1 // Message type
-    + 4 // Message payload
+    + 4 // Message size
     + 1 // Describe message type
     + Buffer.byteLength(queryId) + 1
 
@@ -392,7 +430,7 @@ function createDescribeMessage(queryId = ''): Buffer {
 function createSyncMessage(): Buffer {
   const bufferSize
     = 1 // Message type
-    + 4 // Message payload
+    + 4 // Message size
 
   const message = Buffer.allocUnsafe(bufferSize)
   let offset = 0
@@ -403,19 +441,41 @@ function createSyncMessage(): Buffer {
   return message
 }
 
-function createBindMessage(values: any[], queryId = '', portal = ''): Buffer {
+function createFlushMessage(): Buffer {
   const bufferSize
     = 1 // Message type
-    + 4 // Message payload
-    + Buffer.byteLength(queryId) + 1
+    + 4 // Message size
+
+  const message = Buffer.allocUnsafe(bufferSize)
+  let offset = 0
+
+  offset = writeInt8(message, FrontendMessage.Flush, offset)
+  writeInt32(message, bufferSize - 1, offset)
+
+  return message
+}
+
+function createBindMessage(values: any[], queryId = '', portal = ''): Buffer {
+  let bufferSize
+    = 1 // Message type
+    + 4 // Message size
     + Buffer.byteLength(portal) + 1
+    + Buffer.byteLength(queryId) + 1
     + 2 // Number of parameter format codes
-    + 0 // Paramter format codes
+    + 2 // Parameter format code(s)
     + 2 // Number of parameter values
-      + 0 // Length of the parameter value
-      + 0 // Value of the parameter
+      + 4 * values.length // Length of the parameter values
+      + 0 // Values of the parameters (see below)
     + 2 // Number of result-column format codes
-    + 0 // Result-column format codes
+    + 2 // Result-column format code(s)
+
+  for (const v of values) {
+    if (typeof v === 'number') {
+      bufferSize += 4
+    } else {
+      throw new Error('Tried binding a parameter of an unsupported type: ' + v)
+    }
+  }
 
   const message = Buffer.allocUnsafe(bufferSize)
   let offset = 0
@@ -424,19 +484,44 @@ function createBindMessage(values: any[], queryId = '', portal = ''): Buffer {
   offset = writeInt32(message, bufferSize - 1, offset)
   offset = writeString(message, portal, offset)
   offset = writeString(message, queryId, offset)
-  offset = writeInt16(message, BindFormat.Binary, offset) // Parameter format
+  offset = writeInt16(message, 1, offset)
+  offset = writeInt16(message, BindFormat.Binary, offset)
   offset = writeInt16(message, values.length, offset)
 
   for (const v of values) {
     if (v == null) {
       offset = writeInt32(message, -1, offset)
+    } else if (typeof v === 'number') {
+      offset = writeInt32(message, 4, offset)
+      offset = writeInt32(message, v, offset)
+    // } else if (typeof v === 'string') {
+    //   offset = writeInt32(message, Buffer.byteLength(v), offset)
+    //   offset = writeString(message, v, offset)
     } else {
-      offset = writeInt32(message, Buffer.byteLength(v), offset)
-      offset = writeString(message, v, offset)
+      throw new Error('Tried binding a parameter of an unsupported type: ' + v)
     }
   }
 
-  writeInt16(message, BindFormat.Binary, offset) // Result format
+  offset = writeInt16(message, 1, offset)
+  offset = writeInt16(message, BindFormat.Binary, offset)
+
+  return message
+}
+
+function createExecuteMessage(portal = ''): Buffer {
+  const bufferSize
+    = 1 // Message type
+    + 4 // Message size
+    + Buffer.byteLength(portal) + 1
+    + 4 // Maximum number of rows to return
+
+  const message = Buffer.allocUnsafe(bufferSize)
+  let offset = 0
+
+  offset = writeInt8(message, FrontendMessage.Execute, offset)
+  offset = writeInt32(message, bufferSize - 1, offset)
+  offset = writeString(message, portal, offset)
+  writeInt32(message, 0, offset)
 
   return message
 }
