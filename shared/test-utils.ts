@@ -37,7 +37,7 @@ export function runTestSuites(testSuites: (readonly [string, TestSuite])[]): boo
   testSuites.forEach(([file, suite]) => {
     testPromises.push(
       ...Object.entries(suite).map(([testName, fn]) => {
-        let t = process.hrtime()
+        const t = process.hrtime()
         try {
           const out = fn()
           if (!(out instanceof Promise)) {
