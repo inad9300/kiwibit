@@ -8,6 +8,10 @@ function isDockerRunning() {
   return spawnSync('docker', ['stats', '--no-stream'], { stdio: 'pipe' }).status === 0
 }
 
+function logStep(desc: string) {
+  console.info(`\n\x1b[36m➜ ${desc}\x1b[0m`)
+}
+
 (async () => {
   process.on('SIGINT', () => {
     clientStart?.kill()
@@ -16,7 +20,7 @@ function isDockerRunning() {
   })
 
   if (!isDockerRunning()) {
-    console.info('\n➜ Starting Docker daemon')
+    logStep('Starting Docker daemon')
     if (process.platform === 'darwin') {
       spawnSync('open', ['--hide', '--background', '-a', 'Docker'], { stdio: 'inherit' })
     } else if (process.platform === 'linux') {
@@ -28,14 +32,14 @@ function isDockerRunning() {
     } while (!isDockerRunning())
   }
 
-  console.info('\n➜ Building image from Dockerfile (verify with \`docker images\`)')
+  logStep('Building image from Dockerfile (verify with `docker images`)')
   spawnSync('docker', ['build', '--tag', 'kiwibiti', 'database'], { stdio: 'inherit' })
 
-  console.info('\n➜ Stopping and removing previous container')
+  logStep('Stopping and removing previous container')
   spawnSync('docker', ['container', 'stop', 'kiwibitc'], { stdio: 'inherit' })
   spawnSync('docker', ['rm', 'kiwibitc'], { stdio: 'inherit' })
 
-  console.info('\n➜ Running container (verify with \`docker ps\`; check logs with \`docker logs -f kiwibitc\`; interact with \`docker exec -it kiwibitc psql -U postgres\`)')
+  logStep('Running container (verify with `docker ps`; check logs with `docker logs -f kiwibitc`; interact with `docker exec -it kiwibitc psql -U postgres`)')
   spawnSync('docker', ['run', '--name', 'kiwibitc', '--env', 'POSTGRES_PASSWORD=hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E', '-p', '5000:5432', '--detach', 'kiwibiti'], { stdio: 'inherit' })
 
   const since = new Date().toISOString()
@@ -48,22 +52,22 @@ function isDockerRunning() {
       .includes('PostgreSQL init process complete; ready for start up.')
   )
 
-  console.info('\n➜ Installing root-level dependencies')
+  logStep('Installing root-level dependencies')
   spawnSync('npm', ['i'], { stdio: 'inherit' })
 
   process.chdir('./server')
 
-  console.info('\n➜ Installing server dependencies')
+  logStep('Installing server dependencies')
   spawnSync('npm', ['i'], { stdio: 'inherit' })
 
-  console.info('\n➜ Starting server')
+  logStep('Starting server')
   const serverStart = spawn('npm', ['start'], { stdio: 'inherit' })
 
   process.chdir('../client')
 
-  console.info('\n➜ Installing client dependencies')
+  logStep('Installing client dependencies')
   spawnSync('npm', ['i'], { stdio: 'inherit' })
 
-  console.info('\n➜ Starting client')
+  logStep('Starting client')
   const clientStart = spawn('npm', ['start'], { stdio: 'inherit' })
 })()
