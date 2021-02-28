@@ -10,7 +10,17 @@ import { ConnectionOptions } from 'tls'
 // - https://github.com/postgres/postgres/tree/master/src/backend/utils/adt
 // - https://github.com/brianc/node-postgres/blob/master/packages/pg-protocol/src
 
+// Simple query
+// conn.write(createQueryMessage('select id, name from foods where id = 9'))
+
+// Extended query
+// (Parse + Describe? + Bind + Execute + Sync)
+// (Parse + Describe? + Sync) + (Bind + Execute + Sync)
+// (Close + Sync)
+
 // TODO For transaction operations, the simple query protocol should be considered for 'BEGIN', 'COMMIT' and 'ROLLBACK' messages
+// TODO Understand and consider "portals"
+// TODO Unify all data handlers?
 
 export interface ConnectionPoolOptions {
   host?: string
@@ -27,7 +37,8 @@ export interface ConnectionPoolOptions {
 }
 
 export interface PreparedQuery {
-  __kind: 'PreparedQuery'
+  queryId: string
+  paramTypes: ObjectId[]
 }
 
 type Row = {
@@ -39,11 +50,10 @@ type ColumnMetadata = {
   type: ObjectId
 }
 
-export type QueryResult<R extends Row> = R[] & {
-  metadata: {
-    rowCount: number
-    columns: ColumnMetadata[]
-  }
+export type QueryResult<R extends Row> = {
+  rows: R[]
+  rowsAffected: number
+  columnMetadata: ColumnMetadata[]
 }
 
 export function newConnectionPool(options: ConnectionPoolOptions) {
@@ -73,16 +83,210 @@ export function runStaticQuery(conn: Socket) {
   }
 }
 
-export function runDynamicQuery<T>(conn: Socket, query: string, values: any[]): Promise<QueryResult<T>> {
+export function runDynamicQuery<R extends Row>(conn: Socket, query: string, values: any[]): Promise<QueryResult<R>> {
   return new Promise((resolve, reject) => {})
 }
 
-export function prepareQuery(conn: Socket, query: string): Promise<PreparedQuery> {
-  return new Promise((resolve, reject) => {})
+const connectionOptions = {
+  host: 'localhost',
+  port: 5000,
+  database: 'postgres',
+  username: 'postgres',
+  password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
+  connectTimeout: 5_000
 }
 
-export function runPreparedQuery<T>(conn: Socket, query: PreparedQuery): Promise<QueryResult<T>> {
-  return new Promise((resolve, reject) => {})
+establishConnection(connectionOptions as Required<ConnectionPoolOptions>).then(async conn => {
+  const preparedQuery = await prepareQuery(conn, `select amount from food_nutrients where amount > $1 limit 4`)
+  console.debug('preparedQuery', preparedQuery)
+  const queryResults = await runPreparedQuery(conn, preparedQuery, [11.11])
+  console.debug('queryResults', queryResults)
+})
+
+let preparedQueryCount = 0
+
+export function prepareQuery(conn: Socket, query: string, paramTypes?: ObjectId[], queryId: string = 'q' + preparedQueryCount++): Promise<PreparedQuery> {
+  return new Promise((resolve, reject) => {
+    conn.on('data', handleQueryPreparation)
+
+    const shouldFetchParamTypes = paramTypes == null
+    if (shouldFetchParamTypes) {
+      paramTypes = []
+    }
+
+    let leftover: Buffer
+    let parseCompleted = false
+    let paramTypesFetched = !shouldFetchParamTypes
+
+    function handleQueryPreparation(data: Buffer): void {
+      if (leftover) {
+        data = Buffer.concat([leftover, data])
+        leftover = undefined
+      }
+
+      const msgSize = readInt32(data, 1)
+      if (1 + msgSize > data.byteLength) {
+        leftover = data
+        return
+      }
+
+      const msgType = readInt8(data, 0) as BackendMessage
+      if (msgType === BackendMessage.ParseComplete) {
+        parseCompleted = true
+      } else if (msgType === BackendMessage.ParameterDescription) {
+        const paramCount = readInt16(data, 5)
+        let offset = 7
+        for (let i = 0; i < paramCount; ++i) {
+          const paramType = readInt32(data, offset)
+          offset += 4
+          paramTypes.push(paramType)
+        }
+        paramTypesFetched = true
+      } else if (msgType === BackendMessage.ReadyForQuery) {
+        conn.removeListener('data', handleQueryPreparation)
+        if (parseCompleted && paramTypesFetched) {
+          resolve({ queryId, paramTypes })
+        } else {
+          reject(new Error('Failed to parse query.'))
+        }
+        return
+      } else {
+        console.warn('[WARN] Unexpected message received during query preparation phase: ' + (BackendMessage[msgType] || msgType))
+      }
+
+      if (data.byteLength > 1 + msgSize) {
+        handleQueryPreparation(data.slice(1 + msgSize))
+      }
+    }
+
+    conn.write(createParseMessage(query, queryId, paramTypes))
+    if (shouldFetchParamTypes) {
+      conn.write(createDescribeMessage(queryId)) // TODO Consider avoiding in all circumstances, as the same message will be received regardless during the execution phase.
+    }
+    conn.write(createSyncMessage())
+  })
+}
+
+// const t0 = process.hrtime()
+// const t1 = process.hrtime(t0)
+// console.debug('Time:', t1[0] * 1000 + t1[1] / 1_000_000, 'ms')
+export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQuery, paramValues: any[]): Promise<QueryResult<R>> {
+  return new Promise((resolve, reject) => {
+    conn.on('data', handleQueryExecution)
+
+    let leftover: Buffer
+    let bindingCompleted = false
+    let commandCompleted = false
+
+    const columnMetadata: ColumnMetadata[] = []
+    const rows: R[] = []
+    let rowsAffected = 0
+
+    function handleQueryExecution(data: Buffer): void {
+      debugMessage(data)
+
+      if (leftover) {
+        data = Buffer.concat([leftover, data])
+        leftover = undefined
+      }
+
+      const msgSize = readInt32(data, 1)
+      if (1 + msgSize > data.byteLength) {
+        leftover = data
+        return
+      }
+
+      const msgType = readInt8(data, 0) as BackendMessage
+      if (msgType === BackendMessage.RowDescription) {
+        const columnCount = readInt16(data, 5)
+        let offset = 7
+        for (let i = 0; i < columnCount; ++i) {
+          const columnName = readCString(data, offset)
+          offset += columnName.length + 1
+
+          const tableType = readInt32(data, offset)
+          offset += 4
+
+          const columnAttrNumber = readInt16(data, offset)
+          offset += 2
+
+          const columnType = readInt32(data, offset)
+          offset += 4
+
+          const dataTypeSize = readInt16(data, offset)
+          offset += 2
+
+          const typeModifier = readInt32(data, offset)
+          offset += 4
+
+          const formatCode = readInt16(data, offset)
+          offset += 2
+
+          columnMetadata.push({ name: columnName, type: columnType })
+        }
+      } else if (msgType === BackendMessage.DataRow) {
+        const valueCount = readInt16(data, 5)
+        if (columnMetadata.length !== valueCount) {
+          conn.destroy(new Error(`Received ${valueCount} column values, but ${columnMetadata.length} column descriptions.`))
+          return
+        }
+
+        const row: Row = {}
+        let offset = 7
+        for (let i = 0; i < valueCount; ++i) {
+          const column = columnMetadata[i]
+          const valueSize = readInt32(data, offset)
+          offset += 4
+          if (valueSize === -1) {
+            row[column.name] = null
+          } else {
+            const value = data.slice(offset, offset + valueSize)
+            offset += valueSize
+            if (column.type === ObjectId.Bool) {
+              row[column.name] = value[0] !== 0
+            } else if (column.type === ObjectId.Int4) {
+              row[column.name] = readInt32(value, 0)
+            } else if (column.type === ObjectId.Float8) {
+              row[column.name] = value.readDoubleBE()
+            } else if (column.type === ObjectId.Varchar || column.type === ObjectId.Text) {
+              row[column.name] = value.toString()
+            } else {
+              console.warn(`[WARN] Unsupported column data type: ${ObjectId[column.type] || column.type}.`)
+              row[column.name] = value
+            }
+          }
+        }
+        rows.push(row as R)
+      } else if (msgType === BackendMessage.EmptyQueryResponse) {
+      } else if (msgType === BackendMessage.PortalSuspended) {
+      } else if (msgType === BackendMessage.BindComplete) {
+        bindingCompleted = true
+      } else if (msgType === BackendMessage.CommandComplete) {
+        const commandTagParts = readCString(data, 5).split(' ')
+        rowsAffected = parseInt(commandTagParts[commandTagParts.length - 1], 10)
+        commandCompleted = true
+      } else if (msgType === BackendMessage.ReadyForQuery) {
+        conn.removeListener('data', handleQueryExecution)
+        if (bindingCompleted && commandCompleted) {
+          resolve({ rows, rowsAffected, columnMetadata })
+        } else {
+          reject(new Error('Failed to execute query.'))
+        }
+        return
+      } else {
+        console.warn('[WARN] Unexpected message received during prepared query execution phase: ' + (BackendMessage[msgType] || msgType))
+      }
+
+      if (data.byteLength > 1 + msgSize) {
+        handleQueryExecution(data.slice(1 + msgSize))
+      }
+    }
+
+    conn.write(createDescribeMessage(query.queryId))
+    conn.write(createBindMessage(paramValues, query, ''))
+    conn.write(createExecuteMessage(''))
+    conn.write(createSyncMessage())
+  })
 }
 
 export enum ObjectId {
@@ -163,6 +367,25 @@ enum BackendMessage {
   RowDescription           = 'T'.charCodeAt(0),
 }
 
+enum ErrorResponseType {
+  SeverityLocalized = 'S'.charCodeAt(0),
+  Severity          = 'V'.charCodeAt(0),
+  Code              = 'C'.charCodeAt(0),
+  Message           = 'M'.charCodeAt(0),
+  Detail            = 'D'.charCodeAt(0),
+  Hint              = 'H'.charCodeAt(0),
+  Position          = 'P'.charCodeAt(0),
+  InternalPosition  = 'p'.charCodeAt(0),
+  Where             = 'W'.charCodeAt(0),
+  SchemaName        = 's'.charCodeAt(0),
+  ColumnName        = 'c'.charCodeAt(0),
+  DateTypeName      = 'd'.charCodeAt(0),
+  ConstraintName    = 'n'.charCodeAt(0),
+  File              = 'F'.charCodeAt(0),
+  Line              = 'L'.charCodeAt(0),
+  Routine           = 'R'.charCodeAt(0),
+}
+
 enum DescribeOrCloseRequest {
   PreparedStatement = 'S'.charCodeAt(0),
   Portal            = 'P'.charCodeAt(0),
@@ -191,171 +414,31 @@ function debugMessage(data: Buffer) {
   console.debug(
     `[DEBUG] ${msgSize} bytes expected, ${data.byteLength} received`,
     [BackendMessage[msgType] || msgType],
-    data.slice(1, 1 + msgSize).toString()//.slice(64)
+    msgType === BackendMessage.ErrorResponse
+      ? parseErrorResponse(data)
+      : data.slice(1, 1 + msgSize).toString()//.slice(64)
   )
 }
 
-establishConnection({
-  host: 'localhost',
-  port: 5000,
-  database: 'postgres',
-  username: 'postgres',
-  password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
-  connectTimeout: 5_000
-} as Required<ConnectionPoolOptions>).then(conn => {
+interface ParsedError {
+  type: ErrorResponseType
+  value: string
+}
 
-  conn.on('data', onData)
-  const t0 = process.hrtime()
-
-  const columMetadata: ColumnMetadata[] = []
-  const rows: Row[] = []
-  const paramTypes: ObjectId[] = []
-
-  let leftover: Buffer
-
-  function onData(data: Buffer): void {
-    debugMessage(data)
-
-    if (leftover) {
-      data = Buffer.concat([leftover, data])
-      leftover = undefined
-    }
-
-    const msgSize = readInt32(data, 1)
-    if (1 + msgSize > data.byteLength) {
-      leftover = data
-      return
-    }
-
-    const msgType = readInt8(data, 0) as BackendMessage
-    if (msgType === BackendMessage.ParseComplete) {
-    } else if (msgType === BackendMessage.ParameterDescription) {
-      const paramCount = readInt16(data, 5)
-      let offset = 7
-      for (let i = 0; i < paramCount; ++i) {
-        const paramType = readInt32(data, offset)
-        offset += 4
-        paramTypes.push(paramType)
-      }
-    } else if (msgType === BackendMessage.RowDescription) {
-      const columnCount = readInt16(data, 5)
-      let offset = 7
-      for (let i = 0; i < columnCount; ++i) {
-        const columnName = readCString(data, offset)
-        offset += columnName.length + 1
-        // console.debug('columnName', columnName)
-
-        const tableType = readInt32(data, offset)
-        offset += 4
-        // console.debug('  tableType', tableType)
-
-        const columnAttrNumber = readInt16(data, offset)
-        offset += 2
-        // console.debug('  columnAttrNo', columnAttrNumber)
-
-        const columnType = readInt32(data, offset)
-        offset += 4
-        // console.debug('  columnType', ObjectId[columnType])
-
-        const dataTypeSize = readInt16(data, offset)
-        offset += 2
-        // console.debug('  dataTypeSize', dataTypeSize)
-
-        const typeModifier = readInt32(data, offset)
-        offset += 4
-        // console.debug('  typeModifier', typeModifier)
-
-        const formatCode = readInt16(data, offset)
-        offset += 2
-        // console.debug('  formatCode', formatCode)
-
-        columMetadata.push({ name: columnName, type: columnType })
-      }
-    } else if (msgType === BackendMessage.BindComplete) {
-    } else if (msgType === BackendMessage.CommandComplete) {
-      const t1 = process.hrtime(t0)
-      console.debug('Rows:', rows)
-      console.debug('Time:', t1[0] * 1000 + t1[1] / 1_000_000, 'ms')
-    } else if (msgType === BackendMessage.DataRow) {
-      const valueCount = readInt16(data, 5)
-      if (columMetadata.length !== valueCount) {
-        conn.destroy(new Error(`Received ${valueCount} column values, but ${columMetadata.length} column descriptions.`))
-        return
-      }
-
-      const row: Row = {}
-      let offset = 7
-      for (let i = 0; i < valueCount; ++i) {
-        const column = columMetadata[i]
-        const valueSize = readInt32(data, offset)
-        offset += 4
-        if (valueSize === -1) {
-          row[column.name] = null
-        } else {
-          const value = data.slice(offset, offset + valueSize)
-          offset += valueSize
-          if (column.type === ObjectId.Int4) {
-            row[column.name] = readInt32(value, 0)
-          } else if (column.type === ObjectId.Float8) {
-            row[column.name] = value.readDoubleBE()
-          } else if (column.type === ObjectId.Varchar || column.type === ObjectId.Text) {
-            row[column.name] = value.toString()
-          } else if (column.type === ObjectId.Bool) {
-            row[column.name] = value[0] !== 0
-          } else {
-            console.warn(`[WARN] Unsupported column data type: ${ObjectId[column.type] || column.type}.`)
-            row[column.name] = value
-          }
-        }
-      }
-      rows.push(row)
-    } else if (msgType === BackendMessage.CopyData) {
-    } else if (msgType === BackendMessage.EmptyQueryResponse) {
-    } else if (msgType === BackendMessage.ReadyForQuery) {
-    } else if (msgType === BackendMessage.PortalSuspended) {
-    } else {
-      // console.warn('[WARN] Unexpected message received during query execution phase.')
-    }
-
-    if (data.byteLength > 1 + msgSize) {
-      onData(data.slice(1 + msgSize))
+function parseErrorResponse(data: Buffer): ParsedError[] {
+  const msgSize = 1 + readInt32(data, 1)
+  const errors: ParsedError[] = []
+  let offset = 5
+  while (offset < msgSize) {
+    const type = readInt8(data, offset++) as ErrorResponseType
+    if (type !== 0) {
+      const value = readCString(data, offset)
+      offset += Buffer.byteLength(value) + 1
+      errors.push({ type, value })
     }
   }
-
-  // Simple query
-  // conn.write(createQueryMessage('select id, name from foods where id = 9'))
-
-  // Extended query
-  // (Parse + Describe? + Bind + Execute + Sync)
-  // (Parse + Describe? + Sync) + (Bind + Execute + Sync)
-  // (Close + Sync)
-
-  const _query = `
-    select id, name, is_public
-    from foods
-    where name like $1
-    and (id = $2 or id = $3)
-    and is_public = $4
-    limit 1024
-  `
-
-  const query = `
-    select *
-    from food_nutrients
-    where amount > $1
-    limit 4
-  `
-
-  conn.write(createParseMessage(query, '', []))
-  // conn.write(createFlushMessage())
-  conn.write(createDescribeMessage())
-  conn.write(createBindMessage([
-    // 'Spices, %', 9, 4, true
-    6.6
-  ]))
-  conn.write(createExecuteMessage())
-  conn.write(createSyncMessage())
-})
+  return errors
+}
 
 // Set up basic error handling, send startup message and authenticate.
 function establishConnection(options: Required<ConnectionPoolOptions>): Promise<Socket> {
@@ -374,7 +457,8 @@ function establishConnection(options: Required<ConnectionPoolOptions>): Promise<
     conn.on('data', data => {
       const msgType = readInt8(data, 0) as BackendMessage
       if (msgType === BackendMessage.ErrorResponse) {
-        conn.destroy(new Error(`Error message sent by backend: ${data}`))
+        const errors = parseErrorResponse(data)
+        conn.destroy(new Error(`Error message sent by backend: ${errors}`))
       }
     })
 
@@ -505,7 +589,7 @@ function createQueryMessage(query: string): Buffer {
   return message
 }
 
-function createParseMessage(query: string, queryId = '', paramTypes: ObjectId[] = []): Buffer {
+function createParseMessage(query: string, queryId: string, paramTypes: ObjectId[]): Buffer {
   const bufferSize
     = 1 // Message type
     + 4 // Message size
@@ -530,7 +614,7 @@ function createParseMessage(query: string, queryId = '', paramTypes: ObjectId[] 
   return message
 }
 
-function createDescribeMessage(queryId = ''): Buffer {
+function createDescribeMessage(queryId: string): Buffer {
   const bufferSize
     = 1 // Message type
     + 4 // Message size
@@ -576,7 +660,9 @@ function createFlushMessage(): Buffer {
   return message
 }
 
-function createBindMessage(values: any[], queryId = '', portal = ''): Buffer {
+function createBindMessage(paramValues: any[], query: PreparedQuery, portal: string): Buffer {
+  const { queryId, paramTypes } = query
+
   let bufferSize
     = 1 // Message type
     + 4 // Message size
@@ -585,21 +671,24 @@ function createBindMessage(values: any[], queryId = '', portal = ''): Buffer {
     + 2 // Number of parameter format codes
     + 2 // Parameter format code(s)
     + 2 // Number of parameter values
-      + 4 * values.length // Length of the parameter values
+      + 4 * paramValues.length // Length of the parameter values
       + 0 // Values of the parameters (see below)
     + 2 // Number of result-column format codes
     + 2 // Result-column format code(s)
 
-  for (const v of values) {
-    if (typeof v === 'boolean') {
+  // TODO Use column size information?
+  for (let i = 0; i < paramValues.length; ++i) {
+    const t = paramTypes[i]
+    if (t === ObjectId.Bool) {
       bufferSize += 1
-    } else if (typeof v === 'number') {
-      // bufferSize += 4
+    } else if (t === ObjectId.Int4 || t === ObjectId.Float4) {
+      bufferSize += 4
+    } else if (t === ObjectId.Int8 || t === ObjectId.Float8) {
       bufferSize += 8
-    } else if (typeof v === 'string') {
-      bufferSize += Buffer.byteLength(v)
+    } else if (t === ObjectId.Varchar || t === ObjectId.Text) {
+      bufferSize += Buffer.byteLength(paramValues[i])
     } else {
-      throw new Error('Tried binding a parameter of an unsupported type: ' + v)
+      throw new Error(`Tried binding a parameter of an unsupported type: ${ObjectId[t] || t}`)
     }
   }
 
@@ -612,24 +701,30 @@ function createBindMessage(values: any[], queryId = '', portal = ''): Buffer {
   offset = writeCString(message, queryId, offset)
   offset = writeInt16(message, 1, offset)
   offset = writeInt16(message, BindFormat.Binary, offset)
-  offset = writeInt16(message, values.length, offset)
+  offset = writeInt16(message, paramValues.length, offset)
 
-  for (const v of values) {
+  for (let i = 0; i < paramValues.length; ++i) {
+    const v = paramValues[i]
+    const t = paramTypes[i]
     if (v == null) {
       offset = writeInt32(message, -1, offset)
-    } else if (typeof v === 'boolean') {
+    } else if (t === ObjectId.Bool) {
       offset = writeInt32(message, 1, offset)
       offset = writeInt8(message, +v, offset)
-    } else if (typeof v === 'number') {
-      // offset = writeInt32(message, 4, offset)
-      // offset = writeInt32(message, v, offset)
+    } else if (t === ObjectId.Int4) {
+      offset = writeInt32(message, 4, offset)
+      offset = writeInt32(message, v, offset)
+    } else if (t === ObjectId.Float4) {
+      offset = writeInt32(message, 4, offset)
+      offset = message.writeFloatBE(v, offset)
+    } else if (t === ObjectId.Float8) {
       offset = writeInt32(message, 8, offset)
       offset = message.writeDoubleBE(v, offset)
-    } else if (typeof v === 'string') {
+    } else if (t === ObjectId.Varchar || t === ObjectId.Text) {
       offset = writeInt32(message, Buffer.byteLength(v), offset)
       offset += message.write(v, offset)
     } else {
-      throw new Error('Tried binding a parameter of an unsupported type: ' + v)
+      throw new Error(`Tried binding a parameter of an unsupported type: ${ObjectId[t] || t}`)
     }
   }
 
@@ -639,7 +734,7 @@ function createBindMessage(values: any[], queryId = '', portal = ''): Buffer {
   return message
 }
 
-function createExecuteMessage(portal = ''): Buffer {
+function createExecuteMessage(portal: string): Buffer {
   const bufferSize
     = 1 // Message type
     + 4 // Message size
@@ -679,7 +774,7 @@ function writeInt32(buffer: Uint8Array, value: number, offset: number): number {
 }
 
 function writeCString(buffer: Buffer, str: string, offset: number): number {
-  offset += buffer.write(str, offset)
+  offset += buffer.write(str, offset, 'ascii')
   buffer[offset++] = 0
   return offset
 }
