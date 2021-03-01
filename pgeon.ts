@@ -21,6 +21,7 @@ import { ConnectionOptions } from 'tls'
 // TODO For transaction operations, the simple query protocol should be considered for 'BEGIN', 'COMMIT' and 'ROLLBACK' messages
 // TODO Understand and consider "portals"
 // TODO Unify all data handlers?
+// TODO Combine contiguous socket writes
 
 export interface ConnectionPoolOptions {
   host?: string
@@ -34,11 +35,13 @@ export interface ConnectionPoolOptions {
   connectTimeout?: number
   idleTimeout?: number
   queryTimeout?: number
+  // prepareTimeout?: number
 }
 
 export interface PreparedQuery {
   queryId: string
   paramTypes: ObjectId[]
+  columnMetadata: ColumnMetadata[]
 }
 
 type Row = {
@@ -98,9 +101,11 @@ const connectionOptions = {
 
 establishConnection(connectionOptions as Required<ConnectionPoolOptions>).then(async conn => {
   const preparedQuery = await prepareQuery(conn, `select amount from food_nutrients where amount > $1 limit 4`)
-  console.debug('preparedQuery', preparedQuery)
-  const queryResults = await runPreparedQuery(conn, preparedQuery, [11.11])
-  console.debug('queryResults', queryResults)
+  console.debug('preparedQuery', preparedQuery, '\n')
+  setTimeout(async () => {
+    const queryResults = await runPreparedQuery(conn, preparedQuery, [11.11])
+    console.debug('queryResults', queryResults)
+  }, 3_000)
 })
 
 let preparedQueryCount = 0
@@ -116,9 +121,14 @@ export function prepareQuery(conn: Socket, query: string, paramTypes?: ObjectId[
 
     let leftover: Buffer
     let parseCompleted = false
-    let paramTypesFetched = !shouldFetchParamTypes
+    let paramTypesFetched = false
+    let columnMetadataFetched = false
+
+    const columnMetadata: ColumnMetadata[] = []
 
     function handleQueryPreparation(data: Buffer): void {
+      debugMessage(data)
+
       if (leftover) {
         data = Buffer.concat([leftover, data])
         leftover = undefined
@@ -134,70 +144,17 @@ export function prepareQuery(conn: Socket, query: string, paramTypes?: ObjectId[
       if (msgType === BackendMessage.ParseComplete) {
         parseCompleted = true
       } else if (msgType === BackendMessage.ParameterDescription) {
-        const paramCount = readInt16(data, 5)
-        let offset = 7
-        for (let i = 0; i < paramCount; ++i) {
-          const paramType = readInt32(data, offset)
-          offset += 4
-          paramTypes.push(paramType)
+        if (shouldFetchParamTypes) {
+          const paramCount = readInt16(data, 5)
+          let offset = 7
+          for (let i = 0; i < paramCount; ++i) {
+            const paramType = readInt32(data, offset)
+            offset += 4
+            paramTypes.push(paramType)
+          }
         }
         paramTypesFetched = true
-      } else if (msgType === BackendMessage.ReadyForQuery) {
-        conn.removeListener('data', handleQueryPreparation)
-        if (parseCompleted && paramTypesFetched) {
-          resolve({ queryId, paramTypes })
-        } else {
-          reject(new Error('Failed to parse query.'))
-        }
-        return
-      } else {
-        console.warn('[WARN] Unexpected message received during query preparation phase: ' + (BackendMessage[msgType] || msgType))
-      }
-
-      if (data.byteLength > 1 + msgSize) {
-        handleQueryPreparation(data.slice(1 + msgSize))
-      }
-    }
-
-    conn.write(createParseMessage(query, queryId, paramTypes))
-    if (shouldFetchParamTypes) {
-      conn.write(createDescribeMessage(queryId)) // TODO Consider avoiding in all circumstances, as the same message will be received regardless during the execution phase.
-    }
-    conn.write(createSyncMessage())
-  })
-}
-
-// const t0 = process.hrtime()
-// const t1 = process.hrtime(t0)
-// console.debug('Time:', t1[0] * 1000 + t1[1] / 1_000_000, 'ms')
-export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQuery, paramValues: any[]): Promise<QueryResult<R>> {
-  return new Promise((resolve, reject) => {
-    conn.on('data', handleQueryExecution)
-
-    let leftover: Buffer
-    let bindingCompleted = false
-    let commandCompleted = false
-
-    const columnMetadata: ColumnMetadata[] = []
-    const rows: R[] = []
-    let rowsAffected = 0
-
-    function handleQueryExecution(data: Buffer): void {
-      debugMessage(data)
-
-      if (leftover) {
-        data = Buffer.concat([leftover, data])
-        leftover = undefined
-      }
-
-      const msgSize = readInt32(data, 1)
-      if (1 + msgSize > data.byteLength) {
-        leftover = data
-        return
-      }
-
-      const msgType = readInt8(data, 0) as BackendMessage
-      if (msgType === BackendMessage.RowDescription) {
+      } else if (msgType === BackendMessage.RowDescription) {
         const columnCount = readInt16(data, 5)
         let offset = 7
         for (let i = 0; i < columnCount; ++i) {
@@ -224,6 +181,62 @@ export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQue
 
           columnMetadata.push({ name: columnName, type: columnType })
         }
+        columnMetadataFetched = true
+      } else if (msgType === BackendMessage.ReadyForQuery) {
+        conn.removeListener('data', handleQueryPreparation)
+        if (parseCompleted && paramTypesFetched && columnMetadataFetched) {
+          resolve({ queryId, paramTypes, columnMetadata })
+        } else {
+          reject(new Error('Failed to parse query.'))
+        }
+        return
+      } else {
+        console.warn('[WARN] Unexpected message received during query preparation phase: ' + (BackendMessage[msgType] || msgType))
+      }
+
+      if (data.byteLength > 1 + msgSize) {
+        handleQueryPreparation(data.slice(1 + msgSize))
+      }
+    }
+
+    conn.write(createParseMessage(query, queryId, paramTypes))
+    conn.write(createDescribeMessage(queryId))
+    conn.write(createSyncMessage())
+  })
+}
+
+// const t0 = process.hrtime()
+// const t1 = process.hrtime(t0)
+// console.debug('Time:', t1[0] * 1000 + t1[1] / 1_000_000, 'ms')
+export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQuery, paramValues: ParamValue[]): Promise<QueryResult<R>> {
+  return new Promise((resolve, reject) => {
+    conn.on('data', handleQueryExecution)
+
+    let leftover: Buffer
+    let bindingCompleted = false
+    let commandCompleted = false
+
+    const { columnMetadata } = query
+    const rows: R[] = []
+    let rowsAffected = 0
+
+    function handleQueryExecution(data: Buffer): void {
+      debugMessage(data)
+
+      if (leftover) {
+        data = Buffer.concat([leftover, data])
+        leftover = undefined
+      }
+
+      const msgSize = readInt32(data, 1)
+      if (1 + msgSize > data.byteLength) {
+        leftover = data
+        return
+      }
+
+      const msgType = readInt8(data, 0) as BackendMessage
+      if (msgType === BackendMessage.BindComplete) {
+        bindingCompleted = true
       } else if (msgType === BackendMessage.DataRow) {
         const valueCount = readInt16(data, 5)
         if (columnMetadata.length !== valueCount) {
@@ -257,10 +270,8 @@ export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQue
           }
         }
         rows.push(row as R)
-      } else if (msgType === BackendMessage.EmptyQueryResponse) {
-      } else if (msgType === BackendMessage.PortalSuspended) {
-      } else if (msgType === BackendMessage.BindComplete) {
-        bindingCompleted = true
+      // } else if (msgType === BackendMessage.EmptyQueryResponse) {
+      // } else if (msgType === BackendMessage.PortalSuspended) {
       } else if (msgType === BackendMessage.CommandComplete) {
         const commandTagParts = readCString(data, 5).split(' ')
         rowsAffected = parseInt(commandTagParts[commandTagParts.length - 1], 10)
@@ -282,7 +293,6 @@ export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQue
       }
     }
 
-    conn.write(createDescribeMessage(query.queryId))
     conn.write(createBindMessage(paramValues, query, ''))
     conn.write(createExecuteMessage(''))
     conn.write(createSyncMessage())
@@ -659,6 +669,8 @@ function createFlushMessage(): Buffer {
 
   return message
 }
+
+type ParamValue = undefined | null | boolean | number | string
 
 function createBindMessage(paramValues: any[], query: PreparedQuery, portal: string): Buffer {
   const { queryId, paramTypes } = query
