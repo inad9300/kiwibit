@@ -2,58 +2,59 @@ import { createConnection, Socket } from 'net'
 import { createHash } from 'crypto'
 import { ConnectionOptions } from 'tls'
 
+const pool = newConnectionPool({
+  host: 'localhost',
+  port: 5000,
+  database: 'postgres',
+  username: 'postgres',
+  password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
+  // connectTimeout: 5_000
+})
+
+pool
+  .runStaticQuery`select amount from food_nutrients where amount > ${11.11} limit 4`
+  .then(result => console.debug('result', result))
+
 // References:
 // - https://postgresql.org/docs/13/protocol.html
 // - https://github.com/sfackler/rust-postgres/tree/master/postgres-protocol/src
-// - https://github.com/porsager/postgres/blob/master/lib
 // - https://github.com/postgres/postgres/tree/master/src/backend/libpq
 // - https://github.com/postgres/postgres/tree/master/src/backend/utils/adt
-// - https://github.com/brianc/node-postgres/blob/master/packages/pg-protocol/src
+// - https://github.com/nodejs/node/blob/master/lib/internal/buffer.js
 
-// Simple query
-// conn.write(createQueryMessage('select id, name from foods where id = 9'))
-
-// Extended query
-// (Parse + Describe? + Bind + Execute + Sync)
-// (Parse + Describe? + Sync) + (Bind + Execute + Sync)
-// (Close + Sync)
-
-// TODO For transaction operations, the simple query protocol should be considered for 'BEGIN', 'COMMIT' and 'ROLLBACK' messages
-// TODO Understand and consider "portals"
-// TODO Unify all data handlers?
-// TODO Combine contiguous socket writes
-
-export interface ConnectionPoolOptions {
+interface ConnectionPoolOptions {
   host?: string
   port?: number
   database?: string
   username?: string
   password: string
   ssl?: ConnectionOptions
-  minConnections?: number
-  maxConnections?: number
-  connectTimeout?: number
-  idleTimeout?: number
-  queryTimeout?: number
+  // minConnections?: number
+  // maxConnections?: number
+  // connectTimeout?: number
+  // idleTimeout?: number
+  // queryTimeout?: number
   // prepareTimeout?: number
 }
 
-export interface PreparedQuery {
+interface PreparedQuery {
   queryId: string
   paramTypes: ObjectId[]
   columnMetadata: ColumnMetadata[]
 }
 
 type Row = {
-  [columnName: string]: any
+  [columnName: string]: ColumnValue | Buffer
 }
+
+type ColumnValue = undefined | null | boolean | number | string
 
 type ColumnMetadata = {
   name: string
   type: ObjectId
 }
 
-export type QueryResult<R extends Row> = {
+type QueryResult<R extends Row> = {
   rows: R[]
   rowsAffected: number
   columnMetadata: ColumnMetadata[]
@@ -64,53 +65,58 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
   if (options.port            == null) options.port           = 5_432
   if (options.database        == null) options.database       = 'postgres'
   if (options.username        == null) options.username       = 'postgres'
-  if (options.minConnections  == null) options.minConnections = 2
-  if (options.maxConnections  == null) options.maxConnections = 16
-  if (options.connectTimeout  == null) options.connectTimeout = 30_000
-  if (options.idleTimeout     == null) options.idleTimeout    = 30_000
-  if (options.queryTimeout    == null) options.queryTimeout   = 120_000
+  // if (options.minConnections  == null) options.minConnections = 2
+  // if (options.maxConnections  == null) options.maxConnections = 16
+  // if (options.connectTimeout  == null) options.connectTimeout = 30_000
+  // if (options.idleTimeout     == null) options.idleTimeout    = 60_000
+  // if (options.queryTimeout    == null) options.queryTimeout   = 120_000
 
-  return {}
-}
+  const connPool = []
+  const queryQueue = []
 
-export function runStaticQuery(conn: Socket) {
-  return (queryParts: TemplateStringsArray, ...values: any[]) => {
-    const lastIdx = queryParts.length - 1
-    let query = ''
-    for (let i = 0; i < lastIdx; ++i) {
-      query += queryParts[i] + '$' + (i + 1)
+  // for (let i = 0; i < options.minConnections; ++i) {
+  //   establishConnection(options as Required<ConnectionPoolOptions>)
+  //     .then(conn => connPool.push(conn))
+  // }
+
+  function runDynamicQuery<R extends Row = Row, V extends ColumnValue[] = ColumnValue[]>(query: string, values: V): Promise<QueryResult<R>> {
+    // const t0 = process.hrtime()
+    // const t1 = process.hrtime(t0)
+    // console.debug('Time:', t1[0] * 1000 + t1[1] / 1_000_000, 'ms')
+
+    return establishConnection(options as Required<ConnectionPoolOptions>).then(async conn => {
+      // TODO Prepare queries at most once per connection
+      const queryId = md5(query)
+      const preparedQuery = await prepareQuery(conn, query, queryId)
+      return runPreparedQuery<R, V>(conn, preparedQuery, values)
+    })
+  }
+
+  return {
+    runDynamicQuery,
+    runStaticQuery<R extends Row = Row, V extends ColumnValue[] = ColumnValue[]>(queryParts: TemplateStringsArray, ...values: V): Promise<QueryResult<R>> {
+      const lastIdx = queryParts.length - 1
+      let query = ''
+      for (let i = 0; i < lastIdx; ++i) {
+        query += queryParts[i] + '$' + (i + 1)
+      }
+      query += queryParts[lastIdx]
+      return runDynamicQuery<R, V>(query, values)
+    },
+    beginTransaction() {
+      return establishConnection(options as Required<ConnectionPoolOptions>).then(conn => {
+        // TODO In each case, wait until a reply.
+        conn.write(createQueryMessage('begin'))
+        return {
+          commit() { conn.write(createQueryMessage('commit')) },
+          rollback() { conn.write(createQueryMessage('rollback')) }
+        }
+      })
     }
-    query += queryParts[lastIdx]
-
-    return runDynamicQuery(conn, query, values)
   }
 }
 
-export function runDynamicQuery<R extends Row>(conn: Socket, query: string, values: any[]): Promise<QueryResult<R>> {
-  return new Promise((resolve, reject) => {})
-}
-
-const connectionOptions = {
-  host: 'localhost',
-  port: 5000,
-  database: 'postgres',
-  username: 'postgres',
-  password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
-  connectTimeout: 5_000
-}
-
-establishConnection(connectionOptions as Required<ConnectionPoolOptions>).then(async conn => {
-  const preparedQuery = await prepareQuery(conn, `select amount from food_nutrients where amount > $1 limit 4`)
-  console.debug('preparedQuery', preparedQuery, '\n')
-  setTimeout(async () => {
-    const queryResults = await runPreparedQuery(conn, preparedQuery, [11.11])
-    console.debug('queryResults', queryResults)
-  }, 3_000)
-})
-
-let preparedQueryCount = 0
-
-export function prepareQuery(conn: Socket, query: string, paramTypes?: ObjectId[], queryId: string = 'q' + preparedQueryCount++): Promise<PreparedQuery> {
+function prepareQuery(conn: Socket, query: string, queryId: string, paramTypes?: ObjectId[]): Promise<PreparedQuery> {
   return new Promise((resolve, reject) => {
     conn.on('data', handleQueryPreparation)
 
@@ -127,8 +133,6 @@ export function prepareQuery(conn: Socket, query: string, paramTypes?: ObjectId[
     const columnMetadata: ColumnMetadata[] = []
 
     function handleQueryPreparation(data: Buffer): void {
-      debugMessage(data)
-
       if (leftover) {
         data = Buffer.concat([leftover, data])
         leftover = undefined
@@ -205,10 +209,7 @@ export function prepareQuery(conn: Socket, query: string, paramTypes?: ObjectId[
   })
 }
 
-// const t0 = process.hrtime()
-// const t1 = process.hrtime(t0)
-// console.debug('Time:', t1[0] * 1000 + t1[1] / 1_000_000, 'ms')
-export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQuery, paramValues: ParamValue[]): Promise<QueryResult<R>> {
+function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Socket, query: PreparedQuery, paramValues: V): Promise<QueryResult<R>> {
   return new Promise((resolve, reject) => {
     conn.on('data', handleQueryExecution)
 
@@ -221,8 +222,6 @@ export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQue
     let rowsAffected = 0
 
     function handleQueryExecution(data: Buffer): void {
-      debugMessage(data)
-
       if (leftover) {
         data = Buffer.concat([leftover, data])
         leftover = undefined
@@ -299,125 +298,6 @@ export function runPreparedQuery<R extends Row>(conn: Socket, query: PreparedQue
   })
 }
 
-export enum ObjectId {
-  Bit         = 1560,
-  Bool        = 16,
-  Box         = 603,
-  Bytea       = 17,
-  Char        = 18,
-  Date        = 1082,
-  Float4      = 700,
-  Float8      = 701,
-  Inet        = 869,
-  Int2        = 21,
-  Int4        = 23,
-  Int8        = 20,
-  Json        = 114,
-  Jsonb       = 3802,
-  Line        = 628,
-  Lseg        = 601,
-  Macaddr     = 829,
-  Money       = 790,
-  Numeric     = 1700,
-  Path        = 602,
-  Point       = 600,
-  Polygon     = 604,
-  Text        = 25,
-  Time        = 1083,
-  Timestamp   = 1114,
-  Timestamptz = 1184,
-  Timetz      = 1266,
-  Tsvector    = 3614,
-  Uuid        = 2950,
-  Varbit      = 1562,
-  Varchar     = 1043,
-  Xml         = 142,
-}
-
-enum FrontendMessage {
-  Bind            = 'B'.charCodeAt(0),
-  Close           = 'C'.charCodeAt(0),
-  CopyData        = 'd'.charCodeAt(0),
-  CopyDone        = 'c'.charCodeAt(0),
-  Describe        = 'D'.charCodeAt(0),
-  Execute         = 'E'.charCodeAt(0),
-  Flush           = 'H'.charCodeAt(0),
-  FunctionCall    = 'F'.charCodeAt(0),
-  Parse           = 'P'.charCodeAt(0),
-  PasswordMessage = 'p'.charCodeAt(0),
-  Query           = 'Q'.charCodeAt(0),
-  Sync            = 'S'.charCodeAt(0),
-  Terminate       = 'X'.charCodeAt(0),
-}
-
-enum BackendMessage {
-  Authentication           = 'R'.charCodeAt(0),
-  BackendKeyData           = 'K'.charCodeAt(0),
-  BindComplete             = '2'.charCodeAt(0),
-  CloseComplete            = '3'.charCodeAt(0),
-  CommandComplete          = 'C'.charCodeAt(0),
-  CopyBothResponse         = 'W'.charCodeAt(0),
-  CopyData                 = 'd'.charCodeAt(0),
-  CopyDone                 = 'c'.charCodeAt(0),
-  CopyInResponse           = 'G'.charCodeAt(0),
-  CopyOutResponse          = 'H'.charCodeAt(0),
-  DataRow                  = 'D'.charCodeAt(0),
-  EmptyQueryResponse       = 'I'.charCodeAt(0),
-  ErrorResponse            = 'E'.charCodeAt(0),
-  FunctionCallResponse     = 'V'.charCodeAt(0),
-  NegotiateProtocolVersion = 'v'.charCodeAt(0),
-  NoData                   = 'n'.charCodeAt(0),
-  NoticeResponse           = 'N'.charCodeAt(0),
-  NotificationResponse     = 'A'.charCodeAt(0),
-  ParameterDescription     = 't'.charCodeAt(0),
-  ParameterStatus          = 'S'.charCodeAt(0),
-  ParseComplete            = '1'.charCodeAt(0),
-  PortalSuspended          = 's'.charCodeAt(0),
-  ReadyForQuery            = 'Z'.charCodeAt(0),
-  RowDescription           = 'T'.charCodeAt(0),
-}
-
-enum ErrorResponseType {
-  SeverityLocalized = 'S'.charCodeAt(0),
-  Severity          = 'V'.charCodeAt(0),
-  Code              = 'C'.charCodeAt(0),
-  Message           = 'M'.charCodeAt(0),
-  Detail            = 'D'.charCodeAt(0),
-  Hint              = 'H'.charCodeAt(0),
-  Position          = 'P'.charCodeAt(0),
-  InternalPosition  = 'p'.charCodeAt(0),
-  Where             = 'W'.charCodeAt(0),
-  SchemaName        = 's'.charCodeAt(0),
-  ColumnName        = 'c'.charCodeAt(0),
-  DateTypeName      = 'd'.charCodeAt(0),
-  ConstraintName    = 'n'.charCodeAt(0),
-  File              = 'F'.charCodeAt(0),
-  Line              = 'L'.charCodeAt(0),
-  Routine           = 'R'.charCodeAt(0),
-}
-
-enum DescribeOrCloseRequest {
-  PreparedStatement = 'S'.charCodeAt(0),
-  Portal            = 'P'.charCodeAt(0),
-}
-
-const enum AuthenticationResponse {
-  Ok                = 0,
-  CleartextPassword = 3,
-  Md5               = 5,
-}
-
-const enum BindFormat {
-  Text   = 0,
-  Binary = 1,
-}
-
-enum TransactionStatus {
-  Idle                     = 'I'.charCodeAt(0),
-  InTransactionBlock       = 'T'.charCodeAt(0),
-  InFailedTransactionBlock = 'E'.charCodeAt(0),
-}
-
 function debugMessage(data: Buffer) {
   const msgType = readInt8(data, 0)
   const msgSize = readInt32(data, 1)
@@ -454,7 +334,7 @@ function parseErrorResponse(data: Buffer): ParsedError[] {
 function establishConnection(options: Required<ConnectionPoolOptions>): Promise<Socket> {
   return new Promise((resolve, reject) => {
     const conn = createConnection(options.port, options.host)
-    const connTimeout = setTimeout(() => conn.destroy(new Error('Connection timed out.')), options.connectTimeout)
+    // const connTimeout = setTimeout(() => conn.destroy(new Error('Connection timed out.')), options.connectTimeout)
 
     conn.on('connect', () => conn.write(createStartupMessage(options.username, options.database)))
 
@@ -498,11 +378,11 @@ function establishConnection(options: Required<ConnectionPoolOptions>): Promise<
           if (msgType === BackendMessage.ReadyForQuery) {
             // const transactionStatus = readInt8(data, 5) as TransactionStatus
             // console.debug('Transaction status:', String.fromCharCode(transactionStatus))
-            clearTimeout(connTimeout)
+            // clearTimeout(connTimeout)
             conn.removeListener('data', handleAuthentication)
             resolve(conn)
           } else {
-            console.warn(`[WARN] Unhandled message type sent by backend after succesful authentication: "${msgType}".`)
+            console.warn(`[WARN] Unhandled message type sent by backend after succesful authentication: "${BackendMessage[msgType] || msgType}".`)
           }
           msgSize = readInt32(data, 1)
         }
@@ -670,8 +550,6 @@ function createFlushMessage(): Buffer {
   return message
 }
 
-type ParamValue = undefined | null | boolean | number | string
-
 function createBindMessage(paramValues: any[], query: PreparedQuery, portal: string): Buffer {
   const { queryId, paramTypes } = query
 
@@ -688,7 +566,6 @@ function createBindMessage(paramValues: any[], query: PreparedQuery, portal: str
     + 2 // Number of result-column format codes
     + 2 // Result-column format code(s)
 
-  // TODO Use column size information?
   for (let i = 0; i < paramValues.length; ++i) {
     const t = paramTypes[i]
     if (t === ObjectId.Bool) {
@@ -764,8 +641,6 @@ function createExecuteMessage(portal: string): Buffer {
   return message
 }
 
-// https://github.com/nodejs/node/blob/master/lib/internal/buffer.js
-
 function writeInt8(buffer: Uint8Array, value: number, offset: number): number {
   buffer[offset++] = value
   return offset
@@ -818,4 +693,123 @@ function readCString(buffer: Buffer, offset: number): string {
     ++end
   }
   return buffer.slice(offset, end).toString('ascii')
+}
+
+enum FrontendMessage {
+  Bind            = 'B'.charCodeAt(0),
+  Close           = 'C'.charCodeAt(0),
+  CopyData        = 'd'.charCodeAt(0),
+  CopyDone        = 'c'.charCodeAt(0),
+  Describe        = 'D'.charCodeAt(0),
+  Execute         = 'E'.charCodeAt(0),
+  Flush           = 'H'.charCodeAt(0),
+  FunctionCall    = 'F'.charCodeAt(0),
+  Parse           = 'P'.charCodeAt(0),
+  PasswordMessage = 'p'.charCodeAt(0),
+  Query           = 'Q'.charCodeAt(0),
+  Sync            = 'S'.charCodeAt(0),
+  Terminate       = 'X'.charCodeAt(0),
+}
+
+enum BackendMessage {
+  Authentication           = 'R'.charCodeAt(0),
+  BackendKeyData           = 'K'.charCodeAt(0),
+  BindComplete             = '2'.charCodeAt(0),
+  CloseComplete            = '3'.charCodeAt(0),
+  CommandComplete          = 'C'.charCodeAt(0),
+  CopyBothResponse         = 'W'.charCodeAt(0),
+  CopyData                 = 'd'.charCodeAt(0),
+  CopyDone                 = 'c'.charCodeAt(0),
+  CopyInResponse           = 'G'.charCodeAt(0),
+  CopyOutResponse          = 'H'.charCodeAt(0),
+  DataRow                  = 'D'.charCodeAt(0),
+  EmptyQueryResponse       = 'I'.charCodeAt(0),
+  ErrorResponse            = 'E'.charCodeAt(0),
+  FunctionCallResponse     = 'V'.charCodeAt(0),
+  NegotiateProtocolVersion = 'v'.charCodeAt(0),
+  NoData                   = 'n'.charCodeAt(0),
+  NoticeResponse           = 'N'.charCodeAt(0),
+  NotificationResponse     = 'A'.charCodeAt(0),
+  ParameterDescription     = 't'.charCodeAt(0),
+  ParameterStatus          = 'S'.charCodeAt(0),
+  ParseComplete            = '1'.charCodeAt(0),
+  PortalSuspended          = 's'.charCodeAt(0),
+  ReadyForQuery            = 'Z'.charCodeAt(0),
+  RowDescription           = 'T'.charCodeAt(0),
+}
+
+enum ErrorResponseType {
+  SeverityLocalized = 'S'.charCodeAt(0),
+  Severity          = 'V'.charCodeAt(0),
+  Code              = 'C'.charCodeAt(0),
+  Message           = 'M'.charCodeAt(0),
+  Detail            = 'D'.charCodeAt(0),
+  Hint              = 'H'.charCodeAt(0),
+  Position          = 'P'.charCodeAt(0),
+  InternalPosition  = 'p'.charCodeAt(0),
+  Where             = 'W'.charCodeAt(0),
+  SchemaName        = 's'.charCodeAt(0),
+  ColumnName        = 'c'.charCodeAt(0),
+  DateTypeName      = 'd'.charCodeAt(0),
+  ConstraintName    = 'n'.charCodeAt(0),
+  File              = 'F'.charCodeAt(0),
+  Line              = 'L'.charCodeAt(0),
+  Routine           = 'R'.charCodeAt(0),
+}
+
+enum DescribeOrCloseRequest {
+  PreparedStatement = 'S'.charCodeAt(0),
+  Portal            = 'P'.charCodeAt(0),
+}
+
+const enum AuthenticationResponse {
+  Ok                = 0,
+  CleartextPassword = 3,
+  Md5               = 5,
+}
+
+const enum BindFormat {
+  Text   = 0,
+  Binary = 1,
+}
+
+enum TransactionStatus {
+  Idle                     = 'I'.charCodeAt(0),
+  InTransactionBlock       = 'T'.charCodeAt(0),
+  InFailedTransactionBlock = 'E'.charCodeAt(0),
+}
+
+enum ObjectId {
+  Bit         = 1560,
+  Bool        = 16,
+  Box         = 603,
+  Bytea       = 17,
+  Char        = 18,
+  Date        = 1082,
+  Float4      = 700,
+  Float8      = 701,
+  Inet        = 869,
+  Int2        = 21,
+  Int4        = 23,
+  Int8        = 20,
+  Json        = 114,
+  Jsonb       = 3802,
+  Line        = 628,
+  Lseg        = 601,
+  Macaddr     = 829,
+  Money       = 790,
+  Numeric     = 1700,
+  Path        = 602,
+  Point       = 600,
+  Polygon     = 604,
+  Text        = 25,
+  Time        = 1083,
+  Timestamp   = 1114,
+  Timestamptz = 1184,
+  Timetz      = 1266,
+  Tsvector    = 3614,
+  Uuid        = 2950,
+  Varbit      = 1562,
+  Varchar     = 1043,
+  Xml         = 142,
 }
