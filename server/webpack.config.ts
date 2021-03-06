@@ -23,10 +23,12 @@ const config: Configuration = {
       new DefinePlugin({ DEBUG: this.options.mode === 'development' }).apply(this)
       new IgnorePlugin({ resourceRegExp: /^pg-native$/ }).apply(this)
 
-      this.hooks.done.tap('hooks::done', () => {
+      this.hooks.done.tap('hooks::done', stats => {
         if (this.options.mode === 'development') {
           lastChild?.kill()
-          lastChild = spawn('node', ['--inspect=9229', 'bin/main.js'], { stdio: 'inherit' })
+          if (!stats.hasErrors()) {
+            lastChild = spawn('node', ['--inspect=9229', 'bin/main.js'], { stdio: 'inherit' })
+          }
         }
       })
     }
