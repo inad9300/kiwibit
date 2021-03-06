@@ -2,16 +2,6 @@ import { createConnection, Socket } from 'net'
 import { createHash } from 'crypto'
 import { ConnectionOptions } from 'tls'
 
-// pool
-//   .runStaticQuery<{ amount: number }, [number]>`select amount from food_nutrients where amount > ${11.11} limit 4`
-//   .then(result => {
-//     console.debug('[DEBUG] result-0', result)
-//
-//     pool
-//       .runStaticQuery<{ amount: number }, [number]>`select amount from food_nutrients where amount > ${11.11} limit 4`
-//       .then(result => console.debug('[DEBUG] result-1', result))
-//   })
-
 // References:
 // - https://postgresql.org/docs/13/protocol.html
 // - https://github.com/sfackler/rust-postgres/tree/master/postgres-protocol/src
@@ -137,13 +127,31 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
   return {
     runDynamicQuery,
     runStaticQuery<R extends Row = Row, V extends ColumnValue[] = ColumnValue[]>(queryParts: TemplateStringsArray, ...values: V): Promise<QueryResult<R>> {
-      const lastIdx = queryParts.length - 1
+      const lastIdx = values.length
+      const uniqueValues = [] as V
+      const argIndices: number[] = []
+
+      out:
+      for (let i = 0; i < lastIdx; ++i) {
+        const val = values[i]
+        const argIdx = uniqueValues.length
+        for (let j = 0; j < argIdx; ++j) {
+          if (val === uniqueValues[j]) {
+            argIndices.push(j + 1)
+            continue out
+          }
+        }
+        argIndices.push(argIdx + 1)
+        uniqueValues.push(val)
+      }
+
       let query = ''
       for (let i = 0; i < lastIdx; ++i) {
-        query += queryParts[i] + '$' + (i + 1)
+        query += queryParts[i] + '$' + argIndices[i]
       }
       query += queryParts[lastIdx]
-      return runDynamicQuery<R, V>(query, values)
+
+      return runDynamicQuery<R, V>(query, uniqueValues)
     },
     beginTransaction() {
       // TODO Take connection from pool.
@@ -378,6 +386,7 @@ function parseErrorResponse(data: Buffer): ParsedError[] {
 }
 
 // Set up basic error handling, send startup message and authenticate.
+// TODO Combine with other data handlers and replace promises with callbacks.
 function establishConnection(options: Required<ConnectionPoolOptions>): Promise<Socket> {
   return new Promise((resolve, reject) => {
     const conn = createConnection(options.port, options.host)
@@ -613,10 +622,13 @@ function createBindMessage(paramValues: any[], query: PreparedQuery, portal: str
     + 2 // Result-column format code(s)
 
   for (let i = 0; i < paramValues.length; ++i) {
-    const t = paramTypes[i]
     const v = paramValues[i]
     if (v == null) {
-    } else if (t === ObjectId.Bool) {
+      continue
+    }
+
+    const t = paramTypes[i]
+    if (t === ObjectId.Bool) {
       bufferSize += 1
     } else if (t === ObjectId.Int2) {
       bufferSize += 2
