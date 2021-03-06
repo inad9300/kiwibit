@@ -28,16 +28,19 @@ interface ColumnMetadata {
   udt_name: keyof typeof pgToJsType
 }
 
+// pg_catalog.pg_type
+
 pool
-  .query<ColumnMetadata>(`
+  .runStaticQuery<ColumnMetadata>`
     select table_name, column_name, udt_name, is_nullable, column_default
       -- character_maximum_length, is_identity, numeric_precision,
       -- numeric_precision_radix, numeric_scale, datetime_precision,
       -- interval_type, interval_precision
+      -- data_type
     from information_schema.columns
     where table_schema = 'public'
     order by table_name, ordinal_position
-  `)
+  `
   .then(res => {
     const columnsByTable: { [table: string]: ColumnMetadata[] } = {}
     res.rows.forEach(col => {

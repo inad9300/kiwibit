@@ -16,7 +16,8 @@ type FoodDetails = {
 const nutrientCategoryOrder = ['Minerals', 'Vitamins', 'Proteins', 'Fats', 'Carbohydrates', 'Other']
 
 export async function findFoodDetails(data: { id: number, nutrients: number[] }) {
-  const { rows } = await pool.query<FoodDetails>(`
+  const maybeNutrients = data.nutrients.length === 0 ? null : data.nutrients
+  const { rows } = await pool.runStaticQuery<FoodDetails>`
     select
       f.name,
       n.id nutrient_id,
@@ -33,12 +34,12 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
     left join nutrient_categories nc on (nc.id = n.category_id)
     left join units u on (u.id = n.unit_id)
     left join usda_categories uc on (uc.id = f.usda_category_id)
-    where f.id = $1
-    and ($2::int[] is null or n.id = any($2))
-  `, [data.id, data.nutrients.length === 0 ? null : data.nutrients])
+    where f.id = ${data.id}
+    and (${maybeNutrients}::int[] is null or n.id = any(${maybeNutrients}))
+  `
 
   if (data.nutrients.length > 0 && rows.length > 0) {
-    const remainingNutrients = await pool.query<FoodDetails>(`
+    const remainingNutrients = await pool.runStaticQuery<FoodDetails>`
       select
         null as name,
         n.id nutrient_id,
@@ -51,9 +52,9 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
         null food_category_color
       from nutrients n
       left join nutrient_categories nc on (nc.id = n.category_id)
-      where n.id = any($1)
-      and not (n.id = any($2))
-    `, [data.nutrients, rows.map(r => r.nutrient_id)])
+      where n.id = any(${data.nutrients})
+      and not (n.id = any(${rows.map(r => r.nutrient_id)}))
+    `
 
     rows.push(...remainingNutrients.rows)
   }

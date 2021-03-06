@@ -1,10 +1,10 @@
-import { Pool } from 'pg'
-import { log } from './log'
+import { newConnectionPool } from './pgeon'
 
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://postgres:hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E@localhost:5000/postgres',
-  max: 16
-})
-.on('error', (err, client) => {
-  log.error('Unexpected error on idle client.', err, client)
+export const pool = newConnectionPool({
+  host: 'localhost',
+  port: 5000,
+  database: 'postgres',
+  username: 'postgres',
+  password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
+  // connectTimeout: 5_000
 })

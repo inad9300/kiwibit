@@ -9,10 +9,10 @@ type UsdaCategory = {
 }
 
 export async function getAllUsdaCategories() {
-  const res = await pool.query<UsdaCategory>(`
+  const res = await pool.runStaticQuery<UsdaCategory>`
     select id, name, color, is_visible_default
     from usda_categories
-  `)
+  `
   return res.rows
 }
 

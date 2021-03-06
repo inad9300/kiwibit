@@ -10,23 +10,20 @@ export async function findFoodsByNameAndUsdaCategory(data: {
   foodName: string
   usdaCategoryIds: number[]
 }) {
-  const res = await pool.query<Food>(`
+  const maybeCategories = data.usdaCategoryIds.length === 0 ? null : data.usdaCategoryIds
+  const res = await pool.runStaticQuery<Food>`
     with foods_in_cat as (
       select f.id, f.name, f.name_tokens
       from foods f
-      where ($1::int[] is null or f.usda_category_id = any($1))
+      where (${maybeCategories}::int[] is null or f.usda_category_id = any(${maybeCategories}))
     )
     (
-      select fc.id, fc.name from foods_in_cat fc where fc.name_tokens @@ websearch_to_tsquery($2)
+      select fc.id, fc.name from foods_in_cat fc where fc.name_tokens @@ websearch_to_tsquery(${data.foodName})
       union
-      select fc.id, fc.name from foods_in_cat fc where lower(fc.name) like '%' || lower($3) || '%'
+      select fc.id, fc.name from foods_in_cat fc where lower(fc.name) like '%' || lower(${data.foodName.replace(/ /g, '%')}) || '%'
     )
     limit 100
-  `, [
-    data.usdaCategoryIds.length === 0 ? null : data.usdaCategoryIds,
-    data.foodName,
-    data.foodName.replace(/ /g, '%')
-  ])
+  `
   return res.rows
 }
 

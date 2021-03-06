@@ -3,7 +3,7 @@ import { pool } from '../pool'
 let energyId: number
 
 pool
-  .query(`select id from nutrients where name = 'Energy'`)
+  .runStaticQuery`select id from nutrients where name = 'Energy'`
   .then(res => (energyId = res.rows[0].id))
 
 type FoodNutrient = {
@@ -35,7 +35,7 @@ export async function getTopFoodsForNutrient(data: {
         )
       )`
 
-  const res = await pool.query<FoodNutrient>(`
+  const res = await pool.runDynamicQuery<FoodNutrient>(`
     select f.id, f.name, ${orderBy} amount, uc.color, uc.name usda_category_name, (
         select u.abbr
         from nutrients n

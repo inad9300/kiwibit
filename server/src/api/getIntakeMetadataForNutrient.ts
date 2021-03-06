@@ -5,33 +5,27 @@ export async function getIntakeMetadataForNutrient(data: {
   age: number
   gender: 'M' | 'F'
 }) {
-  const values = [
-    data.nutrientId,
-    data.age,
-    data.gender
-  ]
-
   const [rdi, ul] = await Promise.all([
-    pool.query<{ value: number }>(`
+    pool.runStaticQuery<{ value: number }>`
       select rdi.value
       from reference_intakes rdi
-      where rdi.nutrient_id = $1
-      and rdi.age_min <= $2
-      and rdi.age_max >= $2
-      and rdi.gender = $3
+      where rdi.nutrient_id = ${data.nutrientId}
+      and rdi.age_min <= ${data.age}
+      and rdi.age_max >= ${data.age}
+      and rdi.gender = ${data.gender}
       and rdi.for_pregnancy = 'N'
       and rdi.for_lactation = 'N'
-    `, values),
-    pool.query<{ value: number }>(`
+    `,
+    pool.runStaticQuery<{ value: number }>`
       select ul.value
       from tolerable_intakes ul
-      where ul.nutrient_id = $1
-      and ul.age_min <= $2
-      and ul.age_max >= $2
-      and ul.gender = $3
+      where ul.nutrient_id = ${data.nutrientId}
+      and ul.age_min <= ${data.age}
+      and ul.age_max >= ${data.age}
+      and ul.gender = ${data.gender}
       and ul.for_pregnancy = 'N'
       and ul.for_lactation = 'N'
-    `, values)
+    `
   ])
 
   return {
