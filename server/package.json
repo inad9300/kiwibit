@@ -6,11 +6,11 @@
     "generators": "ts-node --files ./src/schema.gen.ts"
   },
   "devDependencies": {
-    "@types/node": "14.14.22",
-    "ts-loader": "8.0.14",
+    "@types/node": "14.14.31",
+    "ts-loader": "8.0.17",
     "ts-node": "9.1.1",
-    "typescript": "4.1.3",
-    "webpack": "5.19.0",
-    "webpack-cli": "4.4.0"
+    "typescript": "4.2.3",
+    "webpack": "5.24.3",
+    "webpack-cli": "4.5.0"
   }
 }
