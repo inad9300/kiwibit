@@ -1,7 +1,7 @@
 import { pool } from './pool'
 import { ColumnMetadata, getTypeScriptType, ObjectId, PreparedQuery } from './pgeon'
 
-export default function pgeonLoader(source: string) {
+export default function pgeonLoader(this: any, source: string) {
   const callback = this.async()
   getSourceWithQueryTypes(source).then(typedSource => callback(null, typedSource))
 }
@@ -22,7 +22,7 @@ async function getSourceWithQueryTypes(source: string): Promise<string> {
   })
 
   for await (const { type, match } of promises) {
-    const start = match.index + 'runStaticQuery'.length
+    const start = match.index! + 'runStaticQuery'.length
     source = source.slice(0, start) + type + source.slice(start + (match[1]?.length || 0))
   }
 
@@ -48,8 +48,8 @@ async function getRowType(columnMetadata: ColumnMetadata[]): Promise<string> {
     from information_schema.columns col
     join pg_catalog.pg_class cls on (cls.relname = col.table_name)
     where col.table_schema = 'public'
-    and cls.oid::int in (${tableIds})
-    and col.ordinal_position in (${colPositions})
+    and cls.oid = any(${tableIds}::int[])
+    and col.ordinal_position = any(${colPositions})
   `
 
   const colTypes: string[] = []

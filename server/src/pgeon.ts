@@ -49,6 +49,12 @@ interface QueryResult<R extends Row> {
   columnMetadata: ColumnMetadata[]
 }
 
+interface Connection extends Socket {
+  preparedQueries: {
+    [queryId: string]: PreparedQuery
+  }
+}
+
 export function newConnectionPool(options: ConnectionPoolOptions) {
   if (options.host            == null) options.host           = 'localhost'
   if (options.port            == null) options.port           = 5_432
@@ -61,8 +67,8 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
   // if (options.queryTimeout    == null) options.queryTimeout   = 120_000
 
   let connCount = 0
-  const connPool: Promise<Socket>[] = []
-  const connQueue: ((conn: Socket | PromiseLike<Socket>) => void)[] = []
+  const connPool: Promise<Connection>[] = []
+  const connQueue: ((conn: Connection | PromiseLike<Connection>) => void)[] = []
 
   // const connTimeout = setTimeout(() => conn.destroy(new Error('Connection timed out.')), options.connectTimeout)
   // clearTimeout(connTimeout)
@@ -84,7 +90,7 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
       .catch(() => onConnectionLost(connPromise))
   }
 
-  function onConnectionLost(connPromise: Promise<Socket>) {
+  function onConnectionLost(connPromise: Promise<Connection>) {
     const idx = connPool.indexOf(connPromise)
     if (idx > -1) {
       connPool.splice(idx, 1)
@@ -96,7 +102,7 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
     }
   }
 
-  function takeConnectionFromPool(): Promise<Socket> {
+  function takeConnectionFromPool(): Promise<Connection> {
     if (connPool.length === 0 && connCount < options.maxConnections) {
       putConnectionInPool()
     }
@@ -112,16 +118,16 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
     const conn = await connPromise
     try {
       const queryId = md5(query)
-      const preparedQuery = conn[queryId] as PreparedQuery || await prepareQuery(conn, query, queryId)
-      conn[queryId] = preparedQuery // FIXME Store in different place.
+      const preparedQuery = conn.preparedQueries[queryId] || await prepareQuery(conn, query, queryId)
+      conn.preparedQueries[queryId] = preparedQuery
       return await runPreparedQuery<R, V>(conn, preparedQuery, values)
     } finally {
-      if (conn.destroyed) return
-
-      if (connQueue.length > 0) {
-        connQueue.shift()(conn)
-      } else {
-        connPool.push(connPromise)
+      if (!conn.destroyed) {
+        if (connQueue.length > 0) {
+          connQueue.shift()(conn)
+        } else {
+          connPool.push(connPromise)
+        }
       }
     }
   }
@@ -173,7 +179,7 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
   }
 }
 
-function prepareQuery(conn: Socket, query: string, queryId: string, paramTypes?: ObjectId[]): Promise<PreparedQuery> {
+function prepareQuery(conn: Connection, query: string, queryId: string, paramTypes?: ObjectId[]): Promise<PreparedQuery> {
   return new Promise((resolve, reject) => {
     conn.on('data', handleQueryPreparation)
 
@@ -266,7 +272,7 @@ function prepareQuery(conn: Socket, query: string, queryId: string, paramTypes?:
   })
 }
 
-function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Socket, query: PreparedQuery, paramValues: V): Promise<QueryResult<R>> {
+function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Connection, query: PreparedQuery, paramValues: V): Promise<QueryResult<R>> {
   return new Promise((resolve, reject) => {
     conn.on('data', handleQueryExecution)
 
@@ -395,7 +401,7 @@ function parseErrorResponse(data: Buffer): ParsedError[] {
 
 // Set up basic error handling, send startup message and authenticate.
 // TODO Combine with other data handlers and replace promises with callbacks.
-function establishConnection(options: Required<ConnectionPoolOptions>): Promise<Socket> {
+function establishConnection(options: Required<ConnectionPoolOptions>): Promise<Connection> {
   return new Promise((resolve, reject) => {
     const conn = createConnection(options.port, options.host)
 
@@ -443,7 +449,8 @@ function establishConnection(options: Required<ConnectionPoolOptions>): Promise<
             // const transactionStatus = readInt8(data, 5) as TransactionStatus
             // console.debug('Transaction status:', String.fromCharCode(transactionStatus))
             conn.removeListener('data', handleAuthentication)
-            resolve(conn)
+            ;(conn as Connection).preparedQueries = {}
+            resolve(conn as Connection)
           } else if (msgType === BackendMessage.ParameterStatus) {
             const paramName = readCString(data, 5)
             const paramValue = readCString(data, 5 + paramName.length + 1)
