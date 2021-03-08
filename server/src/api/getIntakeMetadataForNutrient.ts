@@ -6,7 +6,7 @@ export async function getIntakeMetadataForNutrient(data: {
   gender: 'M' | 'F'
 }) {
   const [rdi, ul] = await Promise.all([
-    pool.runStaticQuery<{ value: number }>`
+    pool.runStaticQuery`
       select rdi.value
       from reference_intakes rdi
       where rdi.nutrient_id = ${data.nutrientId}
@@ -16,7 +16,7 @@ export async function getIntakeMetadataForNutrient(data: {
       and rdi.for_pregnancy = 'N'
       and rdi.for_lactation = 'N'
     `,
-    pool.runStaticQuery<{ value: number }>`
+    pool.runStaticQuery`
       select ul.value
       from tolerable_intakes ul
       where ul.nutrient_id = ${data.nutrientId}

@@ -1,15 +1,7 @@
 import { pool } from '../pool'
-import { usda_categories } from '../schema'
-
-type UsdaCategory = {
-  id: usda_categories['id']
-  name: usda_categories['name']
-  color: usda_categories['color']
-  is_visible_default: usda_categories['is_visible_default']
-}
 
 export async function getAllUsdaCategories() {
-  const res = await pool.runStaticQuery<UsdaCategory>`
+  const res = await pool.runStaticQuery`
     select id, name, color, is_visible_default
     from usda_categories
   `

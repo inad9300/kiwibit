@@ -1,29 +1,21 @@
 import { pool } from '../pool'
-import * as schema from '../schema'
-
-type IntakeMetadata = {
-  value: schema.reference_intakes['value']
-  age_min: schema.reference_intakes['age_min']
-  age_max: schema.reference_intakes['age_max']
-  gender: 'M' | 'F'
-}
 
 export async function getAllIntakeMetadataForNutrient(data: { nutrientId: number }) {
   const [unitMetadata, rdis, uls] = await Promise.all([
-    pool.runStaticQuery<{ abbr: schema.units['abbr'] }>`
+    pool.runStaticQuery`
       select u.abbr
       from nutrients n
       left join units u on (u.id = n.unit_id)
       where n.id = ${data.nutrientId}
     `,
-    pool.runStaticQuery<IntakeMetadata>`
+    pool.runStaticQuery`
       select rdi.value, rdi.age_min, rdi.age_max, rdi.gender
       from reference_intakes rdi
       where rdi.nutrient_id = ${data.nutrientId}
       and rdi.for_pregnancy = 'N'
       and rdi.for_lactation = 'N'
     `,
-    pool.runStaticQuery<IntakeMetadata>`
+    pool.runStaticQuery`
       select ul.value, ul.age_min, ul.age_max, ul.gender
       from tolerable_intakes ul
       where ul.nutrient_id = ${data.nutrientId}

@@ -1,19 +1,7 @@
 import { pool } from '../pool'
-import { nutrients, units, nutrient_categories } from '../schema'
-
-type NutrientWithUnit = {
-  id: nutrients['id']
-  name: nutrients['name']
-  alias: nutrients['alias']
-  abbr: nutrients['abbr']
-  is_visible_default: nutrients['is_visible_default']
-  unit_name: units['name']
-  unit_abbr: units['abbr']
-  category: nutrient_categories['name']
-}
 
 export async function getAllNutrients() {
-  const res = await pool.runStaticQuery<NutrientWithUnit>`
+  const res = await pool.runStaticQuery`
     select n.id, n.name, n.alias, n.abbr, n.is_visible_default, u.name unit_name, u.abbr unit_abbr, nc.name category
     from nutrients n
     left join units u on (u.id = n.unit_id)

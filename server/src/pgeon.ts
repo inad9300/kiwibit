@@ -24,7 +24,7 @@ interface ConnectionPoolOptions {
   // prepareTimeout?: number
 }
 
-interface PreparedQuery {
+export interface PreparedQuery {
   queryId: string
   paramTypes: ObjectId[]
   columnMetadata: ColumnMetadata[]
@@ -36,12 +36,14 @@ type Row = {
 
 type ColumnValue = any // undefined | null | boolean | number | string
 
-type ColumnMetadata = {
+export interface ColumnMetadata {
   name: string
   type: ObjectId
+  tableId?: number
+  positionInTable?: number
 }
 
-type QueryResult<R extends Row> = {
+interface QueryResult<R extends Row> {
   rows: R[]
   rowsAffected: number
   columnMetadata: ColumnMetadata[]
@@ -125,8 +127,12 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
   }
 
   return {
+    prepareQuery(q: string) {
+      return establishConnection(options as Required<ConnectionPoolOptions>)
+        .then(conn => prepareQuery(conn, q, ''))
+    },
     runDynamicQuery,
-    runStaticQuery<R extends Row = Row, V extends ColumnValue[] = ColumnValue[]>(queryParts: TemplateStringsArray, ...values: V): Promise<QueryResult<R>> {
+    runStaticQuery<R extends Row = any, V extends ColumnValue[] = any[]>(queryParts: TemplateStringsArray, ...values: V): Promise<QueryResult<R>> {
       const lastIdx = values.length
       const uniqueValues = [] as V
       const argIndices: number[] = []
@@ -210,19 +216,19 @@ function prepareQuery(conn: Socket, query: string, queryId: string, paramTypes?:
         }
         paramTypesFetched = true
       } else if (msgType === BackendMessage.RowDescription) {
-        const columnCount = readInt16(data, 5)
+        const colCount = readInt16(data, 5)
         let offset = 7
-        for (let i = 0; i < columnCount; ++i) {
-          const columnName = readCString(data, offset)
-          offset += columnName.length + 1
+        for (let i = 0; i < colCount; ++i) {
+          const colName = readCString(data, offset)
+          offset += colName.length + 1
 
-          const tableType = readInt32(data, offset)
+          const tableOid = readInt32(data, offset)
           offset += 4
 
-          const columnAttrNumber = readInt16(data, offset)
+          const colAttrNumber = readInt16(data, offset)
           offset += 2
 
-          const columnType = readInt32(data, offset)
+          const colType = readInt32(data, offset)
           offset += 4
 
           const dataTypeSize = readInt16(data, offset)
@@ -234,7 +240,7 @@ function prepareQuery(conn: Socket, query: string, queryId: string, paramTypes?:
           const formatCode = readInt16(data, offset)
           offset += 2
 
-          columnMetadata.push({ name: columnName, type: columnType })
+          columnMetadata.push({ name: colName, type: colType, tableId: tableOid || undefined, positionInTable: colAttrNumber || undefined })
         }
         columnMetadataFetched = true
       } else if (msgType === BackendMessage.ReadyForQuery) {
@@ -311,11 +317,13 @@ function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Socket, 
               row[column.name] = readInt16(value, 0)
             } else if (column.type === ObjectId.Int4) {
               row[column.name] = readInt32(value, 0)
+            } else if (column.type === ObjectId.Oid) {
+              row[column.name] = readInt32(value, 0) // FIXME It is unsigned
             } else if (column.type === ObjectId.Int8) {
-              row[column.name] = readInt32(value, 0)
+              row[column.name] = readInt32(value, 0) // FIXME
             } else if (column.type === ObjectId.Float8) {
               row[column.name] = value.readDoubleBE()
-            } else if (column.type === ObjectId.Varchar || column.type === ObjectId.Text || column.type === ObjectId.Bpchar) {
+            } else if (column.type === ObjectId.Char || column.type === ObjectId.Varchar || column.type === ObjectId.Text || column.type === ObjectId.Bpchar || column.type === ObjectId.Name) {
               row[column.name] = value.toString()
             } else {
               console.warn(`[WARN] Unsupported column data type: ${ObjectId[column.type] || column.type}.`)
@@ -436,6 +444,13 @@ function establishConnection(options: Required<ConnectionPoolOptions>): Promise<
             // console.debug('Transaction status:', String.fromCharCode(transactionStatus))
             conn.removeListener('data', handleAuthentication)
             resolve(conn)
+          } else if (msgType === BackendMessage.ParameterStatus) {
+            const paramName = readCString(data, 5)
+            const paramValue = readCString(data, 5 + paramName.length + 1)
+            // console.debug(`[DEBUG] ${paramName} = ${paramValue}`)
+          } else if (msgType === BackendMessage.BackendKeyData) {
+            const processId = readInt32(data, 5)
+            const secretCancellationKey = readInt32(data, 9)
           } else {
             console.warn(`[WARN] Unhandled message type sent by backend after succesful authentication: "${BackendMessage[msgType] || msgType}".`)
           }
@@ -632,11 +647,11 @@ function createBindMessage(paramValues: any[], query: PreparedQuery, portal: str
       bufferSize += 1
     } else if (t === ObjectId.Int2) {
       bufferSize += 2
-    } else if (t === ObjectId.Int4 || t === ObjectId.Float4) {
+    } else if (t === ObjectId.Int4 || t === ObjectId.Float4 || t === ObjectId.Oid) {
       bufferSize += 4
     } else if (t === ObjectId.Int8 || t === ObjectId.Float8) {
       bufferSize += 8
-    } else if (t === ObjectId.Varchar || t === ObjectId.Text || t === ObjectId.Bpchar) {
+    } else if (t === ObjectId.Char || t === ObjectId.Varchar || t === ObjectId.Text || t === ObjectId.Bpchar || t === ObjectId.Name) {
       bufferSize += Buffer.byteLength(paramValues[i])
     } else if (t === ObjectId.Int4Array) {
       bufferSize += 20 + paramValues[i].length * 8
@@ -670,6 +685,9 @@ function createBindMessage(paramValues: any[], query: PreparedQuery, portal: str
     } else if (t === ObjectId.Int4) {
       offset = writeInt32(message, 4, offset)
       offset = writeInt32(message, v, offset)
+    } else if (t === ObjectId.Oid) {
+      offset = writeInt32(message, 4, offset)
+      offset = writeInt32(message, v, offset)
     } else if (t === ObjectId.Int8) {
       offset = writeInt32(message, 8, offset)
       offset = writeInt32(message, 0, offset) // FIXME
@@ -680,7 +698,7 @@ function createBindMessage(paramValues: any[], query: PreparedQuery, portal: str
     } else if (t === ObjectId.Float8) {
       offset = writeInt32(message, 8, offset)
       offset = message.writeDoubleBE(v, offset)
-    } else if (t === ObjectId.Varchar || t === ObjectId.Text || t === ObjectId.Bpchar) {
+    } else if (t === ObjectId.Char || t === ObjectId.Varchar || t === ObjectId.Text || t === ObjectId.Bpchar || t === ObjectId.Name) {
       offset = writeInt32(message, Buffer.byteLength(v), offset)
       offset += message.write(v, offset)
     } else if (t === ObjectId.Int4Array) {
@@ -713,6 +731,23 @@ function createExecuteMessage(portal: string): Buffer {
   writeInt32(message, 0, offset)
 
   return message
+}
+
+export function getTypeScriptType(pgType: ObjectId) {
+  if (pgType === ObjectId.Bool) {
+    return 'boolean'
+  } else if (pgType === ObjectId.Int2 || pgType === ObjectId.Int4 || pgType === ObjectId.Float4 || pgType === ObjectId.Int8 || pgType === ObjectId.Float8) {
+    return 'number'
+  } else if (pgType === ObjectId.Char || pgType === ObjectId.Varchar || pgType === ObjectId.Text || pgType === ObjectId.Bpchar || pgType === ObjectId.Name) {
+    return 'string'
+  } else if (pgType === ObjectId.Int4Array) {
+    return 'number[]'
+  } else if (pgType === ObjectId.Bytea) {
+    return 'Uint8Array'
+  } else {
+    console.warn(`[WARN] Tried binding a parameter of an unsupported type: ${ObjectId[pgType] || pgType}`)
+    return 'any'
+  }
 }
 
 function writeInt8(buffer: Uint8Array, value: number, offset: number): number {
@@ -868,7 +903,7 @@ enum TransactionStatus {
 
 type CommandTag = 'INSERT' | 'DELETE' | 'UPDATE' | 'SELECT' | 'MOVE' | 'FETCH' | 'COPY'
 
-enum ObjectId {
+export enum ObjectId {
   Aclitem               = 1033,
   AclitemArray          = 1034,
   Any                   = 2276,

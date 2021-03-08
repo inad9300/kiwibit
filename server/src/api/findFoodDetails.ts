@@ -1,23 +1,10 @@
 import { pool } from '../pool'
-import * as schema from '../schema'
-
-type FoodDetails = {
-  name: schema.foods['name']
-  nutrient_id: schema.nutrients['id']
-  nutrient_name: schema.nutrients['name']
-  nutrient_alias: schema.nutrients['alias']
-  unit_abbr: schema.units['abbr']
-  amount: schema.food_nutrients['amount']
-  nutrient_category_name: schema.nutrient_categories['name']
-  food_category_name: schema.usda_categories['name']
-  food_category_color: schema.usda_categories['color']
-}
 
 const nutrientCategoryOrder = ['Minerals', 'Vitamins', 'Proteins', 'Fats', 'Carbohydrates', 'Other']
 
 export async function findFoodDetails(data: { id: number, nutrients: number[] }) {
   const maybeNutrients = data.nutrients.length === 0 ? null : data.nutrients
-  const { rows } = await pool.runStaticQuery<FoodDetails>`
+  const { rows: nutrients } = await pool.runStaticQuery`
     select
       f.name,
       n.id nutrient_id,
@@ -38,34 +25,34 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
     and (${maybeNutrients}::int[] is null or n.id = any(${maybeNutrients}))
   `
 
-  if (data.nutrients.length > 0 && rows.length > 0) {
-    const remainingNutrients = await pool.runStaticQuery<FoodDetails>`
+  if (data.nutrients.length > 0 && nutrients.length > 0) {
+    const { rows: remainingNutrients } = await pool.runStaticQuery`
       select
         null as name,
         n.id nutrient_id,
         n.name nutrient_name,
         n.alias nutrient_alias,
         null unit_abbr,
-        null amount,
+        null::int amount,
         nc.name nutrient_category_name,
         null food_category_name,
         null food_category_color
       from nutrients n
       left join nutrient_categories nc on (nc.id = n.category_id)
       where n.id = any(${data.nutrients})
-      and not (n.id = any(${rows.map(r => r.nutrient_id)}))
+      and not (n.id = any(${nutrients.map(r => r.nutrient_id)}))
     `
 
-    rows.push(...remainingNutrients.rows)
+    nutrients.push(...remainingNutrients)
   }
 
-  const { name, food_category_name, food_category_color } = rows[0]
+  const { name, food_category_name, food_category_color } = nutrients[0]
 
   return {
     name,
     food_category_name,
     food_category_color,
-    nutrients: rows
+    nutrients: nutrients
       .sort((a, b) => {
         if (a.nutrient_category_name === b.nutrient_category_name) {
           return a.nutrient_name > b.nutrient_name ? 1 : -1

@@ -11,7 +11,7 @@ const config: Configuration = {
   module: {
     rules: [{
       test: /\.ts$/,
-      use: 'ts-loader',
+      use: ['ts-loader', './src/pgeon-loader.ts'],
       include: [
         resolve(__dirname, 'src'),
         resolve(__dirname, '../shared')

@@ -1,14 +1,7 @@
 import { pool } from '../pool'
-import * as schema from '../schema'
-
-type IntakeMetadata = {
-  nutrient_id: schema.nutrients['id']
-  rdi?: schema.reference_intakes['value']
-  ul?: schema.tolerable_intakes['value']
-}
 
 export async function getIntakeMetadataForAllNutrients(data: { age: number; gender: 'M' | 'F' }) {
-  const res = await pool.runStaticQuery<IntakeMetadata>`
+  const res = await pool.runStaticQuery`
     select *
     from (
       select n.id nutrient_id, (

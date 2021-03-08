@@ -2,8 +2,7 @@
   "private": true,
   "scripts": {
     "start": "webpack --mode development --devtool inline-source-map --watch",
-    "build": "webpack --mode production",
-    "generators": "ts-node --files ./src/schema.gen.ts"
+    "build": "webpack --mode production"
   },
   "devDependencies": {
     "@types/node": "14.14.31",
