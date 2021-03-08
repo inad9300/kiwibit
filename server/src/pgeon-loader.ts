@@ -22,8 +22,8 @@ async function getSourceWithQueryTypes(source: string): Promise<string> {
   })
 
   for await (const { type, match } of promises) {
-    const startIdx = match.index + 'runStaticQuery'.length
-    source = source.slice(0, startIdx) + type + source.slice(startIdx + (match[1]?.length || 0))
+    const start = match.index + 'runStaticQuery'.length
+    source = source.slice(0, start) + type + source.slice(start + (match[1]?.length || 0))
   }
 
   return source
@@ -44,19 +44,19 @@ async function getRowType(columnMetadata: ColumnMetadata[]): Promise<string> {
   }
 
   const { rows } = await pool.runStaticQuery`
-    select cls.oid as table_oid, col.ordinal_position, col.is_nullable
+    select cls.oid, col.ordinal_position, col.is_nullable
     from information_schema.columns col
     join pg_catalog.pg_class cls on (cls.relname = col.table_name)
     where col.table_schema = 'public'
-    and cls.oid = any(${tableIds}::int[])
-    and col.ordinal_position = any(${colPositions})
+    and cls.oid::int in (${tableIds})
+    and col.ordinal_position in (${colPositions})
   `
 
   const colTypes: string[] = []
   for (const col of columnMetadata) {
     let colType = `${col.name}: ${getTypeScriptType(col.type)}`
     if (col.tableId) {
-      const row = rows.find(r => r.table_oid === col.tableId && r.ordinal_position === col.positionInTable)
+      const row = rows.find(r => r.oid === col.tableId && r.ordinal_position === col.positionInTable)
       if (row?.is_nullable === 'YES') {
         colType += ' | null'
       }
@@ -66,28 +66,6 @@ async function getRowType(columnMetadata: ColumnMetadata[]): Promise<string> {
 
   return '{ ' + colTypes.join(', ') + ' }'
 }
-
-// async function getRowType(columnMetadata: ColumnMetadata[]): Promise<string> {
-//   const colTypes: string[] = []
-//   for (const col of columnMetadata) {
-//     let colType = `${col.name}: ${getTypeScriptType(col.type)}`
-//     if (col.tableId) {
-//       const { rows } = await pool.runStaticQuery`
-//         select is_nullable
-//         from information_schema.columns
-//         where table_schema = 'public'
-//         and table_name = (select relname from pg_catalog.pg_class where oid = ${col.tableId})
-//         and ordinal_position = ${col.positionInTable}
-//       `
-//       if (rows.length === 0 || rows[0].is_nullable === 'YES') {
-//         colType += ' | null'
-//       }
-//     }
-//     colTypes.push(colType)
-//   }
-
-//   return '{ ' + colTypes.join(', ') + ' }'
-// }
 
 function getParamsType(paramTypes: ObjectId[]): string {
   return '[' + paramTypes.map(getTypeScriptType).join(', ') + ']'
