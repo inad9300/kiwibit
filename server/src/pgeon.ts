@@ -55,6 +55,17 @@ interface Connection extends Socket {
   }
 }
 
+// newConnectionPool({
+//   host: 'localhost',
+//   port: 5000,
+//   database: 'postgres',
+//   username: 'postgres',
+//   password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
+//   // connectTimeout: 5_000
+// })
+// .runStaticQuery`select 1 one`
+// .then(data => console.log('Selected: ', data))
+
 export function newConnectionPool(options: ConnectionPoolOptions) {
   if (options.host            == null) options.host           = 'localhost'
   if (options.port            == null) options.port           = 5_432
@@ -78,7 +89,7 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
   }
 
   function putConnectionInPool() {
-    const connPromise = establishConnection(options as Required<ConnectionPoolOptions>)
+    const connPromise = openConnection(options as Required<ConnectionPoolOptions>)
     if (connQueue.length > 0) {
       connQueue.shift()(connPromise)
     } else {
@@ -134,11 +145,11 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
 
   return {
     prepareQuery(q: string) {
-      return establishConnection(options as Required<ConnectionPoolOptions>)
+      return openConnection(options as Required<ConnectionPoolOptions>)
         .then(conn => prepareQuery(conn, q, ''))
     },
     runDynamicQuery,
-    runStaticQuery<R extends Row = any, V extends ColumnValue[] = any[]>(queryParts: TemplateStringsArray, ...values: V): Promise<QueryResult<R>> {
+    runStaticQuery<R extends Row = Row, V extends ColumnValue[] = ColumnValue[]>(queryParts: TemplateStringsArray, ...values: V): Promise<QueryResult<R>> {
       const lastIdx = values.length
       const uniqueValues = [] as V
       const argIndices: number[] = []
@@ -167,7 +178,7 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
     },
     beginTransaction() {
       // TODO Take connection from pool.
-      return establishConnection(options as Required<ConnectionPoolOptions>).then(conn => {
+      return openConnection(options as Required<ConnectionPoolOptions>).then(conn => {
         // TODO In each case, wait until a reply.
         conn.write(createQueryMessage('begin'))
         return {
@@ -177,6 +188,101 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
       })
     }
   }
+}
+
+function openConnection(options: Required<ConnectionPoolOptions>): Promise<Connection> {
+  return new Promise((resolve, reject) => {
+    const conn = createConnection(options.port, options.host)
+
+    conn.on('connect', () => conn.write(createStartupMessage(options.username, options.database)))
+
+    conn.on('error', err => {
+      conn.destroy(err)
+      reject(err)
+    })
+
+    conn.on('data', data => {
+      const msgType = readInt8(data, 0) as BackendMessage
+      if (msgType === BackendMessage.NoticeResponse) {
+        const notice = parseErrorResponse(data)
+        console.log('[NOTICE]', notice)
+      }
+    })
+
+    conn.on('data', handleStartupPhase)
+
+    let authOk = false
+
+    function handleStartupPhase(data: Buffer): void {
+      const msgType = readInt8(data, 0) as BackendMessage
+
+      if (msgType === BackendMessage.Authentication) {
+        const authRes = readInt32(data, 5) as AuthenticationResponse
+        if (authRes === AuthenticationResponse.Md5) {
+          const salt = data.slice(9)
+          conn.write(createMd5PasswordMessage(options.username, options.password, salt))
+        } else if (authRes === AuthenticationResponse.Ok) {
+          authOk = true
+        } else if (authRes === AuthenticationResponse.CleartextPassword) {
+          conn.write(createCleartextPasswordMessage(options.password))
+        } else {
+          const err = new Error(`Unsupported authentication response sent by server: "${AuthenticationResponse[authRes] || authRes}".`)
+          conn.destroy(err)
+          return reject(err)
+        }
+      }
+      else if (msgType === BackendMessage.ParameterStatus) {
+        const paramName = readCString(data, 5)
+        const paramValue = readCString(data, 5 + paramName.length + 1)
+        // console.debug(`[DEBUG] ${paramName} = ${paramValue}`)
+      }
+      else if (msgType === BackendMessage.BackendKeyData) {
+        const processId = readInt32(data, 5)
+        const secretCancellationKey = readInt32(data, 9)
+      }
+      else if (msgType === BackendMessage.ReadyForQuery) {
+        // const txStatus = readInt8(data, 5) as TransactionStatus
+        if (authOk) {
+          conn.removeListener('data', handleStartupPhase)
+          ;(conn as Connection).preparedQueries = {}
+          resolve(conn as Connection)
+        } else {
+          const err = new Error('Authentication could not be completed.')
+          conn.destroy(err)
+          return reject(err)
+        }
+      }
+      else if (msgType === BackendMessage.ErrorResponse) {
+        const msg = parseErrorResponse(data).find(err => err.type === ErrorResponseType.Message)?.value || ''
+        const err = new Error(`Error received from server during startup phase: "${msg}".`)
+        conn.destroy(err)
+        return reject(err)
+      }
+      else if (msgType === BackendMessage.NegotiateProtocolVersion) {
+        const minorVersion = readInt32(data, 5)
+        const unrecognizedOptions: string[] = []
+        const unrecognizedOptionsCount = readInt32(data, 9)
+        let offset = 13
+        for (let i = 0; i < unrecognizedOptionsCount; ++i) {
+          const opt = readCString(data, offset)
+          unrecognizedOptions.push(opt)
+          offset += opt.length
+        }
+        const unrecognizedOptionsMsg = unrecognizedOptions.length === 0 ? '' : ` The following options were not recognized by the server: ${unrecognizedOptions.join(', ')}.`
+        const err = new Error(`The Postgres server does not support protocol versions greather than 3.${minorVersion}.${unrecognizedOptionsMsg}`)
+        conn.destroy(err)
+        return reject(err)
+      }
+      else {
+        console.warn(`[WARN] Unexpected message type sent by server during startup phase: "${BackendMessage[msgType] || msgType}".`)
+      }
+
+      const msgSize = readInt32(data, 1)
+      if (data.byteLength > 1 + msgSize) {
+        handleStartupPhase(data.slice(1 + msgSize))
+      }
+    }
+  })
 }
 
 function prepareQuery(conn: Connection, query: string, queryId: string, paramTypes?: ObjectId[]): Promise<PreparedQuery> {
@@ -210,7 +316,8 @@ function prepareQuery(conn: Connection, query: string, queryId: string, paramTyp
       const msgType = readInt8(data, 0) as BackendMessage
       if (msgType === BackendMessage.ParseComplete) {
         parseCompleted = true
-      } else if (msgType === BackendMessage.ParameterDescription) {
+      }
+      else if (msgType === BackendMessage.ParameterDescription) {
         if (shouldFetchParamTypes) {
           const paramCount = readInt16(data, 5)
           let offset = 7
@@ -221,7 +328,8 @@ function prepareQuery(conn: Connection, query: string, queryId: string, paramTyp
           }
         }
         paramTypesFetched = true
-      } else if (msgType === BackendMessage.RowDescription) {
+      }
+      else if (msgType === BackendMessage.RowDescription) {
         const colCount = readInt16(data, 5)
         let offset = 7
         for (let i = 0; i < colCount; ++i) {
@@ -249,7 +357,8 @@ function prepareQuery(conn: Connection, query: string, queryId: string, paramTyp
           columnMetadata.push({ name: colName, type: colType, tableId: tableOid || undefined, positionInTable: colAttrNumber || undefined })
         }
         columnMetadataFetched = true
-      } else if (msgType === BackendMessage.ReadyForQuery) {
+      }
+      else if (msgType === BackendMessage.ReadyForQuery) {
         conn.removeListener('data', handleQueryPreparation)
         if (parseCompleted && paramTypesFetched && columnMetadataFetched) {
           resolve({ queryId, paramTypes, columnMetadata })
@@ -257,7 +366,11 @@ function prepareQuery(conn: Connection, query: string, queryId: string, paramTyp
           reject(new Error('Failed to parse query.'))
         }
         return
-      } else {
+      }
+      else if (msgType === BackendMessage.ErrorResponse) {
+        return reject()
+      }
+      else {
         console.warn('[WARN] Unexpected message received during query preparation phase: ' + (BackendMessage[msgType] || msgType))
       }
 
@@ -299,7 +412,8 @@ function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Connecti
       const msgType = readInt8(data, 0) as BackendMessage
       if (msgType === BackendMessage.BindComplete) {
         bindingCompleted = true
-      } else if (msgType === BackendMessage.DataRow) {
+      }
+      else if (msgType === BackendMessage.DataRow) {
         const valueCount = readInt16(data, 5)
         if (columnMetadata.length !== valueCount) {
           conn.destroy(new Error(`Received ${valueCount} column values, but ${columnMetadata.length} column descriptions.`))
@@ -338,23 +452,30 @@ function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Connecti
           }
         }
         rows.push(row as R)
-      } else if (msgType === BackendMessage.EmptyQueryResponse) {
+      }
+      else if (msgType === BackendMessage.EmptyQueryResponse) {
         reject(new Error('Empty query received.'))
-      // } else if (msgType === BackendMessage.PortalSuspended) {
-      } else if (msgType === BackendMessage.CommandComplete) {
+      // }
+      // else if (msgType === BackendMessage.PortalSuspended) {
+      }
+      else if (msgType === BackendMessage.CommandComplete) {
         const commandTagParts = readCString(data, 5).split(' ')
         const commandTag = commandTagParts[0] as CommandTag
         rowsAffected = parseInt(commandTagParts[commandTagParts.length - 1], 10)
         commandCompleted = true
-      } else if (msgType === BackendMessage.ReadyForQuery) {
+      }
+      else if (msgType === BackendMessage.ReadyForQuery) {
         conn.removeListener('data', handleQueryExecution)
         if (bindingCompleted && commandCompleted) {
-          resolve({ rows, rowsAffected, columnMetadata })
+          return resolve({ rows, rowsAffected, columnMetadata })
         } else {
-          reject(new Error('Failed to execute query.'))
+          return reject(new Error('Failed to execute query.'))
         }
-        return
-      } else {
+      }
+      else if (msgType === BackendMessage.ErrorResponse) {
+        return reject()
+      }
+      else {
         console.warn('[WARN] Unexpected message received during prepared query execution phase: ' + (BackendMessage[msgType] || msgType))
       }
 
@@ -367,15 +488,6 @@ function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Connecti
     conn.write(createExecuteMessage(''))
     conn.write(createSyncMessage())
   })
-}
-
-function debugMessage(data: Buffer) {
-  const msgType = readInt8(data, 0)
-  const msgSize = readInt32(data, 1)
-  console.debug(
-    `[DEBUG] [${BackendMessage[msgType] || msgType}] ${1 + msgSize} bytes expected, ${data.byteLength} received`,
-    data.slice(1, 1 + msgSize).toString()
-  )
 }
 
 interface ParsedError {
@@ -392,83 +504,10 @@ function parseErrorResponse(data: Buffer): ParsedError[] {
     if (type !== 0) {
       const value = readCString(data, offset)
       offset += Buffer.byteLength(value) + 1
-      // errors.push({ type, value })
-      errors.push({ type: ErrorResponseType[type] as any, value })
+      errors.push({ type, value })
     }
   }
   return errors
-}
-
-// Set up basic error handling, send startup message and authenticate.
-// TODO Combine with other data handlers and replace promises with callbacks.
-function establishConnection(options: Required<ConnectionPoolOptions>): Promise<Connection> {
-  return new Promise((resolve, reject) => {
-    const conn = createConnection(options.port, options.host)
-
-    conn.on('connect', () => conn.write(createStartupMessage(options.username, options.database)))
-
-    conn.on('error', err => {
-      conn.destroy(err)
-      console.error(`[ERROR] ${err.message}`)
-      reject(err)
-    })
-
-    conn.on('data', data => {
-      const msgType = readInt8(data, 0) as BackendMessage
-      if (msgType === BackendMessage.ErrorResponse) {
-        const errRes = parseErrorResponse(data)
-        console.debug('[ERROR]', errRes)
-        conn.destroy(new Error(`Error message sent by backend: TODO`))
-      }
-    })
-
-    conn.on('data', handleAuthentication)
-
-    function handleAuthentication(data: Buffer): void {
-      const msgType = readInt8(data, 0) as BackendMessage
-      if (msgType !== BackendMessage.Authentication) {
-        console.warn(`[WARN] Unexpected message type sent by backend during connection establishment: "${msgType}".`)
-        return
-      }
-
-      const authRes = readInt32(data, 5) as AuthenticationResponse
-      switch (authRes) {
-      case AuthenticationResponse.CleartextPassword:
-        conn.write(createCleartextPasswordMessage(options.password))
-        break
-      case AuthenticationResponse.Md5:
-        const salt = data.slice(9)
-        conn.write(createMd5PasswordMessage(options.username, options.password, salt))
-        break
-      case AuthenticationResponse.Ok:
-        let msgSize = readInt32(data, 1)
-        while (data.byteLength > 1 + msgSize) {
-          data = data.slice(1 + msgSize)
-          const msgType = readInt8(data, 0) as BackendMessage
-          if (msgType === BackendMessage.ReadyForQuery) {
-            // const transactionStatus = readInt8(data, 5) as TransactionStatus
-            // console.debug('Transaction status:', String.fromCharCode(transactionStatus))
-            conn.removeListener('data', handleAuthentication)
-            ;(conn as Connection).preparedQueries = {}
-            resolve(conn as Connection)
-          } else if (msgType === BackendMessage.ParameterStatus) {
-            const paramName = readCString(data, 5)
-            const paramValue = readCString(data, 5 + paramName.length + 1)
-            // console.debug(`[DEBUG] ${paramName} = ${paramValue}`)
-          } else if (msgType === BackendMessage.BackendKeyData) {
-            const processId = readInt32(data, 5)
-            const secretCancellationKey = readInt32(data, 9)
-          } else {
-            console.warn(`[WARN] Unhandled message type sent by backend after succesful authentication: "${BackendMessage[msgType] || msgType}".`)
-          }
-          msgSize = readInt32(data, 1)
-        }
-        break
-      default:
-        conn.destroy(new Error(`Unsupported authentication response sent by backend: "${authRes}".`))
-      }
-    }
-  })
 }
 
 function createStartupMessage(username: string, database: string): Buffer {
@@ -891,7 +930,7 @@ enum DescribeOrCloseRequest {
   Portal            = 'P'.charCodeAt(0),
 }
 
-const enum AuthenticationResponse {
+enum AuthenticationResponse {
   Ok                = 0,
   CleartextPassword = 3,
   Md5               = 5,
