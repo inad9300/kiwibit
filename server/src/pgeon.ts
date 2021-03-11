@@ -63,8 +63,12 @@ interface Connection extends Socket {
 //   password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
 //   // connectTimeout: 5_000
 // })
-// .runStaticQuery`select 1 one`
-// .then(data => console.log('Selected: ', data))
+// .runStaticQuery`
+//   select id, source_id, external_id, is_public, name, usda_category_id, nf_dd_category_id, picture
+//   from foods
+//   limit 999
+// `
+// .then(data => console.log('rows ', data.rows.length))
 
 export function newConnectionPool(options: ConnectionPoolOptions) {
   if (options.host            == null) options.host           = 'localhost'
@@ -277,9 +281,9 @@ function openConnection(options: Required<ConnectionPoolOptions>): Promise<Conne
         console.warn(`[WARN] Unexpected message type sent by server during startup phase: "${BackendMessage[msgType] || msgType}".`)
       }
 
-      const msgSize = readInt32(data, 1)
-      if (data.byteLength > 1 + msgSize) {
-        handleStartupPhase(data.slice(1 + msgSize))
+      const msgSize = 1 + readInt32(data, 1)
+      if (data.byteLength > msgSize) {
+        handleStartupPhase(data.slice(msgSize))
       }
     }
   })
@@ -307,8 +311,13 @@ function prepareQuery(conn: Connection, query: string, queryId: string, paramTyp
         leftover = undefined
       }
 
-      const msgSize = readInt32(data, 1)
-      if (1 + msgSize > data.byteLength) {
+      if (data.byteLength <= 5) {
+        leftover = data
+        return
+      }
+
+      const msgSize = 1 + readInt32(data, 1)
+      if (msgSize > data.byteLength) {
         leftover = data
         return
       }
@@ -333,28 +342,15 @@ function prepareQuery(conn: Connection, query: string, queryId: string, paramTyp
         const colCount = readInt16(data, 5)
         let offset = 7
         for (let i = 0; i < colCount; ++i) {
-          const colName = readCString(data, offset)
-          offset += colName.length + 1
-
-          const tableOid = readInt32(data, offset)
-          offset += 4
-
-          const colAttrNumber = readInt16(data, offset)
+          const name            = readCString(data, offset)
+          const tableId         = readInt32(data, offset += name.length + 1) || undefined
+          const positionInTable = readInt16(data, offset += 4) || undefined
+          const type            = readInt32(data, offset += 2)
+          const typeSize        = readInt16(data, offset += 4)
+          const typeModifier    = readInt32(data, offset += 2)
+          const format          = readInt16(data, offset += 4) as WireFormat
           offset += 2
-
-          const colType = readInt32(data, offset)
-          offset += 4
-
-          const dataTypeSize = readInt16(data, offset)
-          offset += 2
-
-          const typeModifier = readInt32(data, offset)
-          offset += 4
-
-          const formatCode = readInt16(data, offset)
-          offset += 2
-
-          columnMetadata.push({ name: colName, type: colType, tableId: tableOid || undefined, positionInTable: colAttrNumber || undefined })
+          columnMetadata.push({ name, type, tableId, positionInTable })
         }
         columnMetadataFetched = true
       }
@@ -368,14 +364,16 @@ function prepareQuery(conn: Connection, query: string, queryId: string, paramTyp
         return
       }
       else if (msgType === BackendMessage.ErrorResponse) {
-        return reject()
+        const msg = parseErrorResponse(data).find(err => err.type === ErrorResponseType.Message)?.value || ''
+        const err = new Error(`Error received from server during query preparation phase: "${msg}".`)
+        return reject(err)
       }
       else {
         console.warn('[WARN] Unexpected message received during query preparation phase: ' + (BackendMessage[msgType] || msgType))
       }
 
-      if (data.byteLength > 1 + msgSize) {
-        handleQueryPreparation(data.slice(1 + msgSize))
+      if (data.byteLength > msgSize) {
+        handleQueryPreparation(data.slice(msgSize))
       }
     }
 
@@ -403,17 +401,19 @@ function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Connecti
         leftover = undefined
       }
 
-      const msgSize = readInt32(data, 1)
-      if (1 + msgSize > data.byteLength) {
+      if (data.byteLength <= 5) {
+        leftover = data
+        return
+      }
+
+      const msgSize = 1 + readInt32(data, 1)
+      if (msgSize > data.byteLength) {
         leftover = data
         return
       }
 
       const msgType = readInt8(data, 0) as BackendMessage
-      if (msgType === BackendMessage.BindComplete) {
-        bindingCompleted = true
-      }
-      else if (msgType === BackendMessage.DataRow) {
+      if (msgType === BackendMessage.DataRow) {
         const valueCount = readInt16(data, 5)
         if (columnMetadata.length !== valueCount) {
           conn.destroy(new Error(`Received ${valueCount} column values, but ${columnMetadata.length} column descriptions.`))
@@ -428,35 +428,49 @@ function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Connecti
           offset += 4
           if (valueSize === -1) {
             row[column.name] = null
-          } else {
-            const value = data.slice(offset, offset + valueSize)
-            offset += valueSize
-            if (column.type === ObjectId.Bool) {
-              row[column.name] = value[0] !== 0
-            } else if (column.type === ObjectId.Int2) {
-              row[column.name] = readInt16(value, 0)
-            } else if (column.type === ObjectId.Int4) {
-              row[column.name] = readInt32(value, 0)
-            } else if (column.type === ObjectId.Oid) {
-              row[column.name] = readInt32(value, 0) // FIXME It is unsigned
-            } else if (column.type === ObjectId.Int8) {
-              row[column.name] = readInt32(value, 0) // FIXME
-            } else if (column.type === ObjectId.Float8) {
-              row[column.name] = value.readDoubleBE()
-            } else if (column.type === ObjectId.Char || column.type === ObjectId.Varchar || column.type === ObjectId.Text || column.type === ObjectId.Bpchar || column.type === ObjectId.Name) {
-              row[column.name] = value.toString()
-            } else {
-              console.warn(`[WARN] Unsupported column data type: ${ObjectId[column.type] || column.type}.`)
-              row[column.name] = value
-            }
+            continue
+          }
+
+          const value = data.slice(offset, offset += valueSize)
+          switch (column.type) {
+          case ObjectId.Bool:
+            row[column.name] = value[0] !== 0
+            break
+          case ObjectId.Int2:
+            row[column.name] = readInt16(value, 0)
+            break
+          case ObjectId.Int4:
+            row[column.name] = readInt32(value, 0)
+            break
+          case ObjectId.Int8:
+            row[column.name] = readInt64(value, 0)
+            break
+          case ObjectId.Float4:
+            row[column.name] = readFloat32(value, 0)
+            break
+          case ObjectId.Float8:
+            row[column.name] = readFloat64(value, 0)
+            break
+          case ObjectId.Oid:
+            row[column.name] = readUint32(value, 0)
+            break
+          case ObjectId.Char:
+          case ObjectId.Varchar:
+          case ObjectId.Text:
+          case ObjectId.Bpchar:
+          case ObjectId.Name:
+            row[column.name] = value.toString()
+            break
+          default:
+            console.warn(`[WARN] Unsupported column data type: ${ObjectId[column.type] || column.type}.`)
+            row[column.name] = value
           }
         }
+
         rows.push(row as R)
       }
-      else if (msgType === BackendMessage.EmptyQueryResponse) {
-        reject(new Error('Empty query received.'))
-      // }
-      // else if (msgType === BackendMessage.PortalSuspended) {
+      else if (msgType === BackendMessage.BindComplete) {
+        bindingCompleted = true
       }
       else if (msgType === BackendMessage.CommandComplete) {
         const commandTagParts = readCString(data, 5).split(' ')
@@ -473,14 +487,21 @@ function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Connecti
         }
       }
       else if (msgType === BackendMessage.ErrorResponse) {
-        return reject()
+        const msg = parseErrorResponse(data).find(err => err.type === ErrorResponseType.Message)?.value || ''
+        const err = new Error(`Error received from server during query execution phase: "${msg}".`)
+        return reject(err)
+      }
+      else if (msgType === BackendMessage.EmptyQueryResponse) {
+        return reject(new Error('Empty query received.'))
+      // }
+      // else if (msgType === BackendMessage.PortalSuspended) {
       }
       else {
-        console.warn('[WARN] Unexpected message received during prepared query execution phase: ' + (BackendMessage[msgType] || msgType))
+        console.warn(`[WARN] Unexpected message received during prepared query execution phase: ${BackendMessage[msgType] || msgType}.`)
       }
 
-      if (data.byteLength > 1 + msgSize) {
-        handleQueryExecution(data.slice(1 + msgSize))
+      if (data.byteLength > msgSize) {
+        handleQueryExecution(data.slice(msgSize))
       }
     }
 
@@ -683,26 +704,38 @@ function createBindMessage(paramValues: any[], query: PreparedQuery, portal: str
     + 2 // Result-column format code(s)
 
   for (let i = 0; i < paramValues.length; ++i) {
-    const v = paramValues[i]
-    if (v == null) {
+    if (paramValues[i] == null) {
       continue
     }
 
-    const t = paramTypes[i]
-    if (t === ObjectId.Bool) {
+    switch (paramTypes[i]) {
+    case ObjectId.Bool:
       bufferSize += 1
-    } else if (t === ObjectId.Int2) {
+      break
+    case ObjectId.Int2:
       bufferSize += 2
-    } else if (t === ObjectId.Int4 || t === ObjectId.Float4 || t === ObjectId.Oid) {
+      break
+    case ObjectId.Int4:
+    case ObjectId.Float4:
+    case ObjectId.Oid:
       bufferSize += 4
-    } else if (t === ObjectId.Int8 || t === ObjectId.Float8) {
+      break
+    case ObjectId.Int8:
+    case ObjectId.Float8:
       bufferSize += 8
-    } else if (t === ObjectId.Char || t === ObjectId.Varchar || t === ObjectId.Text || t === ObjectId.Bpchar || t === ObjectId.Name) {
+      break
+    case ObjectId.Char:
+    case ObjectId.Varchar:
+    case ObjectId.Text:
+    case ObjectId.Bpchar:
+    case ObjectId.Name:
       bufferSize += Buffer.byteLength(paramValues[i])
-    } else if (t === ObjectId.Int4Array) {
+      break
+    case ObjectId.Int4Array:
       bufferSize += 20 + paramValues[i].length * 8
-    } else {
-      throw new Error(`Tried binding a parameter of an unsupported type: ${ObjectId[t] || t}`)
+      break
+    default:
+      throw new Error(`Tried binding a parameter of an unsupported type: ${ObjectId[paramTypes[i]] || paramTypes[i]}`)
     }
   }
 
@@ -714,49 +747,66 @@ function createBindMessage(paramValues: any[], query: PreparedQuery, portal: str
   offset = writeCString(message, portal, offset)
   offset = writeCString(message, queryId, offset)
   offset = writeInt16(message, 1, offset)
-  offset = writeInt16(message, BindFormat.Binary, offset)
+  offset = writeInt16(message, WireFormat.Binary, offset)
   offset = writeInt16(message, paramValues.length, offset)
 
   for (let i = 0; i < paramValues.length; ++i) {
-    const t = paramTypes[i]
     const v = paramValues[i]
     if (v == null) {
       offset = writeInt32(message, -1, offset)
-    } else if (t === ObjectId.Bool) {
+      continue
+    }
+
+    switch (paramTypes[i]) {
+    case ObjectId.Bool:
       offset = writeInt32(message, 1, offset)
       offset = writeInt8(message, +v, offset)
-    } else if (t === ObjectId.Int2) {
+      break
+    case ObjectId.Int2:
       offset = writeInt32(message, 2, offset)
       offset = writeInt16(message, v, offset)
-    } else if (t === ObjectId.Int4) {
+      break
+    case ObjectId.Int4:
       offset = writeInt32(message, 4, offset)
       offset = writeInt32(message, v, offset)
-    } else if (t === ObjectId.Oid) {
+      break
+    case ObjectId.Oid:
       offset = writeInt32(message, 4, offset)
-      offset = writeInt32(message, v, offset)
-    } else if (t === ObjectId.Int8) {
+      offset = writeInt32(message, v, offset) // FIXME
+      break
+    case ObjectId.Int8:
       offset = writeInt32(message, 8, offset)
-      offset = writeInt32(message, 0, offset) // FIXME
+      offset = writeInt32(message, 0, offset)
       offset = writeInt32(message, v, offset)
-    } else if (t === ObjectId.Float4) {
+      // offset = writeInt64(message, v, offset)
+      break
+    case ObjectId.Float4:
       offset = writeInt32(message, 4, offset)
-      offset = message.writeFloatBE(v, offset)
-    } else if (t === ObjectId.Float8) {
+      offset = writeFloat32(message, v, offset)
+      break
+    case ObjectId.Float8:
       offset = writeInt32(message, 8, offset)
-      offset = message.writeDoubleBE(v, offset)
-    } else if (t === ObjectId.Char || t === ObjectId.Varchar || t === ObjectId.Text || t === ObjectId.Bpchar || t === ObjectId.Name) {
+      offset = writeFloat64(message, v, offset)
+      break
+    case ObjectId.Char:
+    case ObjectId.Varchar:
+    case ObjectId.Text:
+    case ObjectId.Bpchar:
+    case ObjectId.Name:
       offset = writeInt32(message, Buffer.byteLength(v), offset)
       offset += message.write(v, offset)
-    } else if (t === ObjectId.Int4Array) {
+      break
+    case ObjectId.Int4Array:
       offset = writeInt32(message, 20 + paramValues[i].length * 8, offset)
-      offset = writeInt4Array(message, v, offset)
-    } else {
-      throw new Error(`Tried binding a parameter of an unsupported type: ${ObjectId[t] || t}`)
+      offset = writeInt32Array(message, v, offset)
+      break
+    default:
+      throw new Error(`Tried binding a parameter of an unsupported type: ${ObjectId[paramTypes[i]] || paramTypes[i]}`)
     }
   }
 
   offset = writeInt16(message, 1, offset)
-  offset = writeInt16(message, BindFormat.Binary, offset)
+  offset = writeInt16(message, WireFormat.Binary, offset)
 
   return message
 }
@@ -780,45 +830,30 @@ function createExecuteMessage(portal: string): Buffer {
 }
 
 export function getTypeScriptType(pgType: ObjectId) {
-  if (pgType === ObjectId.Bool) {
+  switch (pgType) {
+  case ObjectId.Bool:
     return 'boolean'
-  } else if (pgType === ObjectId.Int2 || pgType === ObjectId.Int4 || pgType === ObjectId.Float4 || pgType === ObjectId.Int8 || pgType === ObjectId.Float8) {
+  case ObjectId.Int2:
+  case ObjectId.Int4:
+  case ObjectId.Float4:
+  case ObjectId.Float8:
     return 'number'
-  } else if (pgType === ObjectId.Char || pgType === ObjectId.Varchar || pgType === ObjectId.Text || pgType === ObjectId.Bpchar || pgType === ObjectId.Name) {
+  case ObjectId.Int8:
+    return 'bigint'
+  case ObjectId.Char:
+  case ObjectId.Varchar:
+  case ObjectId.Text:
+  case ObjectId.Bpchar:
+  case ObjectId.Name:
     return 'string'
-  } else if (pgType === ObjectId.Int4Array) {
+  case ObjectId.Int4Array:
     return 'number[]'
-  } else if (pgType === ObjectId.Bytea) {
+  case ObjectId.Bytea:
     return 'Uint8Array'
-  } else {
-    console.warn(`[WARN] Tried binding a parameter of an unsupported type: ${ObjectId[pgType] || pgType}`)
+  default:
+    console.warn(`[WARN] Tried binding a parameter of an unsupported type: ${ObjectId[pgType] || pgType}`)
     return 'any'
   }
-}
-
-function writeInt8(buffer: Uint8Array, value: number, offset: number): number {
-  buffer[offset++] = value
-  return offset
-}
-
-function writeInt16(buffer: Uint8Array, value: number, offset: number): number {
-  buffer[offset++] = value >>> 8
-  buffer[offset++] = value
-  return offset
-}
-
-function writeInt32(buffer: Uint8Array, value: number, offset: number): number {
-  buffer[offset++] = value >>> 24
-  buffer[offset++] = value >>> 16
-  buffer[offset++] = value >>> 8
-  buffer[offset++] = value
-  return offset
-}
-
-function writeCString(buffer: Buffer, str: string, offset: number): number {
-  offset += buffer.write(str, offset, 'ascii')
-  buffer[offset++] = 0
-  return offset
 }
 
 function readInt8(buffer: Uint8Array, offset: number): number {
@@ -826,11 +861,22 @@ function readInt8(buffer: Uint8Array, offset: number): number {
   return value | (value & 128) * 0x1fffffe
 }
 
+function writeInt8(buffer: Uint8Array, value: number, offset: number): number {
+  buffer[offset++] = value
+  return offset
+}
+
 function readInt16(buffer: Uint8Array, offset: number): number {
   const first = buffer[offset]
   const last = buffer[offset + 1]
   const value = first * 256 + last;
   return value | (value & 32768) * 0x1fffe
+}
+
+function writeInt16(buffer: Uint8Array, value: number, offset: number): number {
+  buffer[offset++] = value >>> 8
+  buffer[offset++] = value
+  return offset
 }
 
 function readInt32(buffer: Uint8Array, offset: number): number {
@@ -842,15 +888,15 @@ function readInt32(buffer: Uint8Array, offset: number): number {
     + last
 }
 
-function readCString(buffer: Buffer, offset: number): string {
-  let end = offset
-  while (buffer[end] !== 0) {
-    ++end
-  }
-  return buffer.slice(offset, end).toString('ascii')
+function writeInt32(buffer: Uint8Array, value: number, offset: number): number {
+  buffer[offset++] = value >>> 24
+  buffer[offset++] = value >>> 16
+  buffer[offset++] = value >>> 8
+  buffer[offset++] = value
+  return offset
 }
 
-function writeInt4Array(buffer: Buffer, values: number[], offset: number): number {
+function writeInt32Array(buffer: Buffer, values: number[], offset: number): number {
   offset = writeInt32(buffer, 1, offset) // Number of dimensions
   offset = writeInt32(buffer, 0, offset) // Has nulls?
   offset = writeInt32(buffer, ObjectId.Int4, offset) // Element type
@@ -860,6 +906,152 @@ function writeInt4Array(buffer: Buffer, values: number[], offset: number): numbe
     offset = writeInt32(buffer, 4, offset)
     offset = writeInt32(buffer, v, offset)
   }
+  return offset
+}
+
+function readUint32(buffer: Uint8Array, offset: number): number {
+  return buffer[offset] * 16777216 +
+    buffer[++offset] * 65536 +
+    buffer[++offset] * 256 +
+    buffer[++offset]
+}
+
+function readInt64(buffer: Uint8Array, offset: number): bigint {
+  const value =
+    (buffer[offset] << 24) + // Overflow
+    buffer[++offset] * 65536 +
+    buffer[++offset] * 256 +
+    buffer[++offset]
+
+  return (BigInt(value) << 32n) +
+    BigInt(
+      buffer[++offset] * 16777216 +
+      buffer[++offset] * 65536 +
+      buffer[++offset] * 256 +
+      buffer[++offset]
+    )
+}
+
+function writeInt64(buffer: Uint8Array, value: bigint, offset: number): number {
+  let lo = Number(value & 0xffffffffn)
+  buffer[offset + 7] = lo
+  lo = lo >> 8
+  buffer[offset + 6] = lo
+  lo = lo >> 8
+  buffer[offset + 5] = lo
+  lo = lo >> 8
+  buffer[offset + 4] = lo
+
+  let hi = Number(value >> 32n & 0xffffffffn)
+  buffer[offset + 3] = hi
+  hi = hi >> 8
+  buffer[offset + 2] = hi
+  hi = hi >> 8
+  buffer[offset + 1] = hi
+  hi = hi >> 8
+  buffer[offset] = hi
+
+  return offset + 8
+}
+
+// const writeUint64 = writeInt64
+
+const float32Arr = new Float32Array(1)
+const uint8Float32Arr = new Uint8Array(float32Arr.buffer)
+
+const float64Arr = new Float64Array(1)
+const uint8Float64Arr = new Uint8Array(float64Arr.buffer)
+
+float32Arr[0] = -1
+const bigEndian = uint8Float32Arr[3] === 0
+
+const readFloat32 = bigEndian ? function readFloat32(buffer: Uint8Array, offset: number): number {
+  uint8Float32Arr[0] = buffer[offset]
+  uint8Float32Arr[1] = buffer[++offset]
+  uint8Float32Arr[2] = buffer[++offset]
+  uint8Float32Arr[3] = buffer[++offset]
+  return float32Arr[0]
+} : function readFloat32(buffer: Uint8Array, offset: number): number {
+  uint8Float32Arr[3] = buffer[offset]
+  uint8Float32Arr[2] = buffer[++offset]
+  uint8Float32Arr[1] = buffer[++offset]
+  uint8Float32Arr[0] = buffer[++offset]
+  return float32Arr[0]
+}
+
+const writeFloat32 = bigEndian ? function writeFloat32(buffer: Uint8Array, value: number, offset: number): number {
+  float32Arr[0] = value
+  buffer[offset++] = uint8Float32Arr[0]
+  buffer[offset++] = uint8Float32Arr[1]
+  buffer[offset++] = uint8Float32Arr[2]
+  buffer[offset++] = uint8Float32Arr[3]
+  return offset
+} : function writeFloat32(buffer: Uint8Array, value: number, offset: number): number {
+  float32Arr[0] = value
+  buffer[offset++] = uint8Float32Arr[3]
+  buffer[offset++] = uint8Float32Arr[2]
+  buffer[offset++] = uint8Float32Arr[1]
+  buffer[offset++] = uint8Float32Arr[0]
+  return offset
+}
+
+const readFloat64 = bigEndian ? function readFloat64(buffer: Uint8Array, offset: number): number {
+  uint8Float64Arr[0] = buffer[offset]
+  uint8Float64Arr[1] = buffer[++offset]
+  uint8Float64Arr[2] = buffer[++offset]
+  uint8Float64Arr[3] = buffer[++offset]
+  uint8Float64Arr[4] = buffer[++offset]
+  uint8Float64Arr[5] = buffer[++offset]
+  uint8Float64Arr[6] = buffer[++offset]
+  uint8Float64Arr[7] = buffer[++offset]
+  return float64Arr[0]
+} : function readFloat64(buffer: Uint8Array, offset: number): number {
+  uint8Float64Arr[7] = buffer[offset]
+  uint8Float64Arr[6] = buffer[++offset]
+  uint8Float64Arr[5] = buffer[++offset]
+  uint8Float64Arr[4] = buffer[++offset]
+  uint8Float64Arr[3] = buffer[++offset]
+  uint8Float64Arr[2] = buffer[++offset]
+  uint8Float64Arr[1] = buffer[++offset]
+  uint8Float64Arr[0] = buffer[++offset]
+  return float64Arr[0]
+}
+
+const writeFloat64 = bigEndian ? function writeFloat64(buffer: Uint8Array, value: number, offset: number): number {
+  float64Arr[0] = value
+  buffer[offset++] = uint8Float64Arr[0]
+  buffer[offset++] = uint8Float64Arr[1]
+  buffer[offset++] = uint8Float64Arr[2]
+  buffer[offset++] = uint8Float64Arr[3]
+  buffer[offset++] = uint8Float64Arr[4]
+  buffer[offset++] = uint8Float64Arr[5]
+  buffer[offset++] = uint8Float64Arr[6]
+  buffer[offset++] = uint8Float64Arr[7]
+  return offset
+} : function writeFloat64(buffer: Uint8Array, value: number, offset: number): number {
+  float64Arr[0] = value
+  buffer[offset++] = uint8Float64Arr[7]
+  buffer[offset++] = uint8Float64Arr[6]
+  buffer[offset++] = uint8Float64Arr[5]
+  buffer[offset++] = uint8Float64Arr[4]
+  buffer[offset++] = uint8Float64Arr[3]
+  buffer[offset++] = uint8Float64Arr[2]
+  buffer[offset++] = uint8Float64Arr[1]
+  buffer[offset++] = uint8Float64Arr[0]
+  return offset
+}
+
+function readCString(buffer: Buffer, offset: number): string {
+  let end = offset
+  while (buffer[end] !== 0) {
+    ++end
+  }
+  return buffer.slice(offset, end).toString('ascii')
+}
+
+function writeCString(buffer: Buffer, str: string, offset: number): number {
+  offset += buffer.write(str, offset, 'ascii')
+  buffer[offset++] = 0
   return offset
 }
 
@@ -936,7 +1128,7 @@ enum AuthenticationResponse {
   Md5               = 5,
 }
 
-const enum BindFormat {
+const enum WireFormat {
   Text   = 0,
   Binary = 1,
 }
