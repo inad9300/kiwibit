@@ -18,7 +18,7 @@ import { ConnectionOptions } from 'tls'
 // - Type checking (?)
 // - Timeouts
 // - Authentication mechanisms
-// - Cursors
+// - Cursors, copy, function calls
 
 interface ConnectionPoolOptions {
   host?: string
@@ -64,6 +64,7 @@ interface QueryResult<R extends Row> {
 }
 
 interface Connection extends Socket {
+  processId: number
   cancelKey: number
   preparedQueries: {
     [queryId: string]: PreparedQuery
@@ -123,6 +124,11 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
     } else {
       connPool.push(connPromise)
     }
+  }
+
+  function cancelQuery({ processId, cancelKey }: Connection) {
+    const conn = createConnection(options.port, options.host)
+    conn.on('connect', () => conn.write(createCancelRequestMessage(processId, cancelKey)))
   }
 
   async function runDynamicQuery<R extends Row = Row, V extends ColumnValue[] = ColumnValue[]>(query: string, values: V): Promise<QueryResult<R>> {
@@ -243,7 +249,7 @@ function openConnection(options: Required<ConnectionPoolOptions>): Promise<Conne
         // console.debug(`[DEBUG] ${paramName} = ${paramValue}`)
       }
       else if (msgType === BackendMessage.BackendKeyData) {
-        const processId = readInt32(data, 5)
+        conn.processId = readInt32(data, 5)
         conn.cancelKey = readInt32(data, 9)
       }
       else if (msgType === BackendMessage.ReadyForQuery) {
@@ -564,6 +570,16 @@ function createStartupMessage(username: string, database: string): Buffer {
 
   writeInt8(message, 0, offset)
 
+  return message
+}
+
+function createCancelRequestMessage(processId: number, cancelKey: number): Buffer {
+  const size = 16
+  const message = Buffer.allocUnsafe(size)
+  writeInt32(message, size, 0)
+  writeInt32(message, 80877102, 4) // Cancel request code
+  writeInt32(message, processId, 8)
+  writeInt32(message, cancelKey, 12)
   return message
 }
 
