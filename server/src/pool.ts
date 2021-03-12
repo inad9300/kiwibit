@@ -5,6 +5,5 @@ export const pool = newConnectionPool({
   port: 5000,
   database: 'postgres',
   username: 'postgres',
-  password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
-  // connectTimeout: 5_000
+  password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E'
 })

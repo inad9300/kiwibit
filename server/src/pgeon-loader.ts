@@ -1,5 +1,5 @@
 import { pool } from './pool'
-import { ColumnMetadata, getTypeScriptType, ObjectId, PreparedQuery } from './pgeon'
+import { getTypeScriptType, QueryMetadata } from './pgeon'
 
 export default function pgeonLoader(this: any, source: string) {
   const callback = this.async()
@@ -16,7 +16,7 @@ async function getSourceWithQueryTypes(source: string): Promise<string> {
     let i = 1
     const query = match[2].replace(/\$\{[^\}]+?\}/g, () => '$' + i++)
     return pool
-      .prepareQuery(query)
+      .getQueryMetadata(query)
       .then(getQueryType)
       .then(type => ({ type, match }))
   })
@@ -29,19 +29,21 @@ async function getSourceWithQueryTypes(source: string): Promise<string> {
   return source
 }
 
-async function getQueryType(q: PreparedQuery): Promise<string> {
-  const rowType = await getRowType(q.columnMetadata)
-  const paramsType = getParamsType(q.paramTypes)
+async function getQueryType(q: QueryMetadata): Promise<string> {
+  const rowType = await getRowType(q)
+  const paramsType = getParamsType(q)
   return `<${rowType}, ${paramsType}>`
 }
 
-async function getRowType(columnMetadata: ColumnMetadata[]): Promise<string> {
+async function getRowType({ columnMetadata }: QueryMetadata): Promise<string> {
   const tableIds = columnMetadata.map(col => col.tableId).filter(x => !!x)
   const colPositions = columnMetadata.map(col => col.positionInTable).filter(x => !!x)
 
   if (columnMetadata.length === 0 || tableIds.length === 0) {
     return Promise.resolve('{}')
   }
+
+  // IDEA Execute select queries with null params and "limit 1" to spot nullable parameters.
 
   const { rows } = await pool.runStaticQuery`
     select cls.oid, col.ordinal_position, col.is_nullable
@@ -67,6 +69,6 @@ async function getRowType(columnMetadata: ColumnMetadata[]): Promise<string> {
   return '{ ' + colTypes.join(', ') + ' }'
 }
 
-function getParamsType(paramTypes: ObjectId[]): string {
+function getParamsType({ paramTypes }: QueryMetadata): string {
   return '[' + paramTypes.map(getTypeScriptType).join(', ') + ']'
 }

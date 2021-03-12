@@ -9,6 +9,17 @@ import { ConnectionOptions } from 'tls'
 // - https://github.com/postgres/postgres/tree/master/src/backend/utils/adt
 // - https://github.com/nodejs/node/blob/master/lib/internal/buffer.js
 
+// Features:
+// - Portal suspension
+// - Transactions
+// - Transaction status messages
+// - Query cancellation
+// - Data types (arrays)
+// - Type checking (?)
+// - Timeouts
+// - Authentication mechanisms
+// - Cursors
+
 interface ConnectionPoolOptions {
   host?: string
   port?: number
@@ -24,10 +35,13 @@ interface ConnectionPoolOptions {
   // prepareTimeout?: number
 }
 
-export interface PreparedQuery {
-  queryId: string
+export interface QueryMetadata {
   paramTypes: ObjectId[]
   columnMetadata: ColumnMetadata[]
+}
+
+interface PreparedQuery extends QueryMetadata {
+  queryId: string
 }
 
 type Row = {
@@ -36,7 +50,7 @@ type Row = {
 
 type ColumnValue = any // undefined | null | boolean | number | string
 
-export interface ColumnMetadata {
+interface ColumnMetadata {
   name: string
   type: ObjectId
   tableId?: number
@@ -50,107 +64,87 @@ interface QueryResult<R extends Row> {
 }
 
 interface Connection extends Socket {
+  cancelKey: number
   preparedQueries: {
     [queryId: string]: PreparedQuery
   }
 }
-
-// newConnectionPool({
-//   host: 'localhost',
-//   port: 5000,
-//   database: 'postgres',
-//   username: 'postgres',
-//   password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E',
-//   // connectTimeout: 5_000
-// })
-// .runStaticQuery`
-//   select id, source_id, external_id, is_public, name, usda_category_id, nf_dd_category_id, picture
-//   from foods
-//   limit 999
-// `
-// .then(data => console.log('rows ', data.rows.length))
 
 export function newConnectionPool(options: ConnectionPoolOptions) {
   if (options.host            == null) options.host           = 'localhost'
   if (options.port            == null) options.port           = 5_432
   if (options.database        == null) options.database       = 'postgres'
   if (options.username        == null) options.username       = 'postgres'
-  if (options.minConnections  == null) options.minConnections = 1
+  if (options.minConnections  == null) options.minConnections = 2
   if (options.maxConnections  == null) options.maxConnections = 8
   // if (options.connectTimeout  == null) options.connectTimeout = 30_000
   // if (options.idleTimeout     == null) options.idleTimeout    = 60_000
   // if (options.queryTimeout    == null) options.queryTimeout   = 120_000
+  // if (options.prepareTimeout  == null) options.prepareTimeout = 10_000
 
   let connCount = 0
   const connPool: Promise<Connection>[] = []
-  const connQueue: ((conn: Connection | PromiseLike<Connection>) => void)[] = []
-
-  // const connTimeout = setTimeout(() => conn.destroy(new Error('Connection timed out.')), options.connectTimeout)
-  // clearTimeout(connTimeout)
+  const connQueue: ((connPromise: Promise<Connection>) => void)[] = []
 
   for (let i = connCount; i < options.minConnections; ++i) {
     putConnectionInPool()
   }
 
-  function putConnectionInPool() {
+  function putConnectionInPool(delay = 1) {
     const connPromise = openConnection(options as Required<ConnectionPoolOptions>)
-    if (connQueue.length > 0) {
-      connQueue.shift()(connPromise)
-    } else {
-      connPool.push(connPromise)
-      connCount++
-    }
-    connPromise
-      .then(conn => conn.on('close', () => onConnectionLost(connPromise)))
-      .catch(() => onConnectionLost(connPromise))
-  }
-
-  function onConnectionLost(connPromise: Promise<Connection>) {
-    const idx = connPool.indexOf(connPromise)
-    if (idx > -1) {
-      connPool.splice(idx, 1)
-      connCount--
-      if (connCount < options.minConnections) {
-        // TODO Math.min(1024, delay * 2)
-        setTimeout(putConnectionInPool, 0)
-      }
-    }
+    connPromise.then(conn => {
+      conn.on('close', () => {
+        const idx = connPool.indexOf(connPromise)
+        if (idx > -1) {
+          connPool.splice(idx, 1)
+        }
+        connCount--
+        if (connCount < options.minConnections) {
+          setTimeout(() => putConnectionInPool(Math.min(1024, delay * 2)), delay)
+        }
+      })
+    })
+    connCount++
+    onConnectionAvailable(connPromise)
   }
 
   function takeConnectionFromPool(): Promise<Connection> {
     if (connPool.length === 0 && connCount < options.maxConnections) {
       putConnectionInPool()
     }
-    if (connPool.length > 0) {
-      return connPool.pop()
+    return connPool.length > 0
+      ? connPool.pop()
+      : new Promise(resolve => connQueue.push(resolve))
+  }
+
+  function onConnectionAvailable(connPromise: Promise<Connection>) {
+    if (connQueue.length > 0) {
+      connQueue.shift()(connPromise)
+    } else {
+      connPool.push(connPromise)
     }
-    // TODO Before pushing more things into the queue, we should at some point verify if there are "queries" pending there.
-    return new Promise(resolve => connQueue.push(resolve))
   }
 
   async function runDynamicQuery<R extends Row = Row, V extends ColumnValue[] = ColumnValue[]>(query: string, values: V): Promise<QueryResult<R>> {
     const connPromise = takeConnectionFromPool()
     const conn = await connPromise
-    try {
-      const queryId = md5(query)
-      const preparedQuery = conn.preparedQueries[queryId] || await prepareQuery(conn, query, queryId)
-      conn.preparedQueries[queryId] = preparedQuery
-      return await runPreparedQuery<R, V>(conn, preparedQuery, values)
-    } finally {
-      if (!conn.destroyed) {
-        if (connQueue.length > 0) {
-          connQueue.shift()(conn)
-        } else {
-          connPool.push(connPromise)
-        }
-      }
-    }
+    const { preparedQueries } = conn
+    const queryId = md5(query)
+    preparedQueries[queryId] = preparedQueries[queryId] || await prepareQuery(conn, query, queryId)
+    const result = await runPreparedQuery<R, V>(conn, preparedQueries[queryId], values)
+    onConnectionAvailable(connPromise)
+    return result
   }
 
   return {
-    prepareQuery(q: string) {
-      return openConnection(options as Required<ConnectionPoolOptions>)
-        .then(conn => prepareQuery(conn, q, ''))
+    async getQueryMetadata(query: string): Promise<QueryMetadata> {
+      const connPromise = takeConnectionFromPool()
+      const conn = await connPromise
+      const { preparedQueries } = conn
+      const queryId = md5(query)
+      preparedQueries[queryId] = preparedQueries[queryId] || await prepareQuery(conn, query, queryId)
+      onConnectionAvailable(connPromise)
+      return preparedQueries[queryId]
     },
     runDynamicQuery,
     runStaticQuery<R extends Row = Row, V extends ColumnValue[] = ColumnValue[]>(queryParts: TemplateStringsArray, ...values: V): Promise<QueryResult<R>> {
@@ -181,9 +175,10 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
       return runDynamicQuery<R, V>(query, uniqueValues)
     },
     beginTransaction() {
-      // TODO Take connection from pool.
-      return openConnection(options as Required<ConnectionPoolOptions>).then(conn => {
+      const connPromise = takeConnectionFromPool()
+      return connPromise.then(conn => {
         // TODO In each case, wait until a reply.
+        // TODO onConnectionAvailable(connPromise)
         conn.write(createQueryMessage('begin'))
         return {
           commit() { conn.write(createQueryMessage('commit')) },
@@ -196,7 +191,14 @@ export function newConnectionPool(options: ConnectionPoolOptions) {
 
 function openConnection(options: Required<ConnectionPoolOptions>): Promise<Connection> {
   return new Promise((resolve, reject) => {
-    const conn = createConnection(options.port, options.host)
+    const conn = createConnection(options.port, options.host) as Connection
+
+    // conn.setTimeout(options.idleTimeout)
+    // conn.on('timeout', () => {
+    //   const err = new Error('Closing the connection as it has been idle for too long.')
+    //   conn.destroy(err)
+    //   reject(err)
+    // })
 
     conn.on('connect', () => conn.write(createStartupMessage(options.username, options.database)))
 
@@ -242,14 +244,14 @@ function openConnection(options: Required<ConnectionPoolOptions>): Promise<Conne
       }
       else if (msgType === BackendMessage.BackendKeyData) {
         const processId = readInt32(data, 5)
-        const secretCancellationKey = readInt32(data, 9)
+        conn.cancelKey = readInt32(data, 9)
       }
       else if (msgType === BackendMessage.ReadyForQuery) {
         // const txStatus = readInt8(data, 5) as TransactionStatus
         if (authOk) {
           conn.removeListener('data', handleStartupPhase)
-          ;(conn as Connection).preparedQueries = {}
-          resolve(conn as Connection)
+          conn.preparedQueries = {}
+          resolve(conn)
         } else {
           const err = new Error('Authentication could not be completed.')
           conn.destroy(err)
@@ -493,8 +495,10 @@ function runPreparedQuery<R extends Row, V extends ColumnValue[]>(conn: Connecti
       }
       else if (msgType === BackendMessage.EmptyQueryResponse) {
         return reject(new Error('Empty query received.'))
-      // }
-      // else if (msgType === BackendMessage.PortalSuspended) {
+      }
+      else if (msgType === BackendMessage.PortalSuspended) {
+        conn.write(createExecuteMessage(''))
+        conn.write(createSyncMessage())
       }
       else {
         console.warn(`[WARN] Unexpected message received during prepared query execution phase: ${BackendMessage[msgType] || msgType}.`)
@@ -1141,7 +1145,7 @@ enum TransactionStatus {
 
 type CommandTag = 'INSERT' | 'DELETE' | 'UPDATE' | 'SELECT' | 'MOVE' | 'FETCH' | 'COPY'
 
-export enum ObjectId {
+enum ObjectId {
   Aclitem               = 1033,
   AclitemArray          = 1034,
   Any                   = 2276,
