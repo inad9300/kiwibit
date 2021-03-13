@@ -4,9 +4,10 @@ import { ConnectionOptions } from 'tls'
 
 // References:
 // - https://postgresql.org/docs/13/protocol.html
-// - https://github.com/sfackler/rust-postgres/tree/master/postgres-protocol/src
 // - https://github.com/postgres/postgres/tree/master/src/backend/libpq
 // - https://github.com/postgres/postgres/tree/master/src/backend/utils/adt
+// - https://github.com/sfackler/rust-postgres/tree/master/postgres-protocol/src
+// - https://github.com/brianc/node-pg-types/blob/master/lib/binaryParsers.js
 // - https://github.com/nodejs/node/blob/master/lib/internal/buffer.js
 
 // Features:
@@ -14,11 +15,15 @@ import { ConnectionOptions } from 'tls'
 // - Transactions
 // - Transaction status messages
 // - Query cancellation
-// - Data types (arrays)
+// - Data types (numeric, arrays)
 // - Type checking (?)
 // - Timeouts
 // - Authentication mechanisms
 // - Cursors, copy, function calls
+// - Performance
+//   - Replace promises with callbacks
+//   - WASM
+//   - Process static queries at compile time (calculate MD5 and identical parameters, avoid extra function call)
 
 interface ConnectionPoolOptions {
   host?: string
@@ -796,9 +801,7 @@ function createBindMessage(paramValues: any[], query: PreparedQuery, portal: str
       break
     case ObjectId.Int8:
       offset = writeInt32(message, 8, offset)
-      offset = writeInt32(message, 0, offset)
-      offset = writeInt32(message, v, offset)
-      // offset = writeInt64(message, v, offset)
+      offset = writeInt64(message, v, offset)
       break
     case ObjectId.Float4:
       offset = writeInt32(message, 4, offset)
@@ -973,8 +976,6 @@ function writeInt64(buffer: Uint8Array, value: bigint, offset: number): number {
 
   return offset + 8
 }
-
-// const writeUint64 = writeInt64
 
 const float32Arr = new Float32Array(1)
 const uint8Float32Arr = new Uint8Array(float32Arr.buffer)

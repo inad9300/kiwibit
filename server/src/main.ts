@@ -21,9 +21,10 @@ function serve(req: IncomingMessage, res: ServerResponse) {
     reply(res, new Error('Unexpected request error. ' + err.message))
   })
 
-  if (req.method === 'GET') {
-    log.info('GET', req.url)
-    let { pathname } = new URL('http://localhost' + req.url!)
+  const { method, url } = req
+  if (method === 'GET') {
+    log.info('GET', url)
+    let { pathname } = new URL('http://localhost' + url!)
     if (pathname === '/') {
       pathname = '/index.html'
     }
@@ -35,21 +36,21 @@ function serve(req: IncomingMessage, res: ServerResponse) {
       }
     })
   }
-  else if (req.method === 'POST') {
+  else if (method === 'POST') {
     try {
-      const fnName = req.url!.substr('/api/'.length) as keyof typeof apiIndex
+      const fnName = url!.substr('/api/'.length) as keyof typeof apiIndex
       const fn = apiIndex[fnName] as ((payload: any) => Promise<any>) | undefined
       if (!fn) {
         reply(res, new Error(`Unknown API function: "${fnName}".`))
       } else {
-        const reqPayloadChunks: Buffer[] = []
+        const reqPayloadChunks: Uint8Array[] = []
         req
           .on('data', chunk => reqPayloadChunks.push(chunk))
           .on('end', () => {
             const reqPayload = reqPayloadChunks.length > 0
               ? JSON.parse(Buffer.concat(reqPayloadChunks).toString())
               : undefined
-            log.info('POST', req.url, reqPayload)
+            log.info('POST', url, reqPayload)
             fn(reqPayload)
               .then(resPayload => reply(res, resPayload))
               .catch(err => reply(res, err))
@@ -60,7 +61,7 @@ function serve(req: IncomingMessage, res: ServerResponse) {
     }
   }
   else {
-    reply(res, new Error(`Only GET and POST methods allowed. Request was: ${req.method} ${req.url}`))
+    reply(res, new Error(`Only GET and POST methods allowed. Request was: ${method} ${url}`))
   }
 }
 
