@@ -1,7 +1,9 @@
+import { sql } from 'pgeon/postgres-client'
 import { pool } from '../pool'
+import { test, ok } from '../../../shared/test'
 
 export async function getAllNutrients() {
-  const res = await pool.runStaticQuery`
+  const res = await pool.run(sql`
     select n.id, n.name, n.alias, n.abbr, n.is_visible_default, u.name unit_name, u.abbr unit_abbr, nc.name category
     from nutrients n
     left join units u on (u.id = n.unit_id)
@@ -14,12 +16,9 @@ export async function getAllNutrients() {
       when nc.name = 'Carbohydrates' then 5
       when nc.name = 'Other' then 6
     end), n.name
-  `
+  `)
   return res.rows
 }
-
-import { test } from '../../../shared/test'
-import { ok } from 'assert'
 
 test({
   'returns an array': async () => {

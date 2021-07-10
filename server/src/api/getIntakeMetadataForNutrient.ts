@@ -1,4 +1,6 @@
+import { sql } from 'pgeon/postgres-client'
 import { pool } from '../pool'
+import { test, eq } from '../../../shared/test'
 
 export async function getIntakeMetadataForNutrient(data: {
   nutrientId: number
@@ -6,7 +8,7 @@ export async function getIntakeMetadataForNutrient(data: {
   gender: 'M' | 'F'
 }) {
   const [rdi, ul] = await Promise.all([
-    pool.runStaticQuery`
+    pool.run(sql`
       select rdi.value
       from reference_intakes rdi
       where rdi.nutrient_id = ${data.nutrientId}
@@ -15,8 +17,8 @@ export async function getIntakeMetadataForNutrient(data: {
       and rdi.gender = ${data.gender}
       and rdi.for_pregnancy = 'N'
       and rdi.for_lactation = 'N'
-    `,
-    pool.runStaticQuery`
+    `),
+    pool.run(sql`
       select ul.value
       from tolerable_intakes ul
       where ul.nutrient_id = ${data.nutrientId}
@@ -25,7 +27,7 @@ export async function getIntakeMetadataForNutrient(data: {
       and ul.gender = ${data.gender}
       and ul.for_pregnancy = 'N'
       and ul.for_lactation = 'N'
-    `
+    `)
   ])
 
   return {
@@ -34,14 +36,11 @@ export async function getIntakeMetadataForNutrient(data: {
   }
 }
 
-import { test } from '../../../shared/test'
-import { ok } from 'assert'
-
 test({
   'returns an object': async () => {
     const ironId = 25
     const res = await getIntakeMetadataForNutrient({ nutrientId: ironId, age: 26, gender: 'M' })
-    ok(typeof res === 'object')
-    ok(Object.keys(res).length === 2)
+    eq(typeof res, 'object')
+    eq(Object.keys(res).length, 2)
   }
 })

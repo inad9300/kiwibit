@@ -1,15 +1,18 @@
 {
   "private": true,
   "scripts": {
-    "start": "webpack --mode development --devtool inline-source-map --watch",
-    "build": "webpack --mode production"
+    "start": "PGPORT=5000 PGPASSWORD=hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E webpack --mode development --devtool inline-source-map --watch",
+    "build": "PGPORT=5000 PGPASSWORD=hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E webpack --mode production"
+  },
+  "dependencies": {
+    "pgeon": "0.0.6"
   },
   "devDependencies": {
-    "@types/node": "14.14.32",
-    "ts-loader": "8.0.17",
+    "@types/node": "14.14.41",
+    "ts-loader": "9.1.1",
     "ts-node": "9.1.1",
-    "typescript": "4.2.3",
-    "webpack": "5.24.4",
-    "webpack-cli": "4.5.0"
+    "typescript": "4.2.4",
+    "webpack": "5.35.1",
+    "webpack-cli": "4.6.0"
   }
 }

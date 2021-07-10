@@ -26,7 +26,7 @@ function registerError(file: string, testName: string, err: any) {
 }
 
 function registerTime(file: string, testName: string, t: [number, number]) {
-  times.push({ file, testName, time: t[0] * 1000 + t[1] / 1_000_000 })
+  times.push({ file, testName, time: t[0] * 1_000 + t[1] / 1_000_000 })
 }
 
 export type TestSuite = Record<string, () => void | Promise<any>>

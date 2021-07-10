@@ -1,7 +1,9 @@
+import { sql } from 'pgeon/postgres-client'
 import { pool } from '../pool'
+import { test, ok } from '../../../shared/test'
 
 const energyIdPromise = pool
-  .runStaticQuery`select id from nutrients where name = 'Energy'`
+  .run(sql`select id from nutrients where name = 'Energy'`)
   .then(res => res.rows[0].id)
 
 export async function getTopFoodsForNutrient(data: {
@@ -15,7 +17,7 @@ export async function getTopFoodsForNutrient(data: {
   const maybeCategories = data.categories.length === 0 ? null : data.categories
   const perWeight = data.per === 'weight'
 
-  const res = await pool.runStaticQuery`
+  const res = await pool.run(sql`
     with food_nutrients_ext as (
       select fn.nutrient_id, fn.food_id, fn.amount as amount_weight, (100 * fn.amount / en.amount) as amount_energy
       from food_nutrients fn
@@ -38,17 +40,14 @@ export async function getTopFoodsForNutrient(data: {
     left join usda_categories uc on (uc.id = f.usda_category_id)
     where fne.nutrient_id = ${data.nutrientId}
     and (case when ${perWeight} then fne.amount_weight else fne.amount_energy end) is not null
-    and (${maybeCategories}::int[] is null or uc.id = any(${maybeCategories}))
+    and (${maybeCategories!}::int[] is null or uc.id = any(${maybeCategories!}))
     order by (case when ${perWeight} then fne.amount_weight else fne.amount_energy end) desc
     offset ${data.offset}::int
     limit ${data.limit}::int
-  `
+  `)
 
   return res.rows
 }
-
-import { test } from '../../../shared/test'
-import { ok } from 'assert'
 
 test({
   'returns an array': async () => {

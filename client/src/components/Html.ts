@@ -1,5 +1,5 @@
 if (DEBUG && (Element.prototype as any).with) {
-  throw new Error('Whoa! `Element.prototype.with` has already been defined by someone else!?')
+  throw Error('Whoa! `Element.prototype.with` has already been defined by someone else!?')
 }
 
 /**

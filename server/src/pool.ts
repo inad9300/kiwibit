@@ -1,9 +1,6 @@
-import { newConnectionPool } from './pgeon'
+import { newPool } from 'pgeon/postgres-client'
 
-export const pool = newConnectionPool({
-  host: 'localhost',
+export const pool = newPool({
   port: 5000,
-  database: 'postgres',
-  username: 'postgres',
   password: 'hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E'
 })

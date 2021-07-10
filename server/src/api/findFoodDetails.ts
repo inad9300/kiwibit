@@ -1,10 +1,12 @@
+import { sql } from 'pgeon/postgres-client'
 import { pool } from '../pool'
+import { test, ok, eq } from '../../../shared/test'
 
 const nutrientCategoryOrder = ['Minerals', 'Vitamins', 'Proteins', 'Fats', 'Carbohydrates', 'Other']
 
 export async function findFoodDetails(data: { id: number, nutrients: number[] }) {
   const maybeNutrients = data.nutrients.length === 0 ? null : data.nutrients
-  const { rows: nutrients } = await pool.runStaticQuery`
+  const { rows: nutrients } = await pool.run(sql`
     select
       f.name,
       n.id nutrient_id,
@@ -22,11 +24,11 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
     left join units u on (u.id = n.unit_id)
     left join usda_categories uc on (uc.id = f.usda_category_id)
     where f.id = ${data.id}
-    and (${maybeNutrients}::int[] is null or n.id = any(${maybeNutrients}))
-  `
+    and (${maybeNutrients!}::int[] is null or n.id = any(${maybeNutrients!}))
+  `)
 
   if (data.nutrients.length > 0 && nutrients.length > 0) {
-    const { rows: remainingNutrients } = await pool.runStaticQuery`
+    const { rows: remainingNutrients } = await pool.run(sql`
       select
         null as name,
         n.id nutrient_id,
@@ -41,9 +43,9 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
       left join nutrient_categories nc on (nc.id = n.category_id)
       where n.id = any(${data.nutrients})
       and not (n.id = any(${nutrients.map(r => r.nutrient_id)}))
-    `
+    `)
 
-    nutrients.push(...remainingNutrients)
+    nutrients.push(...remainingNutrients as typeof nutrients)
   }
 
   const { name, food_category_name, food_category_color } = nutrients[0]
@@ -54,9 +56,9 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
     food_category_color,
     nutrients: nutrients
       .sort((a, b) => {
-        if (a.nutrient_category_name === b.nutrient_category_name) {
+        if (a.nutrient_category_name === b.nutrient_category_name)
           return a.nutrient_name > b.nutrient_name ? 1 : -1
-        }
+
         return nutrientCategoryOrder.indexOf(a.nutrient_category_name)
              - nutrientCategoryOrder.indexOf(b.nutrient_category_name)
       })
@@ -71,18 +73,15 @@ export async function findFoodDetails(data: { id: number, nutrients: number[] })
   }
 }
 
-import { test } from '../../../shared/test'
-import { ok } from 'assert'
-
 test({
   'returns an object': async () => {
     const ironId = 25
     const res = await findFoodDetails({ id: 1, nutrients: [ironId] })
-    ok(typeof res === 'object')
+    eq(typeof res, 'object')
     ok(Object.keys(res).length > 1)
     ok(Array.isArray(res.nutrients))
-    ok(res.nutrients.length === 1)
-    ok(res.nutrients[0].id === ironId)
-    ok(res.nutrients[0].name === 'Iron')
+    eq(res.nutrients.length, 1)
+    eq(res.nutrients[0].id, ironId)
+    eq(res.nutrients[0].name, 'Iron')
   }
 })

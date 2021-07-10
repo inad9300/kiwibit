@@ -1,7 +1,9 @@
+import { sql } from 'pgeon/postgres-client'
 import { pool } from '../pool'
+import { test, ok } from '../../../shared/test'
 
 export async function getIntakeMetadataForAllNutrients(data: { age: number; gender: 'M' | 'F' }) {
-  const res = await pool.runStaticQuery`
+  const res = await pool.run(sql`
     select *
     from (
       select n.id nutrient_id, (
@@ -27,13 +29,10 @@ export async function getIntakeMetadataForAllNutrients(data: { age: number; gend
     ) x
     where x.rdi is not null
     or x.ul is not null
-  `
+  `)
 
   return res.rows
 }
-
-import { test } from '../../../shared/test'
-import { ok } from 'assert'
 
 test({
   'returns an array': async () => {

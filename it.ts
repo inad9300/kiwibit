@@ -39,8 +39,8 @@ function logStep(desc: string) {
   spawnSync('docker', ['container', 'stop', 'kiwibitc'], { stdio: 'inherit' })
   spawnSync('docker', ['rm', 'kiwibitc'], { stdio: 'inherit' })
 
-  logStep('Running container (verify with `docker ps`; check logs with `docker logs -f kiwibitc`; interact with `docker exec -it kiwibitc psql -U postgres`)')
-  spawnSync('docker', ['run', '--name', 'kiwibitc', '--env', 'POSTGRES_PASSWORD=hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E', '-p', '5000:5432', '--detach', 'kiwibiti'], { stdio: 'inherit' })
+  logStep('Running container (verify with `docker ps`; check logs with `docker logs --follow kiwibitc`; interact with `docker exec -it kiwibitc psql -U postgres`)')
+  spawnSync('docker', ['run', '--name', 'kiwibitc', '--env', 'POSTGRES_PASSWORD=hnzygqa2QLrRLxH4MvsOtcVVUWsYvQ7E', '--publish', '5000:5432', '--detach', 'kiwibiti'], { stdio: 'inherit' })
 
   const since = new Date().toISOString()
   do {

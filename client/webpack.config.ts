@@ -1,5 +1,5 @@
 import { Configuration, DefinePlugin } from 'webpack'
-import { resolve } from 'path'
+// import { resolve } from 'path'
 
 const config: Configuration = {
   entry: './src/main.ts',
@@ -7,7 +7,7 @@ const config: Configuration = {
     rules: [{
       test: /\.ts$/,
       use: 'ts-loader',
-      include: resolve(__dirname, 'src')
+      // include: resolve(__dirname, 'src')
     }]
   },
   plugins: [
@@ -17,10 +17,6 @@ const config: Configuration = {
   ],
   resolve: {
     extensions: ['.ts', '.js']
-  },
-  output: {
-    filename: 'main.js',
-    path: resolve(__dirname, 'bin')
   }
 }
 
